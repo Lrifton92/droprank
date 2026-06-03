@@ -5,7 +5,9 @@ import { BlockscoutError } from "@/lib/providers/blockscout";
 import { scoreAddress } from "@/lib/score-address";
 import { signAttestation } from "@/lib/sign-attestation";
 import { RateLimiter, clientIp } from "@/lib/cache";
-import { BASE_CHAIN_ID } from "@/lib/badge-abi";
+import { BADGE_CHAIN_ID } from "@/lib/badge-abi";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // Tighter limit than /api/score: signing is more sensitive and recomputes data.
 const limiter = new RateLimiter(15, 60_000);
@@ -30,7 +32,13 @@ export async function POST(req: NextRequest) {
   }
 
   const contract = process.env.NEXT_PUBLIC_BADGE_CONTRACT;
-  if (!contract || !isAddress(contract)) {
+  // Refuse to sign against a missing/placeholder contract: a signature for the
+  // zero address is worthless and would only mislead the client.
+  if (
+    !contract ||
+    !isAddress(contract) ||
+    contract.toLowerCase() === ZERO_ADDRESS
+  ) {
     return NextResponse.json(
       { error: "Badge contract not configured" },
       { status: 503 },
@@ -65,7 +73,7 @@ export async function POST(req: NextRequest) {
       wallet: address.toLowerCase() as `0x${string}`,
       score: result.score,
       contract: contract as `0x${string}`,
-      chainId: BASE_CHAIN_ID,
+      chainId: BADGE_CHAIN_ID,
     });
 
     return NextResponse.json(

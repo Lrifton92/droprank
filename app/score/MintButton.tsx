@@ -7,7 +7,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { isAddress } from "viem";
-import { DROPRANK_BADGE_ABI, BASE_CHAIN_ID } from "@/lib/badge-abi";
+import { DROPRANK_BADGE_ABI, BADGE_CHAIN_ID } from "@/lib/badge-abi";
 import styles from "./score.module.css";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -43,12 +43,12 @@ export default function MintButton({
     address: CONTRACT ?? undefined,
     functionName: "balanceOf",
     args: connected ? [connected] : undefined,
-    chainId: BASE_CHAIN_ID,
+    chainId: BADGE_CHAIN_ID,
     query: { enabled: Boolean(CONTRACT && connected) },
   });
   useWaitForTransactionReceipt({
     hash: txHash ?? undefined,
-    chainId: BASE_CHAIN_ID,
+    chainId: BADGE_CHAIN_ID,
     query: { enabled: Boolean(txHash) },
   });
 
@@ -109,7 +109,7 @@ export default function MintButton({
         address: CONTRACT!,
         functionName: owns ? "refresh" : "mint",
         args: [Number(score), BigInt(deadline), signature as `0x${string}`],
-        chainId: BASE_CHAIN_ID,
+        chainId: BADGE_CHAIN_ID,
       });
       setTxHash(hash);
       setPhase("pending");

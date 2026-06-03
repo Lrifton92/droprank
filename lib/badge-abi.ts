@@ -8,6 +8,15 @@ export const BASE_CHAIN_ID = 8453 as const;
 export const BASE_SEPOLIA_CHAIN_ID = 84532 as const;
 
 /**
+ * Active chain id for signing + minting. Configurable so the same build can
+ * target Base Sepolia (84532) first and Base mainnet (8453) later. The attestation
+ * route signs for THIS chain and MintButton writes to THIS chain — they MUST agree.
+ * Defaults to Base mainnet when the env var is absent or unparseable.
+ */
+export const BADGE_CHAIN_ID: number =
+  Number(process.env.NEXT_PUBLIC_CHAIN_ID) || BASE_CHAIN_ID;
+
+/**
  * Deployed contract address per chain.
  * TODO: fill in after deployment (see contracts/README.md).
  */
