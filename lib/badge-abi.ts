@@ -194,6 +194,16 @@ export const DROPRANK_BADGE_ABI = [
   },
   {
     "inputs": [],
+    "name": "NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RenounceDisabled",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidShortString",
     "type": "error"
   },
@@ -668,7 +678,7 @@ export const DROPRANK_BADGE_ABI = [
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {

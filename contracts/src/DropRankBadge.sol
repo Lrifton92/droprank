@@ -23,6 +23,8 @@ contract DropRankBadge is ERC721, Ownable, EIP712 {
     error InvalidSignature();
     error ZeroSigner();
     error InvalidScore();
+    error NotOwner();
+    error RenounceDisabled();
 
     /// @dev keccak256("ScoreAttestation(address wallet,uint16 score,uint256 deadline)")
     bytes32 private constant SCORE_ATTESTATION_TYPEHASH =
@@ -53,6 +55,12 @@ contract DropRankBadge is ERC721, Ownable, EIP712 {
         if (initialSigner == address(0)) revert ZeroSigner();
         signer = initialSigner;
         emit SignerUpdated(address(0), initialSigner);
+    }
+
+    /// @notice Renouncing ownership is disabled: it would permanently lock out
+    ///         setSigner, making signer rotation impossible after a key leak.
+    function renounceOwnership() public pure override {
+        revert RenounceDisabled();
     }
 
     /// @notice Rotate the backend signer (e.g. key compromise / rotation).
@@ -88,6 +96,8 @@ contract DropRankBadge is ERC721, Ownable, EIP712 {
 
     /// @notice Burn the caller's own badge.
     function burn(uint256 tokenId) external {
+        // Defensive: only the badge's own token id may be burned by its holder.
+        if (tokenOf[msg.sender] != tokenId) revert NotOwner();
         // _update with to == address(0) is permitted by soulbound logic.
         // ownership is enforced by passing msg.sender as auth.
         _update(address(0), tokenId, msg.sender);
@@ -128,6 +138,7 @@ contract DropRankBadge is ERC721, Ownable, EIP712 {
 
     // --- Metadata ----------------------------------------------------------
 
+    // SECURITY: never concat user-controlled strings here (only uint->string + internal const tier)
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
         uint16 score = scoreOf[tokenId];
