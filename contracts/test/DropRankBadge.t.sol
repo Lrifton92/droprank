@@ -205,8 +205,21 @@ contract DropRankBadgeTest is Test {
         badge.mint(60, deadline, sig);
 
         vm.prank(bob);
-        vm.expectRevert(); // ERC721 not authorized
+        vm.expectRevert(DropRankBadge.NotOwner.selector);
         badge.burn(1);
+    }
+
+    function test_RevertWhen_BurnWrongTokenId() public {
+        // alice mints token 1, bob mints token 2. alice cannot burn token 2.
+        uint256 deadline = block.timestamp + 1 hours;
+        vm.prank(alice);
+        badge.mint(60, deadline, _sign(signerKey, alice, 60, deadline));
+        vm.prank(bob);
+        badge.mint(50, deadline, _sign(signerKey, bob, 50, deadline));
+
+        vm.prank(alice);
+        vm.expectRevert(DropRankBadge.NotOwner.selector);
+        badge.burn(2);
     }
 
     function test_CanMintAgainAfterBurn() public {
@@ -244,6 +257,29 @@ contract DropRankBadgeTest is Test {
         vm.prank(alice);
         vm.expectRevert();
         badge.setSigner(bob);
+    }
+
+    function test_RevertWhen_RenounceOwnership() public {
+        // Renouncing would permanently disable setSigner; it must revert.
+        vm.expectRevert(DropRankBadge.RenounceDisabled.selector);
+        badge.renounceOwnership();
+        assertEq(badge.owner(), address(this));
+    }
+
+    function test_RevertWhen_SetSignerZero() public {
+        vm.expectRevert(DropRankBadge.ZeroSigner.selector);
+        badge.setSigner(address(0));
+    }
+
+    // --- score boundary --------------------------------------------------
+
+    function test_MintAtMaxScore() public {
+        // score == MAX_SCORE (100) is valid and must mint.
+        uint256 deadline = block.timestamp + 1 hours;
+        bytes memory sig = _sign(signerKey, alice, 100, deadline);
+        vm.prank(alice);
+        badge.mint(100, deadline, sig);
+        assertEq(badge.scoreOf(1), 100);
     }
 
     // --- tokenURI / tiers ------------------------------------------------
