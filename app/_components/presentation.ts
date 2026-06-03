@@ -24,6 +24,17 @@ export function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
+/** Compact relative time: "just now", "2h ago", "3d ago". 0/invalid -> "—". */
+export function timeAgo(ms: number, now = Date.now()): string {
+  if (!ms || ms <= 0) return "—";
+  const s = Math.floor((now - ms) / 1000);
+  if (s < 45) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 7 * 86400) return `${Math.floor(s / 86400)}d ago`;
+  return `${Math.floor(s / (7 * 86400))}w ago`;
+}
+
 /** External "do the quest" links, keyed by quest id (mirrors lib/quests.ts). */
 export const QUEST_LINKS: Record<string, string> = {
   "swap-aerodrome": "https://aerodrome.finance",
