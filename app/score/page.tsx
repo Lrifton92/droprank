@@ -43,11 +43,14 @@ function ScoreInner() {
 
   const onShare = async () => {
     const url = `${window.location.origin}/api/og/${address}`;
+    const text = data
+      ? `My Base score: ${data.score}/100 — scanned with DropRank by @lrifton6240`
+      : `Scan your Base airdrop score — DropRank by @lrifton6240`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "My DropRank", url });
+        await navigator.share({ title: "My DropRank", text, url });
       } else {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(`${text}\n${url}`);
         setShared(true);
         setTimeout(() => setShared(false), 1800);
       }
