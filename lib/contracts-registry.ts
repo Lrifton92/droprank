@@ -89,6 +89,64 @@ export const COINBASE_SMART_WALLET_FACTORY_V1 = lc(
  */
 export const USDC_NATIVE = lc("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
 
+/* ------------------------------------------------------------------ *
+ * Radar v2 — additional Base protocols.
+ * All verified via Blockscout on 2026-06-04 (reported name quoted).
+ * Selected from the live DeFiLlama Base TVL ranking (api.llama.fi/protocols)
+ * to broaden farming coverage with high-TVL or new-category interactions.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Morpho Blue singleton (lending, #1 Base TVL ~2.5B). The whole protocol routes
+ * through this one immutable contract (supply/borrow/etc.).
+ * Source: morpho.org docs / morpho-org/morpho-blue.
+ * Blockscout: name "Morpho", verified.
+ */
+export const MORPHO_BLUE = lc("0xBBBBBbbBBb9cC5e90e3b3Af64bDAF62C37EEFFCb");
+
+/**
+ * Compound III (Comet) — USDC market on Base (lending).
+ * Source: compound.finance docs / compound-finance/comet.
+ * Blockscout: proxy impl "CometWithExtendedAssetList", verified.
+ */
+export const COMPOUND_V3_USDC = lc("0xb125E6687d4313864e53df431d5425969c15Eb2F");
+
+/**
+ * Pendle Router V4 on Base (yield / PT-YT trading). Single entry router.
+ * Source: pendle docs (cross-chain canonical router).
+ * Blockscout: name "PendleRouterV4", verified.
+ */
+export const PENDLE_ROUTER_V4 = lc("0x888888888889758F76e7103c6CbF23ABbF58F946");
+
+/**
+ * Avantis Trading proxy on Base (perps / derivatives — new category).
+ * Source: avantisfi docs.
+ * Blockscout: proxy impl "Trading", verified.
+ */
+export const AVANTIS_TRADING = lc("0x5FF292d70bA9cD9e7CCb313782811b3D7120535f");
+
+/**
+ * Extra Finance LendingPool on Base (leveraged yield farming).
+ * Source: extrafi docs.
+ * Blockscout: name "LendingPool", verified.
+ */
+export const EXTRA_FINANCE_LENDING_POOL = lc("0xBB505c54D71E9e599cB8435b4F0cEEc05fC71cbD");
+
+/**
+ * PancakeSwap SmartRouter on Base (DEX). Single swap entry router.
+ * Source: pancakeswap docs (smart-router deployments).
+ * Blockscout: name "SmartRouter", verified.
+ */
+export const PANCAKESWAP_SMART_ROUTER = lc("0x678Aa4bF4E210cf2166753e054d5b7c31cc7fa86");
+
+/**
+ * OpenSea Seaport 1.6 (NFT marketplace — new category). Same canonical address
+ * across chains; a trade/list fulfilment goes through it.
+ * Source: opensea / ProjectOpenSea/seaport deployments.
+ * Blockscout: name "Seaport", verified.
+ */
+export const SEAPORT_1_6 = lc("0x0000000000000068F116a894984e2DB1123eB395");
+
 /** Convenience sets for matching `tx.to`. */
 export const UNISWAP_ROUTERS = new Set([
   UNISWAP_UNIVERSAL_ROUTER_V1_2,
