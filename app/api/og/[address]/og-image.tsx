@@ -1,12 +1,14 @@
 import { ImageResponse } from "next/og";
 import { isAddress } from "viem";
+import { scoreAddress } from "@/lib/score-address";
 import type { ScoreResult } from "@/lib/types";
 
 /**
  * Dynamic share image (1200x800, 3:2 — Farcaster-friendly).
  * Premium DropRank score card: Base blue on dark, mono data, tier.
- * Pulls the score from our own /api/score route. Degrades to a clean
- * fallback card on any failure. JSX lives here; route.ts re-exports GET.
+ * Computes the score in-process via scoreAddress() (no self-fetch to /api/score,
+ * which would double Blockscout quota). Degrades to a clean fallback card on any
+ * failure. JSX lives here; route.ts re-exports GET.
  */
 
 const TIERS: { name: string; min: number; color: string }[] = [
@@ -35,15 +37,9 @@ export async function renderOg(
   let breakdown: ScoreResult["breakdown"] = [];
   if (isAddress(address)) {
     try {
-      const origin = new URL(req.url).origin;
-      const r = await fetch(`${origin}/api/score/${address}`, {
-        cache: "no-store",
-      });
-      if (r.ok) {
-        const data: ScoreResult = await r.json();
-        score = data.score;
-        breakdown = data.breakdown;
-      }
+      const data = await scoreAddress(address, req.signal);
+      score = data.score;
+      breakdown = data.breakdown;
     } catch {
       /* fall through to fallback card */
     }
@@ -213,6 +209,13 @@ export async function renderOg(
         </div>
       </div>
     ),
-    { width: W, height: H },
+    {
+      width: W,
+      height: H,
+      headers: {
+        "cache-control":
+          "public, s-maxage=3600, stale-while-revalidate",
+      },
+    },
   );
 }
