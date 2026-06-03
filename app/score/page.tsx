@@ -6,6 +6,7 @@ import { isAddress } from "viem";
 import type { ScoreResult } from "@/lib/types";
 import Counter from "../_components/Counter";
 import { tierFor, shortAddr } from "../_components/presentation";
+import MintButton from "./MintButton";
 import styles from "./score.module.css";
 
 function ScoreInner() {
@@ -164,12 +165,7 @@ function ScoreInner() {
             </section>
 
             <section className={styles.cta}>
-              <button
-                className="dr-btn"
-                onClick={() => alert("Mint badge — contract wiring coming soon")}
-              >
-                {empty ? "Mint when ready" : "Mint badge ↗"}
-              </button>
+              <MintButton scannedAddress={address} empty={empty} />
               <button className="dr-btn dr-btn--ghost" onClick={onShare}>
                 {shared ? "✓ link copied" : "Share rank"}
               </button>

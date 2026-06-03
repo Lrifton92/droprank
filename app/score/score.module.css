@@ -149,6 +149,21 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
+}
+.mintWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mintWrap > :global(.dr-btn) {
+  width: 100%;
+}
+.mintNote {
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--text-faint);
 }
 
 /* States */
