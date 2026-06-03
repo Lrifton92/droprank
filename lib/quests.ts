@@ -8,20 +8,34 @@ import {
   BASENAMES_CONTROLLERS,
   L2_STANDARD_BRIDGE,
   USDC_NATIVE,
+  MORPHO_BLUE,
+  COMPOUND_V3_USDC,
+  PENDLE_ROUTER_V4,
+  AVANTIS_TRADING,
+  EXTRA_FINANCE_LENDING_POOL,
+  PANCAKESWAP_SMART_ROUTER,
+  SEAPORT_1_6,
 } from "./contracts-registry";
 
 /**
  * Quest engine. Each quest is a pure predicate over the wallet's tx list.
- * Points sum to QUESTS_MAX_POINTS (20) so a fully-completed radar feeds the
- * "Quests" scoring criterion at its max.
+ *
+ * Scoring model (v2): the radar is a MENU, not a checklist. The raw sum of all
+ * quest points exceeds QUESTS_MAX_POINTS (20) on purpose — adding protocols
+ * creates more PATHS to max out the "Quests" scoring criterion rather than
+ * inflating its cap. `earned` is clamped to QUESTS_MAX_POINTS so a wallet that
+ * touches >20 pts worth of quests still reports 20/20 (and scoring.ts re-clamps
+ * defensively on its side). This keeps earned <= total and pct <= 100% in the UI.
  *
  * Detection note: we match on `tx.to` against verified Base contract addresses
- * (see contracts-registry.ts). This is the keyless Blockscout-only signal for v1.
+ * (see contracts-registry.ts). This is the keyless Blockscout-only signal.
  * Known limitation: canonical bridge DEPOSITS (L1->Base) don't appear as L2 txs,
  * so the bridge quest only catches L2 bridge interactions (documented in registry).
  */
 
 export const QUESTS_MAX_POINTS = 20;
+
+const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
 /** Extra signals computed by the data layer, passed alongside the tx list. */
 export interface QuestContext {
@@ -131,6 +145,56 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     link: "https://www.base.org",
     check: (txs) => txs.some((t) => to(t) === USDC_NATIVE),
   },
+  // --- Radar v2: additional Base protocols (more paths to the 20-pt cap) ---
+  {
+    id: "lend-morpho",
+    label: "Lend / borrow on Morpho",
+    points: 2,
+    link: "https://app.morpho.org",
+    check: (txs) => txs.some((t) => to(t) === MORPHO_BLUE),
+  },
+  {
+    id: "lend-compound",
+    label: "Supply on Compound v3",
+    points: 2,
+    link: "https://app.compound.finance",
+    check: (txs) => txs.some((t) => to(t) === COMPOUND_V3_USDC),
+  },
+  {
+    id: "yield-pendle",
+    label: "Trade yield on Pendle",
+    points: 2,
+    link: "https://app.pendle.finance",
+    check: (txs) => txs.some((t) => to(t) === PENDLE_ROUTER_V4),
+  },
+  {
+    id: "perps-avantis",
+    label: "Trade perps on Avantis",
+    points: 2,
+    link: "https://www.avantisfi.com",
+    check: (txs) => txs.some((t) => to(t) === AVANTIS_TRADING),
+  },
+  {
+    id: "leverage-extra",
+    label: "Leverage farm on Extra Finance",
+    points: 1,
+    link: "https://app.extrafi.io",
+    check: (txs) => txs.some((t) => to(t) === EXTRA_FINANCE_LENDING_POOL),
+  },
+  {
+    id: "swap-pancakeswap",
+    label: "Swap on PancakeSwap (Base)",
+    points: 1,
+    link: "https://pancakeswap.finance",
+    check: (txs) => txs.some((t) => to(t) === PANCAKESWAP_SMART_ROUTER),
+  },
+  {
+    id: "trade-opensea",
+    label: "Trade an NFT on OpenSea",
+    points: 1,
+    link: "https://opensea.io",
+    check: (txs) => txs.some((t) => to(t) === SEAPORT_1_6),
+  },
 ];
 
 export function computeQuests(
@@ -143,7 +207,9 @@ export function computeQuests(
     return { id: q.id, label: q.label, points: q.points, done };
   });
 
-  const earned = quests.reduce((s, q) => s + (q.done ? q.points : 0), 0);
+  const rawEarned = quests.reduce((s, q) => s + (q.done ? q.points : 0), 0);
+  // Clamp: the radar offers >20 pts of paths, but the criterion caps at 20.
+  const earned = clamp(rawEarned, 0, QUESTS_MAX_POINTS);
 
   return {
     address,
