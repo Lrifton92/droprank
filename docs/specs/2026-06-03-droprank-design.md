@@ -37,8 +37,9 @@ Mini-app Base (Farcaster/Base App) premium : **le checker de score airdrop + rad
 
 Percentile : distribution des wallets déjà checkés (store Upstash/Vercel KV, sorted set). Fallback si store down : distribution statique embarquée (pattern edge-cache fallback).
 
-## Quêtes Radar (v1, ~12)
-Swap Aerodrome · Swap Uniswap (Base) · Lend/Borrow Moonwell · Supply Aave v3 Base · Mint NFT (n'importe lequel) · Mint Zora · Basename · Smart Wallet tx · Bridge canonical vers Base · Déployer un contrat · 30 jours actifs distincts · Hold USDC natif.
+## Quêtes Radar (18 — v2)
+Swap Aerodrome · Swap Uniswap (Base) · Lend/Borrow Moonwell · Supply Aave v3 Base · Mint NFT (n'importe lequel) · Basename · Smart Wallet tx · Bridge canonical vers Base · Déployer un contrat · 30 jours actifs distincts · Hold USDC natif · Lend/Borrow Morpho · Supply Compound v3 · Yield Pendle · Perps Avantis · Leverage Extra Finance · Swap PancakeSwap · Trade NFT OpenSea.
+Zora retiré (2026-06-04) : projet basculé sur Solana + backlash communauté Base — l'activité NFT reste couverte par la quête générique "Mint NFT". Le radar = menu : somme brute > 20 pts, `earned` clampé à 20.
 Détection : liste d'adresses contrats connus + scan des tx via Blockscout (keyless) ; Etherscan v2 en fallback optionnel.
 
 ## Architecture

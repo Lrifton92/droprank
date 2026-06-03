@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isAddress } from "viem";
 import type { QuestsResult } from "@/lib/types";
 import Counter from "../_components/Counter";
-import { shortAddr, QUEST_LINKS } from "../_components/presentation";
+import { shortAddr } from "../_components/presentation";
 import styles from "./radar.module.css";
 
 function RadarInner() {
@@ -94,7 +94,7 @@ function RadarInner() {
 
             <ul className={styles.list}>
               {data.quests.map((q, i) => {
-                const link = QUEST_LINKS[q.id];
+                const link = q.link;
                 return (
                   <li
                     key={q.id}

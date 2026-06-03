@@ -44,12 +44,6 @@ export const MOONWELL_MUSDC = lc("0xEdc817A28E8B93B03976FBd4a3dDBc9f7D176c22");
 export const AAVE_V3_POOL = lc("0xA238Dd80C259a72e81d7e4664a9801593F98d1c5");
 
 /**
- * Zora 1155 factory. Source: ourzora/zora-protocol (same factory address across
- * OP-stack chains). Blockscout: impl "ZoraCreator1155FactoryImpl", verified.
- */
-export const ZORA_1155_FACTORY = lc("0x777777C338d93e2C7adf08D102d45CA7CC4Ed021");
-
-/**
  * Basenames registrar controllers. Source: base/web usernames addresses.
  * Blockscout: "EARegistrarController" and proxy impl
  * "UpgradeableRegistrarController", both verified. A tx to either = a Basename

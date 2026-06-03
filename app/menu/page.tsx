@@ -57,7 +57,7 @@ function MenuInner() {
               </svg>
             </span>
             <span className={styles.cardTitle}>RADAR</span>
-            <span className={styles.cardSub}>12 onchain quests &amp; progress</span>
+            <span className={styles.cardSub}>18 onchain quests &amp; progress</span>
             <span className={styles.arrow}>→</span>
           </Link>
 

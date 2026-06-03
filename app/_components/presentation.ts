@@ -34,16 +34,3 @@ export function timeAgo(ms: number, now = Date.now()): string {
   if (s < 7 * 86400) return `${Math.floor(s / 86400)}d ago`;
   return `${Math.floor(s / (7 * 86400))}w ago`;
 }
-
-/** External "do the quest" links, keyed by quest id (mirrors lib/quests.ts). */
-export const QUEST_LINKS: Record<string, string> = {
-  "swap-aerodrome": "https://aerodrome.finance",
-  "swap-uniswap": "https://app.uniswap.org",
-  "lend-moonwell": "https://moonwell.fi",
-  "supply-aave": "https://app.aave.com",
-  "mint-zora": "https://zora.co",
-  basename: "https://base.org/names",
-  "smart-wallet": "https://www.smartwallet.dev",
-  "bridge-canonical": "https://bridge.base.org",
-  "hold-usdc": "https://www.base.org",
-};

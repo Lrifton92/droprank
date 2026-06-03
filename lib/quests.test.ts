@@ -5,7 +5,6 @@ import {
   UNISWAP_UNIVERSAL_ROUTER_V2,
   MOONWELL_COMPTROLLER,
   AAVE_V3_POOL,
-  ZORA_1155_FACTORY,
   BASENAMES_EA_CONTROLLER,
   L2_STANDARD_BRIDGE,
   USDC_NATIVE,
@@ -34,11 +33,11 @@ function tx(over: Partial<Tx>): Tx {
 }
 
 describe("quests registry", () => {
-  it("has 19 quests (12 v1 + 7 v2)", () => {
-    expect(QUESTS.length).toBe(19);
+  it("has 18 quests (11 v1 + 7 v2; Zora removed — shifted off Base)", () => {
+    expect(QUESTS.length).toBe(18);
   });
 
-  it("keeps the 12 original v1 quest ids intact", () => {
+  it("keeps the original v1 quest ids intact (minus Zora)", () => {
     const ids = new Set(QUESTS.map((q) => q.id));
     for (const id of [
       "swap-aerodrome",
@@ -46,7 +45,6 @@ describe("quests registry", () => {
       "lend-moonwell",
       "supply-aave",
       "mint-nft",
-      "mint-zora",
       "basename",
       "smart-wallet",
       "bridge-canonical",
@@ -56,6 +54,7 @@ describe("quests registry", () => {
     ]) {
       expect(ids.has(id)).toBe(true);
     }
+    expect(ids.has("mint-zora")).toBe(false);
   });
 
   it("offers MORE than QUESTS_MAX_POINTS of paths (radar is a menu, earned is clamped)", () => {
@@ -96,11 +95,10 @@ describe("computeQuests", () => {
     expect(r.quests.find((q) => q.id === "swap-uniswap")!.done).toBe(true);
   });
 
-  it("detects Moonwell, Aave, Zora, Basename, bridge, USDC", () => {
+  it("detects Moonwell, Aave, Basename, bridge, USDC", () => {
     const txs = [
       tx({ to: MOONWELL_COMPTROLLER }),
       tx({ to: AAVE_V3_POOL }),
-      tx({ to: ZORA_1155_FACTORY }),
       tx({ to: BASENAMES_EA_CONTROLLER }),
       tx({ to: L2_STANDARD_BRIDGE }),
       tx({ to: USDC_NATIVE }),
@@ -109,7 +107,6 @@ describe("computeQuests", () => {
     const done = (id: string) => r.quests.find((q) => q.id === id)!.done;
     expect(done("lend-moonwell")).toBe(true);
     expect(done("supply-aave")).toBe(true);
-    expect(done("mint-zora")).toBe(true);
     expect(done("basename")).toBe(true);
     expect(done("bridge-canonical")).toBe(true);
     expect(done("hold-usdc")).toBe(true);
@@ -187,7 +184,6 @@ describe("computeQuests", () => {
       tx({ to: MOONWELL_COMPTROLLER }),
       tx({ to: AAVE_V3_POOL }),
       tx({ to: "0xdead000000000000000000000000000000000001", method: "mint", toIsContract: true }),
-      tx({ to: ZORA_1155_FACTORY }),
       tx({ to: BASENAMES_EA_CONTROLLER }),
       tx({ to: L2_STANDARD_BRIDGE }),
       tx({ to: null, createsContract: true }),

@@ -56,6 +56,8 @@ export interface QuestResult {
   label: string;
   points: number;
   done: boolean;
+  /** External "how to complete" link, if any. Single source of truth: lib/quests.ts. */
+  link?: string;
 }
 
 export interface QuestsResult {

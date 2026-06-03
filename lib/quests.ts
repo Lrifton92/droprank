@@ -4,7 +4,6 @@ import {
   UNISWAP_ROUTERS,
   MOONWELL_CONTRACTS,
   AAVE_V3_POOL,
-  ZORA_1155_FACTORY,
   BASENAMES_CONTROLLERS,
   L2_STANDARD_BRIDGE,
   USDC_NATIVE,
@@ -94,13 +93,6 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
           typeof t.method === "string" &&
           t.method.toLowerCase().includes("mint"),
       ),
-  },
-  {
-    id: "mint-zora",
-    label: "Mint on Zora",
-    points: 1,
-    link: "https://zora.co",
-    check: (txs) => txs.some((t) => to(t) === ZORA_1155_FACTORY),
   },
   {
     id: "basename",
@@ -204,7 +196,7 @@ export function computeQuests(
 ): QuestsResult {
   const quests: QuestResult[] = QUESTS.map((q) => {
     const done = q.check(txs, address, ctx);
-    return { id: q.id, label: q.label, points: q.points, done };
+    return { id: q.id, label: q.label, points: q.points, done, link: q.link };
   });
 
   const rawEarned = quests.reduce((s, q) => s + (q.done ? q.points : 0), 0);
