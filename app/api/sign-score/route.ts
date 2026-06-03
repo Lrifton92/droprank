@@ -89,9 +89,17 @@ export async function POST(req: NextRequest) {
     );
   } catch (e) {
     if (e instanceof BlockscoutError) {
-      const status = e.kind === "invalid_address" ? 400 : 502;
-      return NextResponse.json({ error: e.message, kind: e.kind }, { status });
+      if (e.kind === "invalid_address") {
+        return NextResponse.json({ error: "Invalid address" }, { status: 400 });
+      }
+      // Don't leak upstream internals to the client; log them server-side.
+      console.error("[sign-score] upstream error:", e.kind, e.message);
+      return NextResponse.json(
+        { error: "Upstream unavailable" },
+        { status: 502 },
+      );
     }
+    console.error("[sign-score] internal error:", e);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
