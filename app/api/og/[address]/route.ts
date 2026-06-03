@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { renderOg } from "./og-image";
 
-/**
- * Dynamic share image. STUB for now — the designer ships the OG image.
- * Returns 501 Not Implemented until then.
- */
-export async function GET() {
-  return NextResponse.json(
-    { error: "OG image not implemented yet" },
-    { status: 501 },
-  );
+export const runtime = "edge";
+
+/** Dynamic share image. JSX lives in og-image.tsx (route.ts can't hold JSX). */
+export async function GET(
+  req: Request,
+  ctx: { params: Promise<{ address: string }> },
+) {
+  const { address } = await ctx.params;
+  return renderOg(req, address);
 }
