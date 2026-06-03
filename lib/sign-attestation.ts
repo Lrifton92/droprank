@@ -9,8 +9,13 @@
 import type { Account } from "viem";
 import { DROPRANK_EIP712_DOMAIN, SCORE_ATTESTATION_TYPES } from "./badge-abi";
 
-/** Signature validity window. The contract rejects deadlines in the past. */
-export const ATTESTATION_TTL_SECONDS = 10 * 60;
+/**
+ * Signature validity window. The contract rejects deadlines in the past.
+ * Kept short (3 min) to narrow the replay window for a leaked signature: a v1
+ * temporal guard, simpler than an on-chain nonce and enough since each mint is
+ * one-shot and refresh re-signs. Long enough to cover wallet-confirm latency.
+ */
+export const ATTESTATION_TTL_SECONDS = 3 * 60;
 
 export interface AttestationInput {
   wallet: `0x${string}`;
