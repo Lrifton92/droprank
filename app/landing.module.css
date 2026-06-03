@@ -1,0 +1,118 @@
+.main {
+  gap: 8px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.head :global(.dr-brand) {
+  font-size: 16px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+.hero {
+  text-align: center;
+  margin-top: 4px;
+}
+.hero > * {
+  animation: dr-rise 0.6s var(--ease-out) both;
+}
+.hero :global(.dr-eyebrow) { animation-delay: 0.05s; }
+.title { animation-delay: 0.14s; }
+.sub { animation-delay: 0.22s; }
+
+.title {
+  margin-top: 12px;
+  font-size: 32px;
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.titleAccent {
+  color: var(--base-300);
+  text-shadow: 0 0 30px var(--base-glow);
+}
+.sub {
+  margin: 14px auto 0;
+  max-width: 32ch;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.actions {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: dr-rise 0.6s var(--ease-out) 0.3s both;
+}
+
+.connect {
+  display: flex;
+  justify-content: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.paste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.inputErr {
+  color: var(--no);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.foot {
+  margin-top: auto;
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-faint);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}

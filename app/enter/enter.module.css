@@ -1,0 +1,133 @@
+.wrap {
+  position: relative;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--shell-w);
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 40px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.core {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.ring {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  background: radial-gradient(closest-side, rgba(0, 82, 255, 0.1), transparent);
+}
+/* Masked donut progress track (spins) */
+.ringTrack {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--base) calc(var(--p, 0) * 1%),
+    rgba(120, 160, 255, 0.1) 0
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 70%, #000 71%);
+  mask: radial-gradient(closest-side, transparent 70%, #000 71%);
+  filter: drop-shadow(0 0 10px var(--base-glow));
+  animation: spin 8s linear infinite;
+}
+.ringNum {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--text);
+  z-index: 1;
+}
+.ring small {
+  position: absolute;
+  bottom: 30px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.target .mono {
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+
+.log {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+.line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-faint);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+.lineOn {
+  opacity: 1;
+  transform: none;
+  color: var(--text-dim);
+}
+.bracket {
+  color: var(--base-300);
+}
+.grant {
+  color: var(--ok) !important;
+  text-shadow: 0 0 16px rgba(53, 224, 138, 0.5);
+}
+.grant .bracket {
+  color: var(--ok);
+}
+
+.skip {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: color 0.16s var(--ease-out);
+}
+.skip:hover {
+  color: var(--text);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

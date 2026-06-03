@@ -5,12 +5,13 @@ import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import BaseCube from "./_components/BaseCube";
+import styles from "./landing.module.css";
 
 /**
- * Landing. Functional placeholder — the designer ships the premium UI
- * (3D Base cube in #cube-stage, HUD copy). Logic only here:
+ * Landing. Premium UI over the existing logic:
  *  - Connect Wallet (OnchainKit) -> on connect, go to /enter.
- *  - Paste address (read-only) -> go to /enter for that address.
+ *  - Paste address (read-only) -> /enter for that address.
  */
 export default function Home() {
   const router = useRouter();
@@ -22,56 +23,87 @@ export default function Home() {
     if (!isMiniAppReady) setMiniAppReady();
   }, [setMiniAppReady, isMiniAppReady]);
 
-  // When the wallet connects, advance into the entry sequence for that address.
   useEffect(() => {
     if (isConnected && address) {
       router.push(`/enter?address=${address}`);
     }
   }, [isConnected, address, router]);
 
-  const pastedValid = isAddress(pasted.trim());
+  const trimmed = pasted.trim();
+  const pastedValid = isAddress(trimmed);
+  const dirty = trimmed.length > 0;
 
   return (
-    <main style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
-      <h1>DropRank</h1>
-      <p>Your Base airdrop score, ranked.</p>
+    <>
+      <div className="dr-grid-bg" />
+      <main className={`dr-shell ${styles.main}`}>
+        <header className={styles.head}>
+          <span className="dr-brand">
+            Drop<span className="dot">·</span>Rank
+          </span>
+          <span className={styles.status}>
+            <i className={styles.statusDot} />
+            BASE&nbsp;MAINNET
+          </span>
+        </header>
 
-      {/* Placeholder for the designer's 3D Base cube. */}
-      <div
-        id="cube-stage"
-        aria-hidden
-        style={{
-          height: 200,
-          margin: "24px 0",
-          border: "1px dashed #333",
-          display: "grid",
-          placeItems: "center",
-          color: "#555",
-        }}
-      >
-        cube-stage
-      </div>
+        <BaseCube />
 
-      <Wallet />
+        <section className={styles.hero}>
+          <p className="dr-eyebrow">{"// onchain reputation engine"}</p>
+          <h1 className={styles.title}>
+            Your Base airdrop score,
+            <br />
+            <span className={styles.titleAccent}>ranked.</span>
+            <span className="dr-cursor" />
+          </h1>
+          <p className={styles.sub}>
+            Scan any wallet. Get a /100 score, your percentile and a 12-quest
+            radar. Mint your rank as a soulbound badge.
+          </p>
+        </section>
 
-      <div style={{ marginTop: 24 }}>
-        <label htmlFor="paste-address">Or paste an address (read-only)</label>
-        <input
-          id="paste-address"
-          value={pasted}
-          onChange={(e) => setPasted(e.target.value)}
-          placeholder="0x…"
-          spellCheck={false}
-          style={{ width: "100%", marginTop: 8 }}
-        />
-        <button
-          disabled={!pastedValid}
-          onClick={() => router.push(`/enter?address=${pasted.trim()}`)}
-          style={{ marginTop: 8 }}
-        >
-          Check this wallet
-        </button>
-      </div>
-    </main>
+        <section className={styles.actions}>
+          <div className={`ockWrap ${styles.connect}`}>
+            <Wallet />
+          </div>
+
+          <div className={styles.divider}>
+            <span>or scan read-only</span>
+          </div>
+
+          <div className={styles.paste}>
+            <label htmlFor="paste-address" className="dr-eyebrow">
+              wallet address
+            </label>
+            <input
+              id="paste-address"
+              className="dr-input"
+              value={pasted}
+              onChange={(e) => setPasted(e.target.value)}
+              placeholder="0x…"
+              spellCheck={false}
+              autoComplete="off"
+              autoCapitalize="off"
+            />
+            {dirty && !pastedValid && (
+              <p className={styles.inputErr}>! not a valid address</p>
+            )}
+            <button
+              className="dr-btn dr-btn--ghost"
+              disabled={!pastedValid}
+              onClick={() => router.push(`/enter?address=${trimmed}`)}
+            >
+              Scan this wallet →
+            </button>
+          </div>
+        </section>
+
+        <footer className={styles.foot}>
+          <span className="mono">v0.1.0</span>
+          <span className="mono">{"// built on base"}</span>
+        </footer>
+      </main>
+    </>
   );
 }
