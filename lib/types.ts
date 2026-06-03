@@ -47,6 +47,8 @@ export interface ScoreResult {
   score: number;
   max: number;
   breakdown: ScoreBreakdownItem[];
+  /** Share of checked wallets this score beats, in [0,99]. Added by the API route. */
+  percentile?: number;
 }
 
 export interface QuestResult {

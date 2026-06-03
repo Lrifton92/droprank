@@ -109,7 +109,12 @@ function ScoreInner() {
               <div className={styles.tierRow}>
                 <span className={styles.tierBadge}>{tier.name}</span>
                 <span className={styles.percentile}>
-                  percentile <span className="mono">—</span>
+                  percentile{" "}
+                  <span className="mono">
+                    {typeof data.percentile === "number"
+                      ? `top ${100 - data.percentile}%`
+                      : "—"}
+                  </span>
                 </span>
               </div>
               {empty && (

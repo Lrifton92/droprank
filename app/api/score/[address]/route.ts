@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAddress } from "viem";
-import { fetchWalletData, BlockscoutError } from "@/lib/providers/blockscout";
-import { computeScore } from "@/lib/scoring";
-import { computeQuests } from "@/lib/quests";
+import { BlockscoutError } from "@/lib/providers/blockscout";
+import { scoreAddress } from "@/lib/score-address";
+import { recordAndRankScore } from "@/lib/percentile";
 import { LruCache, RateLimiter, clientIp } from "@/lib/cache";
 import type { ScoreResult } from "@/lib/types";
 
@@ -31,14 +31,9 @@ export async function GET(
   }
 
   try {
-    const data = await fetchWalletData(key, req.signal);
-    const quests = computeQuests(data.txs, key, {
-      isSmartWallet: data.usedSmartWallet,
-    });
-    // v1: Basename ownership is approximated from the registration quest.
-    // TODO: replace with a true Basenames reverse resolution read.
-    const hasBasename = quests.quests.find((q) => q.id === "basename")!.done;
-    const result = computeScore({ ...data, hasBasename }, quests.earned);
+    const result = await scoreAddress(key, req.signal);
+    // Record + rank in the percentile store (never throws; static fallback).
+    result.percentile = await recordAndRankScore(key, result.score);
 
     cache.set(key, result);
     return NextResponse.json(result, {

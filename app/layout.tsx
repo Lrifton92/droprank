@@ -9,6 +9,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: minikitConfig.miniapp.name,
     description: minikitConfig.miniapp.description,
+    twitter: {
+      card: "summary_large_image",
+      creator: "@lrifton6240",
+      site: "@lrifton6240",
+    },
     other: {
       "fc:miniapp": JSON.stringify({
         version: minikitConfig.miniapp.version,

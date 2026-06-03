@@ -101,7 +101,14 @@ export default function Home() {
 
         <footer className={styles.foot}>
           <span className="mono">v0.1.0</span>
-          <span className="mono">{"// built on base"}</span>
+          <a
+            href="https://x.com/lrifton6240"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mono"
+          >
+            {"// built on base by @lrifton6240"}
+          </a>
         </footer>
       </main>
     </>
