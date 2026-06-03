@@ -1,0 +1,112 @@
+.head {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+}
+.head :global(.dr-brand) {
+  text-align: center;
+  font-size: 16px;
+}
+.back {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
+}
+.back:hover {
+  border-color: var(--base-300);
+  color: var(--text);
+}
+
+.target {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.addr {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+
+.grid {
+  margin-top: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "glyph idx arrow"
+    "glyph title arrow"
+    "glyph sub arrow";
+  align-items: center;
+  column-gap: 16px;
+  padding: 20px;
+  color: var(--text);
+  transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+.card:hover {
+  transform: translateY(-2px);
+}
+.card:hover .arrow {
+  transform: translateX(4px);
+  color: var(--base-300);
+}
+.card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.idx {
+  grid-area: idx;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+}
+.glyph {
+  grid-area: glyph;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--base-300);
+  background: var(--base-soft);
+  border: 1px solid var(--border);
+}
+.cardTitle {
+  grid-area: title;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.cardSub {
+  grid-area: sub;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.arrow {
+  grid-area: arrow;
+  font-size: 20px;
+  color: var(--text-faint);
+  transition: transform 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.hint {
+  margin-top: auto;
+}

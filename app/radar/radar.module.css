@@ -1,0 +1,218 @@
+.head {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+}
+.head :global(.dr-eyebrow) {
+  text-align: center;
+}
+.back {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: border-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
+}
+.back:hover {
+  border-color: var(--base-300);
+  color: var(--text);
+}
+
+.target {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.progress {
+  margin-top: 18px;
+}
+.progressTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.big {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.total {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-faint);
+  margin-left: 4px;
+}
+.completed {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.completed .mono {
+  color: var(--text);
+}
+.track {
+  margin-top: 12px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(120, 160, 255, 0.1);
+  overflow: hidden;
+}
+.track i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--base), var(--base-200));
+  box-shadow: 0 0 12px var(--base-glow);
+  transition: width 0.9s var(--ease-out);
+}
+
+.list {
+  list-style: none;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quest {
+  display: grid;
+  grid-template-columns: 22px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: rgba(12, 17, 28, 0.5);
+  animation: dr-rise 0.4s var(--ease-out) both;
+  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out);
+}
+.quest:hover {
+  border-color: var(--border-strong);
+}
+.check {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+}
+.questDone {
+  background: rgba(53, 224, 138, 0.05);
+  border-color: rgba(53, 224, 138, 0.2);
+}
+.questDone .check {
+  color: var(--ok);
+  border-color: rgba(53, 224, 138, 0.4);
+  background: var(--ok-dim);
+}
+.qLabel {
+  font-size: 13px;
+  color: var(--text);
+  min-width: 0;
+}
+.questDone .qLabel {
+  color: var(--text-dim);
+}
+.qLink {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--base-300);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
+  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out);
+  white-space: nowrap;
+}
+.qLink:hover {
+  background: var(--base-soft);
+  color: var(--text);
+}
+.qStatus {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ok);
+}
+.questDone .qStatus {
+  color: var(--ok);
+}
+.quest:not(.questDone) .qStatus {
+  color: var(--text-faint);
+}
+.qPts {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--base-300);
+  min-width: 32px;
+  text-align: right;
+}
+.questDone .qPts {
+  color: var(--ok);
+}
+
+/* States */
+.state {
+  margin: 64px auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.stateTitle {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  color: var(--no);
+}
+.stateErr {
+  font-size: 12px;
+  color: var(--text-faint);
+  max-width: 36ch;
+  word-break: break-word;
+}
+
+/* Skeleton */
+.skeleton {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.skScan {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--base-300);
+  margin-bottom: 14px;
+}
+.skRow {
+  height: 48px;
+  border-radius: var(--r-md);
+  background: linear-gradient(
+    100deg,
+    rgba(120, 160, 255, 0.05) 30%,
+    rgba(120, 160, 255, 0.13) 50%,
+    rgba(120, 160, 255, 0.05) 70%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
