@@ -1,0 +1,131 @@
+.stage {
+  --size: 92px;
+  position: relative;
+  width: 100%;
+  height: 240px;
+  display: grid;
+  place-items: center;
+  perspective: 760px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Ground glow that the cube bounces over */
+.shadow {
+  position: absolute;
+  bottom: 44px;
+  width: calc(var(--size) * 1.1);
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 82, 255, 0.5), transparent 70%);
+  filter: blur(6px);
+  animation: shadowPulse 3.4s var(--ease-in-out) infinite;
+}
+
+/* Vertical bob + squash&stretch wrapper */
+.bob {
+  transform-style: preserve-3d;
+  animation: bob 3.4s var(--ease-in-out) infinite;
+}
+
+/* Continuous tumble */
+.cube {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  transform-style: preserve-3d;
+  animation: tumble 9s linear infinite;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(138, 176, 255, 0.55);
+  border-radius: 10px;
+  background:
+    linear-gradient(150deg, rgba(77, 134, 255, 0.92), rgba(0, 82, 255, 0.78));
+  box-shadow:
+    inset 0 0 22px rgba(0, 30, 110, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  backface-visibility: visible;
+}
+
+/* Subtle Base "square" emblem etched on every face */
+.face::after {
+  content: "";
+  position: absolute;
+  inset: 26%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.front { transform: translateZ(calc(var(--size) / 2)); }
+.back { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
+.right { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); }
+.left { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); }
+.top {
+  transform: rotateX(90deg) translateZ(calc(var(--size) / 2));
+  background: linear-gradient(150deg, rgba(138, 176, 255, 0.95), rgba(77, 134, 255, 0.85));
+}
+.bottom {
+  transform: rotateX(-90deg) translateZ(calc(var(--size) / 2));
+  background: linear-gradient(150deg, rgba(0, 60, 190, 0.9), rgba(0, 38, 120, 0.85));
+}
+
+/* Excited reaction on hover / tap */
+.stage:hover .cube {
+  animation-duration: 3.4s;
+}
+.poke .cube {
+  animation: spinPoke 0.72s var(--ease-snap);
+}
+.poke {
+  animation: bobPoke 0.72s var(--ease-snap);
+}
+
+@keyframes tumble {
+  0% { transform: rotateX(-18deg) rotateY(0deg); }
+  100% { transform: rotateX(-18deg) rotateY(360deg); }
+}
+
+@keyframes bob {
+  0%, 100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  42% {
+    transform: translateY(-26px) scale(0.97, 1.04);
+  }
+  50% {
+    transform: translateY(-30px) scale(0.97, 1.04);
+  }
+  92% {
+    transform: translateY(0) scale(1.08, 0.9);
+  }
+  96% {
+    transform: translateY(0) scale(1.04, 0.94);
+  }
+}
+
+@keyframes bobPoke {
+  0% { transform: translateY(0) scale(1.14, 0.86); }
+  40% { transform: translateY(-40px) scale(0.92, 1.1); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes spinPoke {
+  0% { transform: rotateX(-18deg) rotateY(0deg); }
+  100% { transform: rotateX(-18deg) rotateY(540deg); }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  46% { transform: scale(0.6); opacity: 0.28; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bob, .cube, .shadow, .poke, .poke .cube {
+    animation: none;
+  }
+  .cube { transform: rotateX(-18deg) rotateY(-30deg); }
+}
