@@ -4,13 +4,10 @@ import { privateKeyToAccount } from "viem/accounts";
 import { BlockscoutError } from "@/lib/providers/blockscout";
 import { scoreAddress } from "@/lib/score-address";
 import { signAttestation } from "@/lib/sign-attestation";
-import { RateLimiter, clientIp } from "@/lib/cache";
+import { checkRateLimit } from "@/lib/cache";
 import { BADGE_CHAIN_ID } from "@/lib/badge-abi";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
-// Tighter limit than /api/score: signing is more sensitive and recomputes data.
-const limiter = new RateLimiter(15, 60_000);
 
 /** Normalize a private key from env to a 0x-prefixed string viem accepts. */
 function normalizePk(raw: string): `0x${string}` {
@@ -19,7 +16,12 @@ function normalizePk(raw: string): `0x${string}` {
 }
 
 export async function POST(req: NextRequest) {
-  if (!limiter.allow(clientIp(req))) {
+  // Tighter limit than /api/score: signing is sensitive and recomputes data.
+  if (!(await checkRateLimit(req, {
+    prefix: "sign-score",
+    limit: 10,
+    windowSeconds: 60,
+  }))) {
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 

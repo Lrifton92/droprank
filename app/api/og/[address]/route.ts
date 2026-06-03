@@ -1,4 +1,5 @@
 import { renderOg } from "./og-image";
+import { checkRateLimit } from "@/lib/cache";
 
 export const runtime = "edge";
 
@@ -7,6 +8,13 @@ export async function GET(
   req: Request,
   ctx: { params: Promise<{ address: string }> },
 ) {
+  if (!(await checkRateLimit(req, {
+    prefix: "og",
+    limit: 60,
+    windowSeconds: 60,
+  }))) {
+    return new Response("Rate limited", { status: 429 });
+  }
   const { address } = await ctx.params;
   return renderOg(req, address);
 }

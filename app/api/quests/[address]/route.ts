@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAddress } from "viem";
 import { fetchWalletData, BlockscoutError } from "@/lib/providers/blockscout";
 import { computeQuests } from "@/lib/quests";
-import { LruCache, RateLimiter, clientIp } from "@/lib/cache";
+import { LruCache, checkRateLimit } from "@/lib/cache";
 import type { QuestsResult } from "@/lib/types";
 
 const cache = new LruCache<QuestsResult>(500, 5 * 60 * 1000);
-const limiter = new RateLimiter(30, 60_000);
 
 export async function GET(
   req: NextRequest,
@@ -17,7 +16,11 @@ export async function GET(
   if (!isAddress(address)) {
     return NextResponse.json({ error: "Invalid address" }, { status: 400 });
   }
-  if (!limiter.allow(clientIp(req))) {
+  if (!(await checkRateLimit(req, {
+    prefix: "quests",
+    limit: 30,
+    windowSeconds: 60,
+  }))) {
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 

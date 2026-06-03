@@ -3,11 +3,10 @@ import { isAddress } from "viem";
 import { BlockscoutError } from "@/lib/providers/blockscout";
 import { scoreAddress } from "@/lib/score-address";
 import { recordAndRankScore } from "@/lib/percentile";
-import { LruCache, RateLimiter, clientIp } from "@/lib/cache";
+import { LruCache, checkRateLimit } from "@/lib/cache";
 import type { ScoreResult } from "@/lib/types";
 
 const cache = new LruCache<ScoreResult>(500, 5 * 60 * 1000);
-const limiter = new RateLimiter(30, 60_000);
 
 export async function GET(
   req: NextRequest,
@@ -18,7 +17,11 @@ export async function GET(
   if (!isAddress(address)) {
     return NextResponse.json({ error: "Invalid address" }, { status: 400 });
   }
-  if (!limiter.allow(clientIp(req))) {
+  if (!(await checkRateLimit(req, {
+    prefix: "score",
+    limit: 30,
+    windowSeconds: 60,
+  }))) {
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 
