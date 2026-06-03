@@ -60,6 +60,20 @@ function MenuInner() {
             <span className={styles.cardSub}>12 onchain quests &amp; progress</span>
             <span className={styles.arrow}>→</span>
           </Link>
+
+          <Link href={`/news${qs}`} className={`dr-panel ${styles.card}`}>
+            <span className={styles.idx}>03</span>
+            <span className={styles.glyph} aria-hidden>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+                <path d="M4 14a8 8 0 0 1 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.45" />
+                <path d="M7 17a5 5 0 0 1 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.75" />
+                <circle cx="9" cy="19" r="1.6" fill="currentColor" />
+              </svg>
+            </span>
+            <span className={styles.cardTitle}>NEWS</span>
+            <span className={styles.cardSub}>latest base ecosystem signals</span>
+            <span className={styles.arrow}>→</span>
+          </Link>
         </nav>
 
         <div className={`dr-term ${styles.hint}`}>
