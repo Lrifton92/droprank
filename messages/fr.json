@@ -111,7 +111,14 @@
     "cancelled": "Annulé dans le wallet",
     "txSubmitted": "tx envoyée — confirmation onchain…",
     "connectToMint": "Connecte ton wallet pour mint.",
-    "onlyConnectedWallet": "Le mint n'est disponible que pour ton wallet connecté."
+    "onlyConnectedWallet": "Le mint n'est disponible que pour ton wallet connecté.",
+    "celebTitle": "Félicitations",
+    "celebKindMint": "soulbound · minté",
+    "celebKindRefresh": "soulbound · rafraîchi",
+    "celebSubMint": "Ton badge DropRank est minté onchain — soulbound à ton wallet, pour toujours.",
+    "celebSubRefresh": "Ton badge DropRank est rafraîchi onchain avec ton dernier score.",
+    "celebViewTx": "Voir la tx ↗",
+    "celebClose": "Fermer"
   },
   "radar": {
     "questRadar": "// radar de quêtes",

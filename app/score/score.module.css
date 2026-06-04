@@ -308,3 +308,179 @@
   0% { background-position: 120% 0; }
   100% { background-position: -120% 0; }
 }
+
+/* ─── Mint celebration overlay ─────────────────────────────────────────── */
+.celebBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--s-5);
+  background: radial-gradient(
+      120% 90% at 50% 0%,
+      rgba(0, 82, 255, 0.22),
+      transparent 60%
+    ),
+    rgba(4, 6, 12, 0.74);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  animation: celeb-fade 0.32s var(--ease-out) both;
+}
+.celebCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The card itself — a glass slab that arrives with a 3D rotate-settle. */
+.celebCard {
+  position: relative;
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6) var(--s-5) var(--s-5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, rgba(16, 22, 36, 0.86), rgba(8, 12, 22, 0.92));
+  box-shadow:
+    0 30px 80px -28px var(--base-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform-style: preserve-3d;
+  animation: celeb-card-in 0.7s var(--ease-snap) both;
+}
+
+/* The 3D badge — perspective tilt + an animated glossy reflet sweeping over it. */
+.celebBadge {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 22px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(120% 120% at 28% 18%, rgba(138, 176, 255, 0.55), transparent 55%),
+    linear-gradient(150deg, var(--base) 0%, #0a2e9e 60%, #06165a 100%);
+  border: 1px solid rgba(138, 176, 255, 0.5);
+  box-shadow:
+    0 22px 50px -18px var(--base-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -18px 30px -20px rgba(0, 0, 0, 0.6);
+  transform: perspective(900px) rotateX(8deg) rotateY(-16deg);
+  animation: celeb-badge-tilt 7s var(--ease-in-out) infinite alternate;
+}
+/* Glossy diagonal reflet that travels across the badge once on entry, then idles. */
+.celebGloss {
+  position: absolute;
+  top: -60%;
+  left: -120%;
+  width: 70%;
+  height: 220%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  transform: rotate(8deg);
+  animation: celeb-gloss 2.6s var(--ease-out) 0.35s infinite;
+}
+.celebBadgeLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: rgba(255, 255, 255, 0.78);
+}
+.celebScore {
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.35);
+}
+.celebScoreMax {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+.celebBadgeFoot {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.celebHeadline {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+}
+.celebSub {
+  margin-top: -6px;
+  max-width: 30ch;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--text-dim);
+}
+.celebActions {
+  margin-top: 4px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+.celebActions > :global(.dr-btn) {
+  width: 100%;
+  text-align: center;
+}
+
+@keyframes celeb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes celeb-card-in {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) translateY(26px) rotateX(14deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1000px) translateY(0) rotateX(0deg) scale(1);
+  }
+}
+@keyframes celeb-badge-tilt {
+  from { transform: perspective(900px) rotateX(8deg) rotateY(-16deg); }
+  to { transform: perspective(900px) rotateX(4deg) rotateY(14deg); }
+}
+@keyframes celeb-gloss {
+  0% { left: -120%; }
+  55%, 100% { left: 160%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebBadge { transform: none; animation: none; }
+  .celebGloss { display: none; }
+  .celebCard { animation: none; }
+  .celebBackdrop { animation: none; }
+}
+
+@media (max-width: 380px) {
+  .celebBadge { width: 148px; height: 148px; }
+  .celebScore { font-size: 50px; }
+}
