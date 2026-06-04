@@ -12,6 +12,11 @@ import { DROPRANK_BADGE_ABI, BADGE_CHAIN_ID } from "@/lib/badge-abi";
 import styles from "./score.module.css";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
+// Explorer base per chain (84532 = Base Sepolia, else mainnet). Fixes testnet tx links.
+const EXPLORER =
+  BADGE_CHAIN_ID === 84532
+    ? "https://sepolia.basescan.org"
+    : "https://basescan.org";
 const RAW_CONTRACT = process.env.NEXT_PUBLIC_BADGE_CONTRACT ?? "";
 const CONTRACT =
   isAddress(RAW_CONTRACT) && RAW_CONTRACT.toLowerCase() !== ZERO
@@ -88,7 +93,7 @@ export default function MintButton({
 
   async function onMint() {
     if (phase === "success" && txHash) {
-      window.open(`https://basescan.org/tx/${txHash}`, "_blank");
+      window.open(`${EXPLORER}/tx/${txHash}`, "_blank");
       return;
     }
     setErrMsg("");

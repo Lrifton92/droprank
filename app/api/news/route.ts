@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchAllNews, type NewsItem } from "@/lib/news";
-import { LruCache, RateLimiter, clientIp } from "@/lib/cache";
+import { LruCache, checkRateLimit } from "@/lib/cache";
 
 // 15-minute in-memory cache (per the news spec). Single key: the whole feed.
 const cache = new LruCache<NewsItem[]>(1, 15 * 60 * 1000);
-const limiter = new RateLimiter(30, 60_000);
 const CACHE_KEY = "base-news";
 
 export async function GET(req: NextRequest) {
-  if (!limiter.allow(clientIp(req))) {
+  // Distributed rate-limit (Upstash) — each miss fans out to 7 third-party feeds,
+  // so the in-memory limiter was insufficient on serverless. (re-audit MED-1)
+  if (!(await checkRateLimit(req, { prefix: "news", limit: 30, windowSeconds: 60 }))) {
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 

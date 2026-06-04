@@ -35,11 +35,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
-    if (e instanceof Error) {
-      return NextResponse.json({ message: e.message }, { status: 500 });
-    }
-
-    throw e;
+    // Generic message to the client; detail stays server-side. (re-audit LOW-1, ref FIX-10)
+    console.error("[auth] verify error:", e);
+    return NextResponse.json({ message: "Internal error" }, { status: 500 });
   }
 }
 

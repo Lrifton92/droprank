@@ -58,6 +58,37 @@ export const FEEDS: NewsFeed[] = [
 const FEED_TIMEOUT_MS = 5_000;
 const ITEM_CAP = 40;
 const DESC_MAX = 240;
+/** Hard cap on a single feed's body to prevent unbounded buffering (re-audit LOW-2). */
+const FEED_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+
+/** Read a response body as text, aborting if it exceeds `maxBytes`. Returns null if over cap. */
+async function readCapped(res: Response, maxBytes: number): Promise<string | null> {
+  const len = Number(res.headers?.get?.("content-length") ?? 0);
+  if (len > maxBytes) return null;
+  // No streamable body (e.g. test mocks): fall back to buffered text, still capped.
+  if (!res.body?.getReader) return (await res.text()).slice(0, maxBytes);
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > maxBytes) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(
+    chunks.reduce<Uint8Array>((acc, c) => {
+      const next = new Uint8Array(acc.length + c.length);
+      next.set(acc);
+      next.set(c, acc.length);
+      return next;
+    }, new Uint8Array(0)),
+  );
+}
 // Browser-like UA: the generalist feeds serve any agent, but some hosts gate
 // on it. Note: blog.base.org & base.mirror.xyz sit behind Cloudflare bot
 // protection that fingerprints at the TLS level and returns 403 to Node's
@@ -316,7 +347,9 @@ async function fetchOne(
       redirect: "follow",
     });
     if (!res.ok) return { items: [], baseOnly: feed.baseOnly };
-    const xml = await res.text();
+    // Bound the read so a giant/hostile payload can't be fully buffered (re-audit LOW-2).
+    const xml = await readCapped(res, FEED_MAX_BYTES);
+    if (xml === null) return { items: [], baseOnly: feed.baseOnly };
     return { items: parseFeed(xml, feed.source), baseOnly: feed.baseOnly };
   } catch {
     // Timeout, network error or abort: this feed contributes nothing.
