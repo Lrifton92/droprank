@@ -27,7 +27,7 @@ function MenuInner() {
             onClick={() => router.replace("/")}
             aria-label={tc("back")}
           >
-            ←
+            ← <span className={styles.backLabel}>WALLET</span>
           </button>
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
@@ -99,17 +99,33 @@ function MenuInner() {
             <span className={styles.cardSub}>{t("discover.sub")}</span>
             <span className={styles.arrow}>→</span>
           </Link>
+
+          {/* 5th card. With 2 cols (md) and 4 cols (xl) it would dangle alone on a
+              new row; `cardWide` spans the full row instead so it reads as an
+              intentional feature strip, never an orphan. <768px = full-width too. */}
+          <Link href={`/yields${qs}`} className={`dr-panel dr-enter ${styles.card} ${styles.cardWide}`} style={{ "--i": 6 } as CSSProperties}>
+            <span className={styles.idx}>05</span>
+            <span className={styles.glyph} aria-hidden>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+                <path d="M4 17l4-5 3 3 5-7 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
+              </svg>
+            </span>
+            <span className={styles.cardTitle}>{t("yield.title")}</span>
+            <span className={styles.cardSub}>{t("yield.sub")}</span>
+            <span className={styles.arrow}>→</span>
+          </Link>
         </nav>
 
-        <div className="dr-enter" style={{ "--i": 6 } as CSSProperties}>
+        <div className="dr-enter" style={{ "--i": 7 } as CSSProperties}>
           <BasenameCard address={address} />
         </div>
 
-        <div className="dr-enter" style={{ "--i": 7 } as CSSProperties}>
+        <div className="dr-enter" style={{ "--i": 8 } as CSSProperties}>
           <BaseBanner />
         </div>
 
-        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 8 } as CSSProperties}>
+        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 9 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />

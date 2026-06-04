@@ -1,6 +1,6 @@
 .head {
   display: grid;
-  grid-template-columns: 32px 1fr 32px;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
 .head :global(.dr-brand) {
@@ -8,10 +8,15 @@
   font-size: 16px;
 }
 .back {
-  width: 32px;
+  width: auto;
+  padding: 0 12px 0 10px;
+  gap: 7px;
   height: 32px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  white-space: nowrap;
   background: none;
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
@@ -19,6 +24,15 @@
   font-size: 16px;
   cursor: pointer;
   transition: border-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
+}
+.backLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+.head > :last-child {
+  justify-self: end;
 }
 .back:hover {
   border-color: var(--base-300);
@@ -155,5 +169,24 @@
 @media (min-width: 1600px) {
   .grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 5th card (YIELD). The 4 cards fill a clean row at md (2 cols) and xl (4 cols),
+   so a 5th would dangle alone. Instead it spans the whole row as a feature
+   strip — deliberate, not orphaned. Below 768px the grid is single-column so
+   this is a no-op there. Layout left-aligned (vs centered) at full width so the
+   wide card doesn't read as a stretched copy of the square cards. */
+@media (min-width: 768px) {
+  .cardWide {
+    grid-column: 1 / -1;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas: "glyph idx . arrow" "glyph title . arrow" "glyph sub . arrow";
+    text-align: left;
+  }
+  .cardWide .idx,
+  .cardWide .cardTitle,
+  .cardWide .cardSub {
+    text-align: left;
   }
 }

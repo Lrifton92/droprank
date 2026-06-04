@@ -49,7 +49,13 @@ export default function InfoTip({ label }: { label: string }) {
         className={styles.btn}
         aria-label="info"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          // The tip can live inside a link/button (e.g. a yields pool card that
+          // is itself an <a>). Toggling the tip must never trigger that ancestor.
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
       >
         i
       </button>
