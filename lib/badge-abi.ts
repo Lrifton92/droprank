@@ -18,11 +18,12 @@ export const BADGE_CHAIN_ID: number =
 
 /**
  * Deployed contract address per chain.
- * TODO: fill in after deployment (see contracts/README.md).
+ * Base Sepolia: deployed 2026-06-04. Base mainnet: pending.
+ * Runtime source of truth is NEXT_PUBLIC_BADGE_CONTRACT (see MintButton/sign-score).
  */
 export const DROPRANK_BADGE_ADDRESS: Record<number, `0x${string}`> = {
   [BASE_CHAIN_ID]: '0x0000000000000000000000000000000000000000',
-  [BASE_SEPOLIA_CHAIN_ID]: '0x0000000000000000000000000000000000000000',
+  [BASE_SEPOLIA_CHAIN_ID]: '0xbcf4b2b6cef046eab27bffbd8ea4a3d695948899',
 };
 
 /** EIP-712 typed-data domain (must match the contract constructor). */
