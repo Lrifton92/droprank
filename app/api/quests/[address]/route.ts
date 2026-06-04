@@ -3,9 +3,11 @@ import { isAddress } from "viem";
 import { fetchWalletData, BlockscoutError } from "@/lib/providers/blockscout";
 import { computeQuests } from "@/lib/quests";
 import { LruCache, checkRateLimit } from "@/lib/cache";
+import { getOrSetCached } from "@/lib/shared-cache";
 import type { QuestsResult } from "@/lib/types";
 
 const cache = new LruCache<QuestsResult>(500, 5 * 60 * 1000);
+const QUESTS_TTL_S = 5 * 60;
 
 export async function GET(
   req: NextRequest,
@@ -25,19 +27,15 @@ export async function GET(
   }
 
   const key = address.toLowerCase();
-  const cached = cache.get(key);
-  if (cached) {
-    return NextResponse.json(cached, {
-      headers: { "cache-control": "public, max-age=60, s-maxage=300" },
-    });
-  }
 
   try {
-    const data = await fetchWalletData(key, req.signal);
-    const result = computeQuests(data.txs, key, {
-      isSmartWallet: data.usedSmartWallet,
+    // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
+    const result = await getOrSetCached(cache, key, QUESTS_TTL_S, async () => {
+      const data = await fetchWalletData(key, req.signal);
+      return computeQuests(data.txs, key, {
+        isSmartWallet: data.usedSmartWallet,
+      });
     });
-    cache.set(key, result);
     return NextResponse.json(result, {
       headers: { "cache-control": "public, max-age=60, s-maxage=300" },
     });

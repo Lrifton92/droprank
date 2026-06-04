@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchAllNews, type NewsItem } from "@/lib/news";
 import { LruCache, checkRateLimit } from "@/lib/cache";
+import { getOrSetCached } from "@/lib/shared-cache";
 import { translateToFr } from "@/lib/translate";
 import { isLocale } from "@/i18n/config";
 
 // 15-minute in-memory cache (per the news spec). Keyed by language so the FR
 // (translated) and EN (VO) feeds never mix; room for both.
 const cache = new LruCache<NewsItem[]>(2, 15 * 60 * 1000);
+const NEWS_TTL_S = 15 * 60;
 
 /**
  * Translate title + description of every item to FR, position-mapped so the
@@ -41,15 +43,13 @@ export async function GET(req: NextRequest) {
   };
 
   const cacheKey = `base-news:${lang}`;
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return NextResponse.json({ items: cached }, { headers });
-  }
 
   try {
-    const base = await fetchAllNews(req.signal);
-    const items = lang === "fr" ? await translateNews(base) : base;
-    cache.set(cacheKey, items);
+    // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
+    const items = await getOrSetCached(cache, cacheKey, NEWS_TTL_S, async () => {
+      const base = await fetchAllNews(req.signal);
+      return lang === "fr" ? await translateNews(base) : base;
+    });
     return NextResponse.json({ items }, { headers });
   } catch {
     // fetchAllNews degrades internally; this guards only unexpected failures.

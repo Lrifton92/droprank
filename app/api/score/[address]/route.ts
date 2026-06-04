@@ -4,9 +4,11 @@ import { BlockscoutError } from "@/lib/providers/blockscout";
 import { scoreAddress } from "@/lib/score-address";
 import { recordAndRankScore } from "@/lib/percentile";
 import { LruCache, checkRateLimit } from "@/lib/cache";
+import { getOrSetCached } from "@/lib/shared-cache";
 import type { ScoreResult } from "@/lib/types";
 
 const cache = new LruCache<ScoreResult>(500, 5 * 60 * 1000);
+const SCORE_TTL_S = 5 * 60;
 
 export async function GET(
   req: NextRequest,
@@ -26,19 +28,15 @@ export async function GET(
   }
 
   const key = address.toLowerCase();
-  const cached = cache.get(key);
-  if (cached) {
-    return NextResponse.json(cached, {
-      headers: { "cache-control": "public, max-age=60, s-maxage=300" },
-    });
-  }
 
   try {
-    const result = await scoreAddress(key, req.signal);
-    // Record + rank in the percentile store (never throws; static fallback).
-    result.percentile = await recordAndRankScore(key, result.score);
-
-    cache.set(key, result);
+    // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
+    const result = await getOrSetCached(cache, key, SCORE_TTL_S, async () => {
+      const r = await scoreAddress(key, req.signal);
+      // Record + rank in the percentile store (never throws; static fallback).
+      r.percentile = await recordAndRankScore(key, r.score);
+      return r;
+    });
     return NextResponse.json(result, {
       headers: { "cache-control": "public, max-age=60, s-maxage=300" },
     });

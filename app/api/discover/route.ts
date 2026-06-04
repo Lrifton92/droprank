@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchDiscover, type DiscoverItem } from "@/lib/discover";
 import { LruCache, checkRateLimit } from "@/lib/cache";
+import { getOrSetCached } from "@/lib/shared-cache";
 import { translateToFr } from "@/lib/translate";
 import { isLocale } from "@/i18n/config";
 
 // 30-minute in-memory cache. Keyed by language so the FR (translated) and EN (VO)
 // lists never mix; room for both.
 const cache = new LruCache<DiscoverItem[]>(2, 30 * 60 * 1000);
+const DISCOVER_TTL_S = 30 * 60;
 
 /**
  * Translate ONLY the headlines of "announced" items to FR. Protocol names
@@ -40,15 +42,13 @@ export async function GET(req: NextRequest) {
   };
 
   const cacheKey = `new-on-base:${lang}`;
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return NextResponse.json({ items: cached }, { headers });
-  }
 
   try {
-    const base = await fetchDiscover(req.signal);
-    const items = lang === "fr" ? await translateDiscover(base) : base;
-    cache.set(cacheKey, items);
+    // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
+    const items = await getOrSetCached(cache, cacheKey, DISCOVER_TTL_S, async () => {
+      const base = await fetchDiscover(req.signal);
+      return lang === "fr" ? await translateDiscover(base) : base;
+    });
     return NextResponse.json({ items }, { headers });
   } catch (err) {
     // fetchDiscover degrades internally; this guards only unexpected failures.
