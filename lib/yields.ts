@@ -545,7 +545,21 @@ export async function fetchAllYields(
     slugs.map((slug) => fetchOne(slug, signal)),
   );
   const ok = settled
-    .filter((s): s is PromiseFulfilledResult<YieldsResult> => s.status === "fulfilled")
-    .map((s) => s.value);
+    .map((s, i) =>
+      s.status === "fulfilled"
+        ? // Re-stamp every pool with the slug WE requested — never trust the
+          // cached payload's own `chain` field (stale-cache rule: per-chain
+          // payloads cached before a shape change may lack it for a full TTL).
+          ({
+            ...s.value,
+            profiles: {
+              stable: s.value.profiles.stable.map((p) => ({ ...p, chain: slugs[i] })),
+              majors: s.value.profiles.majors.map((p) => ({ ...p, chain: slugs[i] })),
+              degen: s.value.profiles.degen.map((p) => ({ ...p, chain: slugs[i] })),
+            },
+          } satisfies YieldsResult)
+        : null,
+    )
+    .filter((r): r is YieldsResult => r !== null);
   return mergeAllYields(ok);
 }
