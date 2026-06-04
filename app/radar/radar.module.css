@@ -82,6 +82,19 @@
   flex-direction: column;
   gap: 8px;
 }
+
+/* Desktop: widen the radar container and split the quest list into 2 columns.
+   Mobile/webview (< 768px) stays a single 424px-wide column. */
+@media (min-width: 768px) {
+  .wide {
+    max-width: 780px;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12px;
+  }
+}
 .quest {
   display: grid;
   grid-template-columns: 22px 1fr auto auto;

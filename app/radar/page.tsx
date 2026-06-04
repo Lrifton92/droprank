@@ -48,7 +48,7 @@ function RadarInner() {
   return (
     <>
       <div className="dr-grid-bg" />
-      <main className="dr-shell">
+      <main className={`dr-shell ${styles.wide}`}>
         <header className={styles.head}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
