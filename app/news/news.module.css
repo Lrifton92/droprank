@@ -77,14 +77,54 @@
   box-shadow: inset 2px 0 0 var(--base-300), 0 14px 38px -24px var(--base-glow);
 }
 
-.thumb {
+/* Reserved 16/9 box: shimmer while the image streams in, then a soft fade-in.
+   The box (not the img) carries border/radius so the placeholder and the photo
+   share the exact same frame — zero layout shift, no border flash. */
+.thumbBox {
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
-  display: block;
   border-radius: var(--r-sm);
   border: 1px solid var(--border);
+  overflow: hidden;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(120, 160, 255, 0.05) 38%,
+      rgba(120, 160, 255, 0.13) 50%,
+      rgba(120, 160, 255, 0.05) 62%
+    )
+    0 0 / 220% 100%;
+  animation: thumb-shimmer 1.3s linear infinite;
+}
+.thumbReady {
+  animation: none;
   background: rgba(120, 160, 255, 0.05);
+}
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out);
+}
+.thumbReady .thumb {
+  opacity: 1;
+}
+@keyframes thumb-shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thumbBox {
+    animation: none;
+  }
+  .thumb {
+    transition: none;
+    opacity: 1;
+  }
 }
 
 .meta {

@@ -89,20 +89,7 @@ function NewsInner() {
                   className={styles.item}
                   style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}
                 >
-                  {it.image && (
-                    /* Thumbnail. onError hides it so a dead URL leaves no broken
-                       icon — the card falls back to its text-only layout. */
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      className={styles.thumb}
-                      src={it.image}
-                      alt=""
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  )}
+                  {it.image && <NewsThumb src={it.image} eager={i < 3} />}
                   <div className={styles.meta}>
                     <span className={`mono ${styles.source}`}>{it.source}</span>
                     <span className={`mono ${styles.date}`}>{timeAgo(it.date)}</span>
@@ -126,6 +113,40 @@ function NewsInner() {
         )}
       </main>
     </>
+  );
+}
+
+/**
+ * Article thumbnail with a polished load path:
+ *  - shimmer placeholder in the reserved 16/9 box (no layout shift, no flash);
+ *  - fade-in once the bytes are decoded (`onLoad`), incl. cache hits via the
+ *    ref `complete` check (cached images can fire load before hydration);
+ *  - first row (`eager`) loads at high priority, the rest stays lazy;
+ *  - `no-referrer` dodges hotlink blocks on common RSS CDNs;
+ *  - a dead URL unmounts the box entirely — text-only card, no broken icon.
+ */
+function NewsThumb({ src, eager }: { src: string; eager: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  const [dead, setDead] = useState(false);
+  if (dead) return null;
+  return (
+    <span className={`${styles.thumbBox} ${loaded ? styles.thumbReady : ""}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className={styles.thumb}
+        src={src}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "low"}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onLoad={() => setLoaded(true)}
+        onError={() => setDead(true)}
+        ref={(el) => {
+          if (el && el.complete && el.naturalWidth > 0 && !loaded) setLoaded(true);
+        }}
+      />
+    </span>
   );
 }
 
