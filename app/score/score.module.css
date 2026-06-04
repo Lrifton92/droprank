@@ -44,14 +44,19 @@
     grid-template-areas:
       "hero breakdown"
       "cta  breakdown";
+    /* Row 1 soaks up the rail's free height (set by the taller breakdown
+       column) so the hero can center vertically; the CTA stays anchored low. */
+    grid-template-rows: 1fr auto;
     align-content: start;
     column-gap: var(--s-6);
     row-gap: var(--s-5);
     margin-top: var(--s-5);
   }
-  .layout .hero { grid-area: hero; margin-top: 0; }
+  .layout .hero { grid-area: hero; margin-top: 0; align-self: center; }
   .layout .breakdown { grid-area: breakdown; margin-top: 0; align-self: start; }
-  .layout .cta { grid-area: cta; margin-top: 0; align-self: start; }
+  .layout .cta { grid-area: cta; margin-top: 0; align-self: end; }
+  /* Desktop: the score dominates — bigger digits, the /100 stays discreet. */
+  .layout .score { font-size: 148px; }
 }
 
 /* Hero score */
@@ -61,8 +66,11 @@
   padding: 28px 20px;
   position: relative;
   border-radius: var(--r-lg);
+  /* Glow anchored INSIDE the block (not at 50% 0%): a gradient centered on the
+     top edge is brightest exactly where the block ends -> visible seam line.
+     Centered at 35% it fades to transparent before every border. */
   background:
-    radial-gradient(70% 80% at 50% 0%, var(--base-soft), transparent 70%);
+    radial-gradient(70% 65% at 50% 35%, var(--base-soft), transparent 68%);
 }
 .scoreWrap {
   display: flex;
