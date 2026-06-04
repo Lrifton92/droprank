@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useAccount,
   useReadContract,
@@ -32,6 +33,7 @@ export default function MintButton({
   scannedAddress: string;
   empty: boolean;
 }) {
+  const t = useTranslations("mint");
   const { address: connected, isConnected } = useAccount();
   const [phase, setPhase] = useState<Phase>("idle");
   const [errMsg, setErrMsg] = useState("");
@@ -61,8 +63,8 @@ export default function MintButton({
   // No contract yet -> disabled placeholder, keeps the page shippable.
   if (!CONTRACT) {
     return (
-      <button className="dr-btn" disabled title="Badge contract not deployed yet">
-        Badge soon
+      <button className="dr-btn" disabled title={t("badgeSoonTitle")}>
+        {t("badgeSoon")}
       </button>
     );
   }
@@ -71,18 +73,18 @@ export default function MintButton({
 
   const label =
     phase === "signing"
-      ? "Attesting…"
+      ? t("attesting")
       : phase === "confirm"
-        ? "Confirm in wallet…"
+        ? t("confirmInWallet")
         : phase === "pending"
-          ? "Minting…"
+          ? t("minting")
           : phase === "success"
-            ? "✓ Badge live ↗"
+            ? t("badgeLive")
             : owns
-              ? "Refresh badge ↗"
+              ? t("refreshBadge")
               : empty
-                ? "Mint when ready"
-                : "Mint badge ↗";
+                ? t("mintWhenReady")
+                : t("mintBadge");
 
   async function onMint() {
     if (phase === "success" && txHash) {
@@ -99,7 +101,7 @@ export default function MintButton({
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
-        throw new Error(j.error ?? `attestation failed (${res.status})`);
+        throw new Error(j.error ?? t("attestationFailed", { status: res.status }));
       }
       const { score, deadline, signature } = await res.json();
 
@@ -116,16 +118,16 @@ export default function MintButton({
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       // Trim verbose wallet rejections to a short line.
-      setErrMsg(/user rejected|denied/i.test(m) ? "Cancelled in wallet" : m);
+      setErrMsg(/user rejected|denied/i.test(m) ? t("cancelled") : m);
       setPhase("error");
     }
   }
 
   const blocked = !sameWallet && phase !== "success";
   const hint = !isConnected
-    ? "Connect your wallet to mint."
+    ? t("connectToMint")
     : !sameWallet
-      ? "Mint is only available for your connected wallet."
+      ? t("onlyConnectedWallet")
       : "";
 
   return (
@@ -143,9 +145,7 @@ export default function MintButton({
         <span className={`mono ${styles.mintNote}`}>! {errMsg}</span>
       )}
       {phase === "pending" && (
-        <span className={`mono ${styles.mintNote}`}>
-          tx submitted — confirming onchain…
-        </span>
+        <span className={`mono ${styles.mintNote}`}>{t("txSubmitted")}</span>
       )}
       {phase !== "error" && phase !== "pending" && hint && (
         <span className={`mono ${styles.mintNote}`}>{hint}</span>

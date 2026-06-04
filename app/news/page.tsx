@@ -2,12 +2,16 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { timeAgo } from "../_components/presentation";
 import type { NewsItem } from "@/lib/news";
+import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./news.module.css";
 
 function NewsInner() {
   const params = useSearchParams();
+  const t = useTranslations("news");
+  const tc = useTranslations("common");
   const address = params.get("address") ?? "";
   const qs = address ? `?address=${address}` : "";
 
@@ -36,22 +40,22 @@ function NewsInner() {
       <div className="dr-grid-bg" />
       <main className="dr-shell">
         <header className={styles.head}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label="Back">
+          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
           </Link>
-          <span className="dr-eyebrow">{"// base feed"}</span>
-          <span />
+          <span className="dr-eyebrow">{t("baseFeed")}</span>
+          <LocaleSwitcher />
         </header>
 
         {error && (
           <div className={styles.state}>
-            <p className={styles.stateTitle}>! FEED OFFLINE</p>
+            <p className={styles.stateTitle}>{t("feedOffline")}</p>
             <p className={`mono ${styles.stateErr}`}>{error}</p>
             <button
               className="dr-btn dr-btn--ghost"
               onClick={() => setReload((n) => n + 1)}
             >
-              ↻ Retry
+              {tc("retry")}
             </button>
           </div>
         )}
@@ -60,13 +64,13 @@ function NewsInner() {
 
         {items && !error && items.length === 0 && (
           <div className={styles.state}>
-            <p className={styles.stateTitle}>∅ NO SIGNAL</p>
-            <p className={`mono ${styles.stateErr}`}>no base news right now</p>
+            <p className={styles.stateTitle}>{t("noSignal")}</p>
+            <p className={`mono ${styles.stateErr}`}>{t("noNews")}</p>
             <button
               className="dr-btn dr-btn--ghost"
               onClick={() => setReload((n) => n + 1)}
             >
-              ↻ Rescan
+              {tc("rescan")}
             </button>
           </div>
         )}
@@ -74,7 +78,7 @@ function NewsInner() {
         {items && items.length > 0 && (
           <>
             <p className={`mono ${styles.count}`}>
-              <span className="syn-num">{items.length}</span> signals · base l2
+              <span className="syn-num">{items.length}</span> {t("signals")}
             </p>
             <ul className={styles.list}>
               {items.map((it, i) => (
@@ -94,7 +98,7 @@ function NewsInner() {
                     rel="noopener noreferrer"
                   >
                     {it.title}
-                    <span className={styles.read}>read ↗</span>
+                    <span className={styles.read}>{tc("read")}</span>
                   </a>
                   {it.description && (
                     <p className={styles.desc}>{it.description}</p>
@@ -110,10 +114,11 @@ function NewsInner() {
 }
 
 function NewsSkeleton() {
+  const t = useTranslations("news");
   return (
     <div className={styles.skeleton}>
       <div className={styles.skScan}>
-        <span className="mono">SCANNING BASE FEED</span>
+        <span className="mono">{t("scanningFeed")}</span>
         <span className="dr-cursor" />
       </div>
       {Array.from({ length: 6 }).map((_, i) => (

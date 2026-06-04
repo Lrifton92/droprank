@@ -2,12 +2,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { shortAddr } from "../_components/presentation";
+import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./menu.module.css";
 
 function MenuInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const t = useTranslations("menu");
+  const tc = useTranslations("common");
   const address = params.get("address") ?? "";
   const qs = address ? `?address=${address}` : "";
 
@@ -19,18 +23,18 @@ function MenuInner() {
           <button
             className={styles.back}
             onClick={() => router.replace("/")}
-            aria-label="Back"
+            aria-label={tc("back")}
           >
             ←
           </button>
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
           </span>
-          <span />
+          <LocaleSwitcher />
         </header>
 
         <div className={styles.target}>
-          <span className="dr-eyebrow">{"// active target"}</span>
+          <span className="dr-eyebrow">{tc("activeTarget")}</span>
           <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
         </div>
 
@@ -42,8 +46,8 @@ function MenuInner() {
                 <path d="M3 18l5-6 4 4 6-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-            <span className={styles.cardTitle}>SCORE</span>
-            <span className={styles.cardSub}>your /100 rank, breakdown &amp; tier</span>
+            <span className={styles.cardTitle}>{t("score.title")}</span>
+            <span className={styles.cardSub}>{t("score.sub")}</span>
             <span className={styles.arrow}>→</span>
           </Link>
 
@@ -56,8 +60,8 @@ function MenuInner() {
                 <path d="M12 12L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </span>
-            <span className={styles.cardTitle}>RADAR</span>
-            <span className={styles.cardSub}>18 onchain quests &amp; progress</span>
+            <span className={styles.cardTitle}>{t("radar.title")}</span>
+            <span className={styles.cardSub}>{t("radar.sub")}</span>
             <span className={styles.arrow}>→</span>
           </Link>
 
@@ -70,8 +74,8 @@ function MenuInner() {
                 <circle cx="9" cy="19" r="1.6" fill="currentColor" />
               </svg>
             </span>
-            <span className={styles.cardTitle}>NEWS</span>
-            <span className={styles.cardSub}>latest base ecosystem signals</span>
+            <span className={styles.cardTitle}>{t("news.title")}</span>
+            <span className={styles.cardSub}>{t("news.sub")}</span>
             <span className={styles.arrow}>→</span>
           </Link>
         </nav>
@@ -81,20 +85,20 @@ function MenuInner() {
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />
-            <span className="dr-term__title">droprank://session</span>
+            <span className="dr-term__title">{t("term.title")}</span>
           </div>
           <div className="dr-term__body">
             <div className="dr-term__row">
-              <span className="syn-key">chain</span>
-              <span className="syn-str">&quot;base-mainnet&quot;</span>
+              <span className="syn-key">{t("term.chain")}</span>
+              <span className="syn-str">{t("term.chainValue")}</span>
             </div>
             <div className="dr-term__row">
-              <span className="syn-key">mode</span>
-              <span className="syn-str">&quot;read-only&quot;</span>
+              <span className="syn-key">{t("term.mode")}</span>
+              <span className="syn-str">{t("term.modeValue")}</span>
             </div>
             <div className="dr-term__row">
-              <span className="syn-key">badge</span>
-              <span className="syn-str">&quot;soulbound · 1/address&quot;</span>
+              <span className="syn-key">{t("term.badge")}</span>
+              <span className="syn-str">{t("term.badgeValue")}</span>
             </div>
           </div>
         </div>

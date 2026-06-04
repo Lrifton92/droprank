@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BaseCube from "./_components/BaseCube";
+import LocaleSwitcher from "./_components/LocaleSwitcher";
 import styles from "./landing.module.css";
 
 /**
@@ -15,6 +17,8 @@ import styles from "./landing.module.css";
  */
 export default function Home() {
   const router = useRouter();
+  const t = useTranslations("landing");
+  const tc = useTranslations("common");
   const { setMiniAppReady, isMiniAppReady } = useMiniKit();
   const { address, isConnected } = useAccount();
   const [pasted, setPasted] = useState("");
@@ -41,26 +45,26 @@ export default function Home() {
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
           </span>
-          <span className={styles.status}>
-            <i className={styles.statusDot} />
-            BASE&nbsp;MAINNET
+          <span className={styles.headRight}>
+            <span className={styles.status}>
+              <i className={styles.statusDot} />
+              {tc("baseMainnet")}
+            </span>
+            <LocaleSwitcher />
           </span>
         </header>
 
         <BaseCube />
 
         <section className={styles.hero}>
-          <p className="dr-eyebrow">{"// onchain reputation engine"}</p>
+          <p className="dr-eyebrow">{t("eyebrow")}</p>
           <h1 className={styles.title}>
-            Your Base airdrop score,
+            {t("titleLine1")}
             <br />
-            <span className={styles.titleAccent}>ranked.</span>
+            <span className={styles.titleAccent}>{t("titleAccent")}</span>
             <span className="dr-cursor" />
           </h1>
-          <p className={styles.sub}>
-            Scan any wallet. Get a /100 score, your percentile and a 12-quest
-            radar. Mint your rank as a soulbound badge.
-          </p>
+          <p className={styles.sub}>{t("sub")}</p>
         </section>
 
         <section className={styles.actions}>
@@ -69,32 +73,32 @@ export default function Home() {
           </div>
 
           <div className={styles.divider}>
-            <span>or scan read-only</span>
+            <span>{t("orScan")}</span>
           </div>
 
           <div className={styles.paste}>
             <label htmlFor="paste-address" className="dr-eyebrow">
-              wallet address
+              {t("walletAddress")}
             </label>
             <input
               id="paste-address"
               className="dr-input"
               value={pasted}
               onChange={(e) => setPasted(e.target.value)}
-              placeholder="0x…"
+              placeholder={t("addressPlaceholder")}
               spellCheck={false}
               autoComplete="off"
               autoCapitalize="off"
             />
             {dirty && !pastedValid && (
-              <p className={styles.inputErr}>! not a valid address</p>
+              <p className={styles.inputErr}>{t("invalidAddress")}</p>
             )}
             <button
               className="dr-btn dr-btn--ghost"
               disabled={!pastedValid}
               onClick={() => router.push(`/enter?address=${trimmed}`)}
             >
-              Scan this wallet →
+              {t("scanThisWallet")}
             </button>
           </div>
         </section>
@@ -107,7 +111,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="mono"
           >
-            {"// built on base by @lrifton6240"}
+            {t("footerCredit")}
           </a>
         </footer>
       </main>

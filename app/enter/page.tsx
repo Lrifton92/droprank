@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { shortAddr } from "../_components/presentation";
 import styles from "./enter.module.css";
 
@@ -11,16 +12,18 @@ import styles from "./enter.module.css";
  * the address into /menu.
  */
 const STEPS = [
-  { t: 200, label: "INITIALIZING DROPRANK CORE", tag: "ok" },
-  { t: 700, label: "ESTABLISHING BASE LINK", tag: "ok" },
-  { t: 1300, label: "SCANNING WALLET", tag: "scan" },
-  { t: 2200, label: "INDEXING ONCHAIN ACTIVITY", tag: "ok" },
-  { t: 2800, label: "ACCESS GRANTED", tag: "grant" },
+  { t: 200, key: "step.initCore", tag: "ok" },
+  { t: 700, key: "step.baseLink", tag: "ok" },
+  { t: 1300, key: "step.scanWallet", tag: "scan" },
+  { t: 2200, key: "step.indexing", tag: "ok" },
+  { t: 2800, key: "step.accessGranted", tag: "grant" },
 ] as const;
 
 function EnterInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const t = useTranslations("enter");
+  const tc = useTranslations("common");
   const address = params.get("address") ?? "";
   const [step, setStep] = useState(-1);
   const [pct, setPct] = useState(0);
@@ -75,7 +78,7 @@ function EnterInner() {
           <small>%</small>
         </div>
         <p className={styles.target}>
-          <span className="dr-eyebrow">target</span>
+          <span className="dr-eyebrow">{tc("target")}</span>
           <span className="mono">{shortAddr(address)}</span>
         </p>
       </div>
@@ -83,7 +86,7 @@ function EnterInner() {
       <ul className={styles.log}>
         {STEPS.map((s, i) => (
           <li
-            key={s.label}
+            key={s.key}
             className={`${styles.line} ${i <= step ? styles.lineOn : ""} ${
               i === STEPS.length - 1 && step >= i ? styles.grant : ""
             }`}
@@ -91,14 +94,14 @@ function EnterInner() {
             <span className={styles.bracket}>
               {i < step ? "[OK]" : i === step ? "[··]" : "[  ]"}
             </span>
-            <span>{s.label}</span>
+            <span>{t(s.key)}</span>
             <span className="dr-cursor" hidden={i !== step} />
           </li>
         ))}
       </ul>
 
       <button className={styles.skip} onClick={go}>
-        tap to skip →
+        {t("skip")}
       </button>
     </main>
   );

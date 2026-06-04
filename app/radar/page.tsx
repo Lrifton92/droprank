@@ -2,15 +2,21 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations, useMessages } from "next-intl";
 import { isAddress } from "viem";
 import type { QuestsResult } from "@/lib/types";
+import { questLabel } from "@/i18n/config";
 import Counter from "../_components/Counter";
 import { shortAddr } from "../_components/presentation";
+import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./radar.module.css";
 
 function RadarInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const t = useTranslations("radar");
+  const tc = useTranslations("common");
+  const messages = useMessages() as { quests?: Record<string, string> };
   const address = params.get("address") ?? "";
   const qs = address ? `?address=${address}` : "";
   const valid = isAddress(address);
@@ -44,28 +50,28 @@ function RadarInner() {
       <div className="dr-grid-bg" />
       <main className="dr-shell">
         <header className={styles.head}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label="Back">
+          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
           </Link>
-          <span className="dr-eyebrow">{"// quest radar"}</span>
-          <span />
+          <span className="dr-eyebrow">{t("questRadar")}</span>
+          <LocaleSwitcher />
         </header>
 
         {!valid && (
           <div className={styles.state}>
-            <p className={styles.stateTitle}>! INVALID TARGET</p>
+            <p className={styles.stateTitle}>{t("invalidTarget")}</p>
             <button className="dr-btn dr-btn--ghost" onClick={() => router.replace("/")}>
-              ← New scan
+              {tc("newScan")}
             </button>
           </div>
         )}
 
         {valid && error && (
           <div className={styles.state}>
-            <p className={styles.stateTitle}>! RADAR OFFLINE</p>
+            <p className={styles.stateTitle}>{t("offline")}</p>
             <p className={`mono ${styles.stateErr}`}>{error}</p>
             <button className="dr-btn dr-btn--ghost" onClick={() => setReload((n) => n + 1)}>
-              ↻ Retry
+              {tc("retry")}
             </button>
           </div>
         )}
@@ -80,11 +86,11 @@ function RadarInner() {
               <div className={styles.progressTop}>
                 <span>
                   <Counter value={data.earned} className={styles.big} duration={1100} />
-                  <span className={styles.total}>/{data.total} pts</span>
+                  <span className={styles.total}>{t("pts", { total: data.total })}</span>
                 </span>
                 <span className={styles.completed}>
                   <span className="mono">{doneCount}</span>
-                  <span className="syn-punct">/{data.quests.length}</span> done
+                  <span className="syn-punct">/{data.quests.length}</span> {t("done")}
                 </span>
               </div>
               <div className={styles.track}>
@@ -104,7 +110,9 @@ function RadarInner() {
                     <span className={styles.check} aria-hidden>
                       {q.done ? "✓" : "○"}
                     </span>
-                    <span className={styles.qLabel}>{q.label}</span>
+                    <span className={styles.qLabel}>
+                      {questLabel(q.id, q.label, messages.quests)}
+                    </span>
                     {!q.done && link ? (
                       <a
                         className={styles.qLink}
@@ -112,11 +120,11 @@ function RadarInner() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        do it ↗
+                        {tc("doIt")}
                       </a>
                     ) : (
                       <span className={styles.qStatus}>
-                        {q.done ? "cleared" : "—"}
+                        {q.done ? t("cleared") : t("dash")}
                       </span>
                     )}
                     <span className={`mono ${styles.qPts}`}>+{q.points}</span>
@@ -132,10 +140,11 @@ function RadarInner() {
 }
 
 function RadarSkeleton() {
+  const t = useTranslations("radar");
   return (
     <div className={styles.skeleton}>
       <div className={styles.skScan}>
-        <span className="mono">PINGING QUEST REGISTRY</span>
+        <span className="mono">{t("pinging")}</span>
         <span className="dr-cursor" />
       </div>
       {Array.from({ length: 8 }).map((_, i) => (
