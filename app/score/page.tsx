@@ -72,7 +72,7 @@ function ScoreInner() {
       <main className="dr-shell dr-wide">
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
-            ←
+            ← <span className={styles.backLabel}>MENU</span>
           </Link>
           <span className="dr-eyebrow">{t("report")}</span>
           <LocaleSwitcher />
