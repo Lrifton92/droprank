@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { minikitConfig } from "@/minikit.config";
 import { RootProvider } from "./rootProvider";
@@ -42,16 +44,19 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <RootProvider>
-      <html lang="en">
+      <html lang={locale}>
         <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
-          <SafeArea>{children}</SafeArea>
+          <NextIntlClientProvider>
+            <SafeArea>{children}</SafeArea>
+          </NextIntlClientProvider>
         </body>
       </html>
     </RootProvider>
