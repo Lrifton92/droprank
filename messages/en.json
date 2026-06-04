@@ -43,6 +43,7 @@
     "score": { "title": "SCORE", "sub": "your /100 rank, breakdown & tier" },
     "radar": { "title": "RADAR", "sub": "18 onchain quests & progress" },
     "news": { "title": "NEWS", "sub": "latest base ecosystem signals" },
+    "discover": { "title": "DISCOVER", "sub": "new projects & protocols on base" },
     "term": {
       "title": "droprank://session",
       "chain": "chain",
@@ -117,6 +118,19 @@
     "noSignal": "∅ NO SIGNAL",
     "noNews": "no base news right now",
     "signals": "signals · base l2"
+  },
+  "discover": {
+    "eyebrow": "// new on base",
+    "scanning": "SCANNING NEW DEPLOYMENTS",
+    "offline": "! DISCOVERY OFFLINE",
+    "noSignal": "∅ NO SIGNAL",
+    "empty": "no new base projects right now",
+    "found": "fresh · on base",
+    "tagNew": "NEW",
+    "tagAnnounced": "ANNOUNCED",
+    "tvl": "{value} tvl",
+    "open": "open ↗",
+    "disclaimer": "auto-discovered · unverified · DYOR"
   },
   "quests": {
     "swap-aerodrome": "Swap on Aerodrome",

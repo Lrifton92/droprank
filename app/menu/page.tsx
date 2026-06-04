@@ -78,6 +78,19 @@ function MenuInner() {
             <span className={styles.cardSub}>{t("news.sub")}</span>
             <span className={styles.arrow}>→</span>
           </Link>
+
+          <Link href={`/discover${qs}`} className={`dr-panel ${styles.card}`}>
+            <span className={styles.idx}>04</span>
+            <span className={styles.glyph} aria-hidden>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+                <path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.5 12 3z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <circle cx="18.5" cy="18.5" r="1.4" fill="currentColor" />
+              </svg>
+            </span>
+            <span className={styles.cardTitle}>{t("discover.title")}</span>
+            <span className={styles.cardSub}>{t("discover.sub")}</span>
+            <span className={styles.arrow}>→</span>
+          </Link>
         </nav>
 
         <div className={`dr-term ${styles.hint}`}>

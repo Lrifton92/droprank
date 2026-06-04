@@ -43,6 +43,7 @@
     "score": { "title": "SCORE", "sub": "ton rang /100, le détail & le palier" },
     "radar": { "title": "RADAR", "sub": "18 quêtes onchain & progression" },
     "news": { "title": "NEWS", "sub": "derniers signaux de l'écosystème base" },
+    "discover": { "title": "DISCOVER", "sub": "nouveaux projets & protocoles sur base" },
     "term": {
       "title": "droprank://session",
       "chain": "chain",
@@ -117,6 +118,19 @@
     "noSignal": "∅ AUCUN SIGNAL",
     "noNews": "aucune news base pour l'instant",
     "signals": "signaux · base l2"
+  },
+  "discover": {
+    "eyebrow": "// new on base",
+    "scanning": "SCAN DES NOUVEAUX DÉPLOIEMENTS",
+    "offline": "! DÉCOUVERTE HORS LIGNE",
+    "noSignal": "∅ AUCUN SIGNAL",
+    "empty": "aucun nouveau projet base pour l'instant",
+    "found": "récents · sur base",
+    "tagNew": "NEW",
+    "tagAnnounced": "ANNOUNCED",
+    "tvl": "{value} tvl",
+    "open": "ouvrir ↗",
+    "disclaimer": "auto-découverts · non vérifiés · DYOR"
   },
   "quests": {
     "swap-aerodrome": "Swap sur Aerodrome",

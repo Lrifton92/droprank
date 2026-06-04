@@ -24,6 +24,15 @@ export function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
+/** Compact USD: 1_240_000 -> "$1.2M", 104_000_000 -> "$104M", 0/invalid -> "". */
+export function formatUsd(n: number | undefined): string {
+  if (!n || !Number.isFinite(n) || n <= 0) return "";
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(n >= 1e10 ? 0 : 1)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(n >= 1e4 ? 0 : 1)}K`;
+  return `$${Math.round(n)}`;
+}
+
 /** Compact relative time: "just now", "2h ago", "3d ago". 0/invalid -> "—". */
 export function timeAgo(ms: number, now = Date.now()): string {
   if (!ms || ms <= 0) return "—";
