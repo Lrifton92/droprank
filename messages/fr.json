@@ -10,7 +10,9 @@
     "target": "cible",
     "activeTarget": "// cible active",
     "doIt": "y aller ↗",
-    "read": "lire ↗"
+    "read": "lire ↗",
+    "menu": "⌂ Menu",
+    "scanOther": "↻ Scanner un autre wallet"
   },
   "locale": {
     "label": "langue",
@@ -67,6 +69,7 @@
     "startYourJourney": "LANCE-TOI",
     "freshWalletPost": " — complète des quêtes sur le radar pour grimper.",
     "breakdownTitle": "score.breakdown[]",
+    "about": "Ton score DropRank (/100) évalue à quel point ce wallet est prêt pour un airdrop Base — d'après le détail ci-dessous (transactions, jours actifs, volume, contrats, Basename, Smart Wallet, quêtes). C'est notre propre score transparent, calculé différemment de l'Onchain Score de base.org (Coinbase, propriétaire) — d'où des chiffres différents.",
     "improve": {
       "maxed": "au max",
       "time": "monte avec le temps",

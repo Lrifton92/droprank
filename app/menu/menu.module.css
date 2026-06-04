@@ -36,6 +36,12 @@
   letter-spacing: 0.05em;
   color: var(--text);
 }
+.scanBtn {
+  align-self: center;
+  margin-top: 10px;
+  font-size: 12px;
+  padding: 7px 14px;
+}
 
 .grid {
   margin-top: 24px;
@@ -47,10 +53,17 @@
    Mobile/webview (< 768px) stays a single 424px-wide column. */
 @media (min-width: 768px) {
   .wide {
-    max-width: 780px;
+    max-width: 860px;
   }
   .grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+/* Large desktop: use more horizontal space so the menu doesn't float in a
+   narrow column with huge empty side margins. */
+@media (min-width: 1240px) {
+  .wide {
+    max-width: 1080px;
   }
 }
 

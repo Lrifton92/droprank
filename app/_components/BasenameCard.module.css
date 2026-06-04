@@ -31,13 +31,45 @@
   50% { transform: translateX(12%) scale(1.12); opacity: 1; }
 }
 
+.avatarWrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
 .avatar {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  flex-shrink: 0;
   overflow: hidden;
+  object-fit: cover;
   box-shadow: 0 0 22px -8px var(--base-glow);
+}
+.edit {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #fff;
+  background: var(--base);
+  border: 2px solid var(--bg, #05070d);
+  cursor: pointer;
+  box-shadow: 0 2px 8px -2px var(--base-glow);
+  transition: transform 0.12s var(--ease-snap), background 0.16s var(--ease-out);
+}
+.edit:hover {
+  background: var(--base-200);
+}
+.edit:active {
+  transform: scale(0.88);
+}
+.file {
+  display: none;
 }
 
 .info {

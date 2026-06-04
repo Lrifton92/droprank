@@ -8,6 +8,7 @@ import type { ScoreResult } from "@/lib/types";
 import { parseDetail } from "@/i18n/config";
 import Counter from "../_components/Counter";
 import { tierFor, shortAddr, improveFor } from "../_components/presentation";
+import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import MintButton from "./MintButton";
 import styles from "./score.module.css";
@@ -124,6 +125,7 @@ function ScoreInner() {
                       : "—"}
                   </span>
                 </span>
+                <InfoTip label={t("about")} />
               </div>
               {empty && (
                 <p className={styles.startMsg}>

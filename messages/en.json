@@ -10,7 +10,9 @@
     "target": "target",
     "activeTarget": "// active target",
     "doIt": "do it ↗",
-    "read": "read ↗"
+    "read": "read ↗",
+    "menu": "⌂ Menu",
+    "scanOther": "↻ Scan another wallet"
   },
   "locale": {
     "label": "language",
@@ -67,6 +69,7 @@
     "startYourJourney": "START YOUR JOURNEY",
     "freshWalletPost": " — complete quests on the radar to climb the ranks.",
     "breakdownTitle": "score.breakdown[]",
+    "about": "Your DropRank score (/100) rates how ready this wallet is for a Base airdrop — from the breakdown below (transactions, active days, volume, contracts, Basename, Smart Wallet, quests). It's our own transparent score, computed differently from base.org's Onchain Score (Coinbase, proprietary) — so the two numbers differ.",
     "improve": {
       "maxed": "maxed",
       "time": "grows over time",
