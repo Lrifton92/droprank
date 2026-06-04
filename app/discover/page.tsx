@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { timeAgo, formatUsd } from "../_components/presentation";
 import type { DiscoverItem } from "@/lib/discover";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
@@ -10,6 +10,7 @@ import styles from "./discover.module.css";
 
 function DiscoverInner() {
   const params = useSearchParams();
+  const locale = useLocale();
   const t = useTranslations("discover");
   const tc = useTranslations("common");
   const address = params.get("address") ?? "";
@@ -23,7 +24,7 @@ function DiscoverInner() {
     const ctrl = new AbortController();
     setItems(null);
     setError(null);
-    fetch("/api/discover", { signal: ctrl.signal })
+    fetch(`/api/discover?lang=${locale}`, { signal: ctrl.signal })
       .then(async (r) => {
         if (!r.ok) throw new Error((await r.json()).error ?? `HTTP ${r.status}`);
         return r.json();
@@ -33,7 +34,8 @@ function DiscoverInner() {
         if (e.name !== "AbortError") setError(String(e.message ?? e));
       });
     return () => ctrl.abort();
-  }, [reload]);
+    // Re-fetch when the language changes so EN↔FR refreshes the translated list.
+  }, [reload, locale]);
 
   return (
     <>
