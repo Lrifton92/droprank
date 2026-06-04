@@ -69,7 +69,7 @@ function ScoreInner() {
   return (
     <>
       <div className="dr-grid-bg" />
-      <main className="dr-shell">
+      <main className="dr-shell dr-wide">
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
@@ -107,6 +107,7 @@ function ScoreInner() {
           <>
             <p className={`mono dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>{shortAddr(address)}</p>
 
+            <div className={styles.layout}>
             <section
               className={`dr-enter ${styles.hero} ${empty ? styles.heroEmpty : ""}`}
               style={{ "--tier": tier.color, "--i": 2 } as CSSProperties}
@@ -217,6 +218,7 @@ function ScoreInner() {
                 {shared ? t("linkCopied") : t("shareRank")}
               </button>
             </section>
+            </div>
           </>
         )}
       </main>

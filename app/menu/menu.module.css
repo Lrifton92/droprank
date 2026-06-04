@@ -49,21 +49,12 @@
   gap: 14px;
 }
 
-/* Desktop: widen the menu and lay the cards out in 2 columns.
-   Mobile/webview (< 768px) stays a single 424px-wide column. */
+/* Desktop: lay the 4 destination cards out in 2 columns. The shell width is
+   handled by the shared `.dr-wide` utility (860 → 1080). Mobile/webview
+   (< 768px) stays a single 424px column. */
 @media (min-width: 768px) {
-  .wide {
-    max-width: 860px;
-  }
   .grid {
     grid-template-columns: 1fr 1fr;
-  }
-}
-/* Large desktop: use more horizontal space so the menu doesn't float in a
-   narrow column with huge empty side margins. */
-@media (min-width: 1240px) {
-  .wide {
-    max-width: 1080px;
   }
 }
 

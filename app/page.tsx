@@ -43,7 +43,7 @@ export default function Home() {
   return (
     <>
       <div className="dr-grid-bg" />
-      <main className={`dr-shell ${styles.main}`}>
+      <main className={`dr-shell dr-wide ${styles.main}`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
@@ -57,20 +57,23 @@ export default function Home() {
           </span>
         </header>
 
-        <BaseCube />
+        <div className={styles.layout}>
+        <div className={styles.lead}>
+          <BaseCube />
 
-        <section className={styles.hero}>
-          <p className="dr-eyebrow">{t("eyebrow")}</p>
-          <h1 className={styles.title}>
-            {t("titleLine1")}
-            <br />
-            <span className={styles.titleAccent}>{t("titleAccent")}</span>
-            <span className="dr-cursor" />
-          </h1>
-          <p className={styles.sub}>{t("sub")}</p>
-        </section>
+          <section className={styles.hero}>
+            <p className="dr-eyebrow">{t("eyebrow")}</p>
+            <h1 className={styles.title}>
+              {t("titleLine1")}
+              <br />
+              <span className={styles.titleAccent}>{t("titleAccent")}</span>
+              <span className="dr-cursor" />
+            </h1>
+            <p className={styles.sub}>{t("sub")}</p>
+          </section>
+        </div>
 
-        <section className={styles.actions}>
+        <section className={`${styles.actions} ${styles.rail}`}>
           <div className={`ockWrap ${styles.connect}`}>
             <Wallet />
           </div>
@@ -114,6 +117,7 @@ export default function Home() {
             </button>
           </div>
         </section>
+        </div>
 
         <footer className={styles.foot}>
           <span className="mono">v0.1.0</span>

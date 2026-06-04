@@ -38,16 +38,20 @@
   gap: 10px;
 }
 
-/* Desktop: widen + 2 columns. Mobile/webview (< 768px) stays single column. */
+/* Desktop: discover cards flow into an even grid. Shell width comes from the
+   shared `.dr-wide`. 2 columns from md, 3 from lg. Mobile/webview (< 768px)
+   stays single column. */
 @media (min-width: 768px) {
-  .wide {
-    max-width: 780px;
-  }
   .list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
+    column-gap: 14px;
     align-items: start;
+  }
+}
+@media (min-width: 1240px) {
+  .list {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 

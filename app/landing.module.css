@@ -73,6 +73,61 @@
   animation: dr-rise 0.6s var(--ease-out) 0.3s both;
 }
 
+/* Desktop landing: a real website hero. Below 768px `.layout`, `.lead` and
+   `.rail` are transparent (display: contents) so the column flows exactly as
+   the validated webview. From md the cube + headline form a left presentation
+   panel, the connect / paste controls become a framed sign-in card on the
+   right, both vertically centred against the breathing grid. */
+.layout {
+  display: contents;
+}
+.lead {
+  display: contents;
+}
+@media (min-width: 768px) {
+  .main {
+    justify-content: center;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr minmax(320px, 380px);
+    align-items: center;
+    column-gap: var(--s-7);
+    margin: auto 0;
+    padding: var(--s-6) 0;
+  }
+  .lead {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  .hero {
+    text-align: left;
+    margin-top: var(--s-4);
+  }
+  .title {
+    font-size: clamp(34px, 4vw, 46px);
+  }
+  .sub {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 38ch;
+    font-size: 15px;
+  }
+  /* Sign-in card: lift the action stack into a framed glass panel so the
+     connect/paste flow reads as a deliberate destination, not loose controls. */
+  .rail.actions {
+    margin-top: 0;
+    padding: var(--s-6);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--panel);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 30px 90px -40px var(--base-glow);
+  }
+}
+
 .connect {
   display: flex;
   justify-content: center;

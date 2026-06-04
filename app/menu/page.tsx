@@ -20,7 +20,7 @@ function MenuInner() {
   return (
     <>
       <div className="dr-grid-bg" />
-      <main className={`dr-shell ${styles.wide}`}>
+      <main className={`dr-shell dr-wide`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <button
             className={styles.back}

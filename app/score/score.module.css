@@ -30,6 +30,30 @@
   color: var(--text-dim);
 }
 
+/* Desktop layout: mobile keeps the natural single-column stack (display
+   contents = the sections flow with their own margins, pixel-identical to
+   the validated webview). From md the focal score + mint CTA sit in a left
+   rail while the detailed breakdown terminal fills a taller right column. */
+.layout {
+  display: contents;
+}
+@media (min-width: 768px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+    grid-template-areas:
+      "hero breakdown"
+      "cta  breakdown";
+    align-content: start;
+    column-gap: var(--s-6);
+    row-gap: var(--s-5);
+    margin-top: var(--s-5);
+  }
+  .layout .hero { grid-area: hero; margin-top: 0; }
+  .layout .breakdown { grid-area: breakdown; margin-top: 0; align-self: start; }
+  .layout .cta { grid-area: cta; margin-top: 0; align-self: start; }
+}
+
 /* Hero score */
 .hero {
   margin-top: 16px;

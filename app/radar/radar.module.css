@@ -99,16 +99,21 @@
   gap: 8px;
 }
 
-/* Desktop: widen the radar container and split the quest list into 2 columns.
-   Mobile/webview (< 768px) stays a single 424px-wide column. */
+/* Desktop: split the quest list into 2 columns. The progress header + the
+   programs footer stay full-width above/below. Shell width comes from the
+   shared `.dr-wide`. Mobile/webview (< 768px) stays single column. */
 @media (min-width: 768px) {
-  .wide {
-    max-width: 780px;
-  }
   .list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
+    column-gap: 14px;
+    row-gap: 8px;
+    align-items: start;
+  }
+}
+@media (min-width: 1240px) {
+  .list {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 .quest {

@@ -58,7 +58,11 @@
     --enter-step: 0.07s;       /* pas de stagger entre étages */
     --hover-dur: 0.2s;         /* micro-interactions hover/active */
 
+    /* Shell widths — mobile/webview stays 424; desktop breathes at md/lg.
+       Single source of truth so every route widens to the same rhythm. */
     --shell-w: 424px;
+    --shell-w-md: 860px;
+    --shell-w-lg: 1080px;
 
     --font-sans: var(--font-inter), system-ui, sans-serif;
     --font-mono: var(--font-mono), ui-monospace, "SF Mono", monospace;
@@ -421,6 +425,26 @@
   .dr-enter {
     animation: dr-rise var(--enter-dur) var(--ease-out) both;
     animation-delay: calc(var(--i, 0) * var(--enter-step));
+  }
+}
+
+/* ── Desktop shell ──────────────────────────────────────────────────────
+   Below 768px every route stays a 424px column — pixel-identical to the
+   Farcaster/Base webview render. At md/lg the shell widens to the shared
+   860/1080 rhythm so the app reads as a real website, never a stretched
+   phone column. Pages opt in by adding `.dr-wide` to their .dr-shell. */
+@layer utilities {
+  @media (min-width: 768px) {
+    .dr-wide {
+      max-width: var(--shell-w-md);
+      padding-left: var(--s-6);
+      padding-right: var(--s-6);
+    }
+  }
+  @media (min-width: 1240px) {
+    .dr-wide {
+      max-width: var(--shell-w-lg);
+    }
   }
 }
 
