@@ -4,11 +4,16 @@ import {
   yieldScore,
   rankProfile,
   buildYields,
+  mergeAllYields,
+  fetchAllYields,
   isChainSlug,
+  ALL_SLUG,
   parseProtocols,
   resolveProjectUrl,
   YIELD_CHAINS,
   type RawPool,
+  type ChainSlug,
+  type YieldsResult,
 } from "./yields";
 
 // --- Fixtures: the three worked examples from spec §6 (inputs frozen). ------
@@ -237,6 +242,14 @@ describe("buildYields(pools, slug) — per-chain isolation, no cross-contaminati
     const result = buildYields(mixed); // no slug arg
     expect(result.chain).toEqual({ slug: "base", label: "Base" });
     expect(result.profiles.stable.map((p) => p.pool)).toEqual(["base-stable"]);
+    // Each card carries its chain, stamped by the builder (single-chain too).
+    expect(result.profiles.stable[0]!.chain).toBe("base");
+  });
+
+  it("stamps every card with the chain it was built for (op, not the slug 'op')", () => {
+    const result = buildYields(mixed, "op");
+    // The card's `chain` is the SLUG ("op"), not the API string ("OP Mainnet").
+    expect(result.profiles.majors.map((p) => p.chain)).toEqual(["op"]);
   });
 
   it("'ethereum' keeps only Ethereum pools", () => {
@@ -360,5 +373,110 @@ describe("buildYields — projectUrl wiring (fallback null on miss / fetch fail)
   it("default (no map arg) leaves projectUrl null — back-compat", () => {
     const result = buildYields([STEAKUSDC]);
     expect(result.profiles.stable[0]!.projectUrl).toBeNull();
+  });
+});
+
+// --- "all" aggregation mode (merge + fan-out, never-fail) -------------------
+
+describe("ALL_SLUG — accepted by the route's validation, NOT a real chain", () => {
+  it("is the literal 'all'", () => {
+    expect(ALL_SLUG).toBe("all");
+  });
+
+  it("'all' is NOT a chain slug (so the route handles it separately)", () => {
+    // The route's guard is `slug === ALL_SLUG || isChainSlug(slug)`: "all" must
+    // fail isChainSlug (it's an aggregation mode, absent from YIELD_CHAINS) yet
+    // still be a valid request.
+    expect(isChainSlug(ALL_SLUG)).toBe(false);
+    expect(ALL_SLUG === ALL_SLUG || isChainSlug(ALL_SLUG)).toBe(true);
+  });
+});
+
+describe("mergeAllYields — cross-chain merge, re-sorted desc, capped 15", () => {
+  // Build one single-chain result per chain from a per-chain dataset.
+  const baseRes = buildYields([{ ...STEAKUSDC, apy: 4 }], "base");
+  const ethRes = buildYields([{ ...STEAKUSDC, chain: "Ethereum", apy: 9 }], "ethereum");
+  const opRes = buildYields([{ ...WEETH, chain: "OP Mainnet" }], "op");
+
+  it("merges all chains' pools and re-sorts each profile by score desc", () => {
+    const merged = mergeAllYields([baseRes, ethRes, opRes]);
+    expect(merged.chain).toEqual({ slug: "all", label: "All networks" });
+    // Both stable pools present, the higher-APY (ethereum, apy 9) ranks first.
+    const scores = merged.profiles.stable.map((p) => p.score);
+    expect(merged.profiles.stable).toHaveLength(2);
+    expect(scores[0]!).toBeGreaterThanOrEqual(scores[1]!);
+    expect(merged.profiles.stable[0]!.chain).toBe("ethereum");
+    expect(merged.profiles.stable[1]!.chain).toBe("base");
+    // The OP majors pool surfaces in the majors profile, tagged "op".
+    expect(merged.profiles.majors.map((p) => p.chain)).toEqual(["op"]);
+  });
+
+  it("preserves each pool's injected `chain` from its source dataset", () => {
+    const merged = mergeAllYields([baseRes, ethRes]);
+    const tags = merged.profiles.stable.map((p) => p.chain).sort();
+    expect(tags).toEqual(["base", "ethereum"]);
+  });
+
+  it("caps each merged profile at 15 across chains", () => {
+    const manyOn = (slug: ChainSlug, chainName: string) =>
+      buildYields(
+        Array.from({ length: 10 }, (_, i) => ({
+          ...STEAKUSDC,
+          chain: chainName,
+          pool: `${slug}-stable-${i}`,
+          apy: 1 + i * 0.1,
+        })),
+        slug,
+      );
+    const merged = mergeAllYields([manyOn("base", "Base"), manyOn("ethereum", "Ethereum")]);
+    // 20 eligible across two chains -> capped to the global top 15.
+    expect(merged.profiles.stable).toHaveLength(15);
+    for (let i = 1; i < merged.profiles.stable.length; i++) {
+      expect(merged.profiles.stable[i - 1]!.score).toBeGreaterThanOrEqual(
+        merged.profiles.stable[i]!.score,
+      );
+    }
+  });
+
+  it("updatedAt is the MAX of the inputs' timestamps", () => {
+    const older: YieldsResult = { ...baseRes, updatedAt: "2026-01-01T00:00:00.000Z" };
+    const newer: YieldsResult = { ...ethRes, updatedAt: "2026-06-01T00:00:00.000Z" };
+    expect(mergeAllYields([older, newer]).updatedAt).toBe("2026-06-01T00:00:00.000Z");
+  });
+
+  it("empty input -> empty profiles with a valid ISO updatedAt (never-fail)", () => {
+    const merged = mergeAllYields([]);
+    expect(merged.profiles.stable).toHaveLength(0);
+    expect(Number.isNaN(Date.parse(merged.updatedAt))).toBe(false);
+  });
+});
+
+describe("fetchAllYields — fans out per chain, a failed chain contributes 0 pools", () => {
+  const okRes = (slug: ChainSlug): YieldsResult =>
+    buildYields(
+      [{ ...STEAKUSDC, chain: YIELD_CHAINS[slug].chainName, pool: `${slug}-p` }],
+      slug,
+    );
+
+  it("aggregates every chain when all succeed", async () => {
+    const fetchOne = (slug: ChainSlug) => Promise.resolve(okRes(slug));
+    const result = await fetchAllYields(fetchOne);
+    // One stable pool per chain (4) -> all merged, each tagged with its chain.
+    expect(result.profiles.stable.map((p) => p.chain).sort()).toEqual([
+      "arbitrum",
+      "base",
+      "ethereum",
+      "op",
+    ]);
+  });
+
+  it("a rejected chain is dropped; the others still aggregate (allSettled)", async () => {
+    const fetchOne = (slug: ChainSlug) =>
+      slug === "op"
+        ? Promise.reject(new Error("op upstream down"))
+        : Promise.resolve(okRes(slug));
+    const result = await fetchAllYields(fetchOne);
+    const tags = result.profiles.stable.map((p) => p.chain).sort();
+    expect(tags).toEqual(["arbitrum", "base", "ethereum"]); // op absent, no throw
   });
 });

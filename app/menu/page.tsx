@@ -37,7 +37,14 @@ function MenuInner() {
 
         <div className={`dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>
           <span className="dr-eyebrow">{tc("activeTarget")}</span>
-          <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
+          <span className={styles.addrRow}>
+            <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
+            {/* "LIVE" universel, pas de clé i18n nécessaire */}
+            <span className={`mono ${styles.liveBadge}`} aria-hidden>
+              <i className={styles.liveDot} />
+              LIVE
+            </span>
+          </span>
           <button
             className={`dr-btn dr-btn--ghost ${styles.scanBtn}`}
             onClick={() => router.replace("/")}

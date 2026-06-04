@@ -50,6 +50,40 @@
   letter-spacing: 0.05em;
   color: var(--text);
 }
+.addrRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Green blinking LIVE badge next to the active target (Soufian 2026-06-05). */
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--ok);
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ok) 40%, transparent);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+  animation: live-blink 1.6s var(--ease-in-out) infinite;
+}
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ok) 80%, transparent);
+}
+@keyframes live-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .liveBadge { animation: none; }
+}
 .scanBtn {
   align-self: center;
   margin-top: 10px;
@@ -175,18 +209,12 @@
 /* 5th card (YIELD). The 4 cards fill a clean row at md (2 cols) and xl (4 cols),
    so a 5th would dangle alone. Instead it spans the whole row as a feature
    strip — deliberate, not orphaned. Below 768px the grid is single-column so
-   this is a no-op there. Layout left-aligned (vs centered) at full width so the
-   wide card doesn't read as a stretched copy of the square cards. */
+   this is a no-op there. Title + sub centered like the square cards (Soufian
+   2026-06-05): the middle column takes the full remaining width. */
 @media (min-width: 768px) {
   .cardWide {
     grid-column: 1 / -1;
-    grid-template-columns: auto auto 1fr auto;
-    grid-template-areas: "glyph idx . arrow" "glyph title . arrow" "glyph sub . arrow";
-    text-align: left;
-  }
-  .cardWide .idx,
-  .cardWide .cardTitle,
-  .cardWide .cardSub {
-    text-align: left;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "glyph idx arrow" "glyph title arrow" "glyph sub arrow";
   }
 }

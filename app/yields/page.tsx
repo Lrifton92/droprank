@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { formatUsd } from "../_components/presentation";
-import { YIELD_CHAINS, type ChainSlug, type YieldPool, type YieldsResult } from "@/lib/yields";
+import { YIELD_CHAINS, ALL_SLUG, type ChainSlug, type YieldPool, type YieldsResult } from "@/lib/yields";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./yields.module.css";
@@ -20,6 +20,19 @@ const PROFILES: { key: ProfileKey; icon: string }[] = [
  *  adding a chain there surfaces a pill here with zero UI change. Labels are
  *  proper names — not translated (BASE / ETHEREUM / OP MAINNET / ARBITRUM). */
 const CHAINS = Object.entries(YIELD_CHAINS) as [ChainSlug, { label: string }][];
+
+/** The chain selection: a real chain slug, or the "all" aggregation mode. */
+type ChainChoice = ChainSlug | typeof ALL_SLUG;
+
+/** Compact per-network tag shown on each row + the hero in "all" mode only.
+ *  Short network codes, not translatable text (same convention as the pill
+ *  labels above): BASE / ETH / OP / ARB. */
+const CHAIN_ABBR: Record<ChainSlug, string> = {
+  base: "BASE",
+  ethereum: "ETH",
+  op: "OP",
+  arbitrum: "ARB",
+};
 
 /** Reduced-motion preference, read synchronously on first render (this only ever
  *  mounts client-side — the whole page is "use client" and count-up components
@@ -95,10 +108,9 @@ function CountUpApy({ value, delay = 0 }: { value: number; delay?: number }) {
 
 /** Primary click target = the protocol's own site (`projectUrl`), falling back to
  *  the DefiLlama pool page when the backend has no official URL for it. The
- *  secondary "defillama ↗" link always points at `pool.url` for research.
- *  TODO(yields.ts): drop the local cast once `projectUrl` lands on YieldPool. */
+ *  secondary "defillama ↗" link always points at `pool.url` for research. */
 function siteUrl(pool: YieldPool): string {
-  return (pool as YieldPool & { projectUrl?: string | null }).projectUrl ?? pool.url;
+  return pool.projectUrl ?? pool.url;
 }
 
 function YieldsInner() {
@@ -111,7 +123,7 @@ function YieldsInner() {
   const [data, setData] = useState<YieldsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
-  const [chain, setChain] = useState<ChainSlug>("base");
+  const [chain, setChain] = useState<ChainChoice>("base");
   const [profile, setProfile] = useState<ProfileKey>("stable");
   const [legalOpen, setLegalOpen] = useState(false);
 
@@ -157,6 +169,15 @@ function YieldsInner() {
           aria-label={t("chainLabel")}
           style={{ "--i": 1 } as CSSProperties}
         >
+          {/* "ALL" / "TOUS" first — aggregates every chain into one leaderboard. */}
+          <button
+            role="tab"
+            aria-selected={chain === ALL_SLUG}
+            className={`${styles.chainPill} ${chain === ALL_SLUG ? styles.chainPillOn : ""}`}
+            onClick={() => setChain(ALL_SLUG)}
+          >
+            {t("allNetworks")}
+          </button>
           {CHAINS.map(([slug, { label }]) => (
             <button
               key={slug}
@@ -228,7 +249,9 @@ function YieldsInner() {
                 {/* Label from the LOCAL selection, not the response: a cached
                     payload predating a shape change must never crash the UI
                     (same stale-cache class as the score/quests bug). */}
-                <span className={styles.chainTag}>{YIELD_CHAINS[chain].label}</span>
+                <span className={styles.chainTag}>
+                  {chain === ALL_SLUG ? t("allNetworks") : YIELD_CHAINS[chain].label}
+                </span>
               </span>
               <span className={`mono ${styles.updated}`}>
                 <i className={styles.liveDot} aria-hidden />
@@ -236,8 +259,9 @@ function YieldsInner() {
               </span>
             </div>
 
-            {/* TOP RATED hero — top 1 by score. Wording is strictly factual. */}
-            {hero && <HeroPool pool={hero} t={t} />}
+            {/* TOP RATED hero — top 1 by score. Wording is strictly factual.
+                In "all" mode each card also carries its network tag. */}
+            {hero && <HeroPool pool={hero} t={t} showChain={chain === ALL_SLUG} />}
 
             {/* No .dr-enter on the <ul> itself: the rows carry their own marked
                 staggered cascade (yld-row-in), so the container must not also
@@ -246,7 +270,14 @@ function YieldsInner() {
               {rest.map((p, i) => {
                 const delay = Math.min(i, 12) * 0.04;
                 return (
-                  <PoolRow key={p.pool} pool={p} rank={i + 2} t={t} delay={delay} />
+                  <PoolRow
+                    key={p.pool}
+                    pool={p}
+                    rank={i + 2}
+                    t={t}
+                    delay={delay}
+                    showChain={chain === ALL_SLUG}
+                  />
                 );
               })}
             </ul>
@@ -312,6 +343,14 @@ function RiskBadges({ pool, t }: { pool: YieldPool; t: ReturnType<typeof useTran
   );
 }
 
+/** Compact network tag (BASE / ETH / OP / ARB), shown only in "all" mode so each
+ *  ranked pool reveals its chain. Sits in the id zone (next to the symbol) so it
+ *  never shifts the row's columns. Styled neutral/discrete like the flags — not
+ *  an alarm — via its own mono pill. */
+function ChainBadge({ chain }: { chain: ChainSlug }) {
+  return <span className={`mono ${styles.chainBadge}`}>{CHAIN_ABBR[chain]}</span>;
+}
+
 /** Total APY, right-aligned in its own fixed column so it tabulates across every
  *  row and the hero. `big` sizes the hero digits. The base/reward split only
  *  shows in the hero (`big`): suppressing it in list rows keeps every row the
@@ -354,7 +393,7 @@ function Trend7d({ pct, t }: { pct: number | null; t: ReturnType<typeof useTrans
    anchor (`.stretch`) rather than wrapping the content. This keeps the HTML
    valid (no <button>/<a> nested inside an <a>) so the in-card InfoTip stays
    independently interactive — it sits above the overlay via z-index. */
-function HeroPool({ pool, t }: { pool: YieldPool; t: ReturnType<typeof useTranslations> }) {
+function HeroPool({ pool, t, showChain }: { pool: YieldPool; t: ReturnType<typeof useTranslations>; showChain: boolean }) {
   return (
     <div className={`dr-panel dr-enter ${styles.hero}`} style={{ "--i": 1 } as CSSProperties}>
       {/* Ambient gloss sweep — a faint diagonal highlight that crosses the hero
@@ -374,7 +413,10 @@ function HeroPool({ pool, t }: { pool: YieldPool; t: ReturnType<typeof useTransl
       </span>
       <div className={styles.heroMain}>
         <div className={styles.heroId}>
-          <span className={styles.project}>{pool.project}</span>
+          <span className={styles.projectLine}>
+            <span className={styles.project}>{pool.project}</span>
+            {showChain && <ChainBadge chain={pool.chain} />}
+          </span>
           <span className={`mono ${styles.symbol}`}>{pool.symbol}</span>
           <RiskBadges pool={pool} t={t} />
         </div>
@@ -407,11 +449,13 @@ function PoolRow({
   rank,
   delay,
   t,
+  showChain,
 }: {
   pool: YieldPool;
   rank: number;
   delay: number;
   t: ReturnType<typeof useTranslations>;
+  showChain: boolean;
 }) {
   return (
     <li className={styles.item} style={{ animationDelay: `${delay}s` }}>
@@ -425,7 +469,10 @@ function PoolRow({
         />
         <span className={`mono ${styles.rank}`}>{String(rank).padStart(2, "0")}</span>
         <div className={styles.rowId}>
-          <span className={styles.project}>{pool.project}</span>
+          <span className={styles.projectLine}>
+            <span className={styles.project}>{pool.project}</span>
+            {showChain && <ChainBadge chain={pool.chain} />}
+          </span>
           <span className={`mono ${styles.symbol}`}>{pool.symbol}</span>
           {/* Always-visible research link → DefiLlama. Raised above the stretched
               overlay so it stays clickable while the row click opens the site. */}

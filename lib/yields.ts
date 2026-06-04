@@ -58,6 +58,15 @@ export const YIELD_CHAINS = {
 
 export type ChainSlug = keyof typeof YIELD_CHAINS;
 
+/**
+ * Special aggregation slug: not a chain, so it's NOT in YIELD_CHAINS (that map
+ * only drives DefiLlama chainName mapping + the per-chain pills). "all" merges
+ * the four chains' rankings into one top-15 per profile. The route accepts it
+ * alongside the real slugs; it never reaches buildYields/YIELD_CHAINS lookups.
+ */
+export const ALL_SLUG = "all" as const;
+export type AllSlug = typeof ALL_SLUG;
+
 /** True when `slug` is a supported chain (narrows to ChainSlug). */
 export function isChainSlug(slug: string): slug is ChainSlug {
   return Object.prototype.hasOwnProperty.call(YIELD_CHAINS, slug);
@@ -94,6 +103,13 @@ export interface RawPool {
 
 /** UI-facing pool card (spec §7). Derived from the raw pool plus the score. */
 export interface YieldPool {
+  /**
+   * The chain this pool lives on. Injected at merge/build time from the dataset
+   * being ranked — NEVER read from a cached payload (per-chain payloads cached
+   * before this field existed don't carry it; the builder always sets it). The
+   * UI uses it only in "all" mode to tag each row with its network.
+   */
+  chain: ChainSlug;
   /** Protocol slug, e.g. "morpho-blue". */
   project: string;
   /** Token symbol, e.g. "STEAKUSDC". */
@@ -132,8 +148,8 @@ export interface YieldPool {
 }
 
 export interface YieldsResult {
-  /** Which chain this snapshot was computed for. */
-  chain: { slug: ChainSlug; label: string };
+  /** Which chain this snapshot was computed for ("all" in aggregation mode). */
+  chain: { slug: ChainSlug | AllSlug; label: string };
   /** ISO timestamp of when this snapshot was computed. */
   updatedAt: string;
   profiles: {
@@ -295,13 +311,17 @@ export function resolveProjectUrl(
 
 // --- Pipeline (spec §5) -----------------------------------------------------
 
-/** UI projection of a raw pool, carrying its computed score and official site. */
+/** UI projection of a raw pool, carrying its computed score and official site.
+ *  `slug` is the chain being ranked; it's stamped onto the card so "all" mode
+ *  can tag the row's network (and single-chain results carry it uniformly). */
 function toYieldPool(
   p: RawPool,
   score: number,
   projectUrls: ProtocolUrlMap,
+  slug: ChainSlug,
 ): YieldPool {
   return {
+    chain: slug,
     project: p.project,
     symbol: p.symbol,
     pool: p.pool,
@@ -327,17 +347,18 @@ function toYieldPool(
  * desc and keep the top N. `pools` is the already-Base-filtered list.
  *
  * `projectUrls` (default {}) maps protocol slug -> official site origin; unknown
- * projects get projectUrl: null. Optional so existing pure callers/tests run
- * unchanged.
+ * projects get projectUrl: null. `slug` (default "base") is stamped onto each
+ * card's `chain`. Both optional so existing pure callers/tests run unchanged.
  */
 export function rankProfile(
   pools: RawPool[],
   profile: Profile,
   projectUrls: ProtocolUrlMap = {},
+  slug: ChainSlug = "base",
 ): YieldPool[] {
   return pools
     .filter((p) => eligible(p, profile))
-    .map((p) => toYieldPool(p, yieldScore(p, profile), projectUrls))
+    .map((p) => toYieldPool(p, yieldScore(p, profile), projectUrls, slug))
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_N);
 }
@@ -361,9 +382,41 @@ export function buildYields(
     chain: { slug, label },
     updatedAt: new Date().toISOString(),
     profiles: {
-      stable: rankProfile(onChain, "STABLE", projectUrls),
-      majors: rankProfile(onChain, "MAJORS", projectUrls),
-      degen: rankProfile(onChain, "DEGEN", projectUrls),
+      stable: rankProfile(onChain, "STABLE", projectUrls, slug),
+      majors: rankProfile(onChain, "MAJORS", projectUrls, slug),
+      degen: rankProfile(onChain, "DEGEN", projectUrls, slug),
+    },
+  };
+}
+
+/**
+ * Merge several single-chain results into one aggregated "all networks" result.
+ *
+ * Each profile's pools are concatenated across chains, re-sorted by score desc
+ * and capped to the top N — so a global cross-chain leaderboard, not a per-chain
+ * one. Each pool already carries its own `chain` (stamped by buildYields), so the
+ * UI can tag networks with zero extra lookup. `updatedAt` is the MAX of the
+ * inputs' timestamps (freshest snapshot wins); empty input -> now. Pure.
+ */
+export function mergeAllYields(results: YieldsResult[]): YieldsResult {
+  const top = (key: keyof YieldsResult["profiles"]) =>
+    results
+      .flatMap((r) => r.profiles[key])
+      .sort((a, b) => b.score - a.score)
+      .slice(0, TOP_N);
+  const updatedAt =
+    results.length === 0
+      ? new Date().toISOString()
+      : results
+          .map((r) => r.updatedAt)
+          .reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a));
+  return {
+    chain: { slug: ALL_SLUG, label: "All networks" },
+    updatedAt,
+    profiles: {
+      stable: top("stable"),
+      majors: top("majors"),
+      degen: top("degen"),
     },
   };
 }
@@ -471,4 +524,28 @@ export async function fetchYields(
     clearTimeout(timer);
     signal?.removeEventListener("abort", onAbort);
   }
+}
+
+/**
+ * Aggregate all supported chains into one "all networks" result.
+ *
+ * Fans out to fetchYields per chain (each goes through its OWN L2 cache, so when
+ * the chains are warm this is near-free — no extra upstream calls). Uses
+ * allSettled so a single chain failing contributes zero pools instead of
+ * sinking the whole response. The route does NOT add a dedicated cache layer for
+ * "all": this assembles from the four per-chain caches, so a 5th entry would
+ * just age out of sync. Never-fail by construction.
+ */
+export async function fetchAllYields(
+  fetchOne: (slug: ChainSlug, signal?: AbortSignal) => Promise<YieldsResult>,
+  signal?: AbortSignal,
+): Promise<YieldsResult> {
+  const slugs = Object.keys(YIELD_CHAINS) as ChainSlug[];
+  const settled = await Promise.allSettled(
+    slugs.map((slug) => fetchOne(slug, signal)),
+  );
+  const ok = settled
+    .filter((s): s is PromiseFulfilledResult<YieldsResult> => s.status === "fulfilled")
+    .map((s) => s.value);
+  return mergeAllYields(ok);
 }

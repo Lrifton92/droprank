@@ -104,7 +104,7 @@
 }
 .score {
   font-family: var(--font-mono);
-  font-size: 30px;
+  font-size: 44px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text);
@@ -113,7 +113,7 @@
 }
 .max {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-faint);
 }
 .tier {
@@ -147,5 +147,5 @@
 }
 @media (max-width: 420px) {
   .tier { display: none; }
-  .score { font-size: 26px; }
+  .score { font-size: 34px; }
 }

@@ -17,6 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
       site: "@lrifton6240",
     },
     other: {
+      // Talent Protocol project ownership proof (public token, served in <head>).
+      "talentapp:project_verification":
+        "ed7969268c0c7330a9dc6ee3535de995d5cf16f1c3498a958e7937fa4d57b26f270b8ad1e4e7cf56426d7fea40ac592f66ae4e00ef429db3d25d35b4a79b21ee",
       "fc:miniapp": JSON.stringify({
         version: minikitConfig.miniapp.version,
         imageUrl: minikitConfig.miniapp.heroImageUrl,

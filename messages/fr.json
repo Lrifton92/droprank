@@ -157,6 +157,7 @@
   "yields": {
     "eyebrow": "// rendements",
     "chainLabel": "chaîne",
+    "allNetworks": "TOUS",
     "scanning": "CLASSEMENT DES POOLS DE RENDEMENT",
     "offline": "! RENDEMENTS HORS LIGNE",
     "offlineSub": "le classement des pools est injoignable pour l'instant",

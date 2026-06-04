@@ -157,6 +157,7 @@
   "yields": {
     "eyebrow": "// yields",
     "chainLabel": "chain",
+    "allNetworks": "ALL",
     "scanning": "RANKING YIELD POOLS",
     "offline": "! YIELDS OFFLINE",
     "offlineSub": "the pool ranking is unreachable right now",

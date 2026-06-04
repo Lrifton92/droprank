@@ -205,12 +205,38 @@
 }
 
 /* ── Shared id / symbol / project ─────────────────────────────────────── */
+/* Project name + (in "all" mode) its network tag on one line; the tag sits in
+   the id zone so it never shifts the row's numeric columns. */
+.projectLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
 .project {
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.01em;
   text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Compact network tag (BASE / ETH / OP / ARB) — discrete & neutral, like the
+   flags: a quiet mono pill, NOT an alert colour. Faint base-blue border so it
+   reads as chrome, not data. */
+.chainBadge {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: rgba(8, 12, 22, 0.6);
+  color: var(--text-faint);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
 }
 .symbol {
   font-size: 11px;
