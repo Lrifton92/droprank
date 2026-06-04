@@ -118,6 +118,7 @@
   gap: 14px;
 }
 .tierBadge {
+  position: relative;
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
@@ -128,6 +129,18 @@
   border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 45%, transparent);
   background: color-mix(in srgb, var(--tier, var(--base-300)) 12%, transparent);
   box-shadow: 0 0 24px -6px color-mix(in srgb, var(--tier, var(--base-300)) 60%, transparent);
+}
+/* Breathing halo behind the tier badge — opacity-only pulse, ~3s, never moves
+   the badge or touches legibility. */
+.tierBadge::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  box-shadow: 0 0 22px 2px color-mix(in srgb, var(--tier, var(--base-300)) 55%, transparent);
+  pointer-events: none;
+  z-index: -1;
+  animation: dr-breathe 3s var(--ease-in-out) infinite;
 }
 .percentile {
   font-size: 12px;
@@ -241,7 +254,7 @@
   transition: width 0.7s var(--ease-out);
   overflow: hidden;
 }
-/* One-time light sweep that traces along the filled bar */
+/* One-time light sweep that traces along the filled bar on mount… */
 .bar i::after {
   content: "";
   position: absolute;
@@ -254,6 +267,12 @@
   );
   width: 40%;
   animation: dr-sweep 1.6s var(--ease-out) 0.6s 1 both;
+}
+/* …and replays, faster & without delay, whenever its row is hovered.
+   Switching to a distinct keyframe name on :hover forces the browser to
+   restart the animation each time the pointer enters the row. */
+.row:hover .bar i::after {
+  animation: dr-sweep-hover 0.9s var(--ease-out) 1 both;
 }
 
 /* CTA */
@@ -353,6 +372,17 @@
 @keyframes shimmer {
   0% { background-position: 120% 0; }
   100% { background-position: -120% 0; }
+}
+
+/* Hover-retriggered bar sweep (distinct name so :hover restarts it). */
+@keyframes dr-sweep-hover {
+  from { transform: translateX(-130%); }
+  to { transform: translateX(340%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tierBadge::after { animation: none; opacity: 0.7; }
+  .row:hover .bar i::after { animation: none; }
 }
 
 /* ─── Mint celebration overlay ─────────────────────────────────────────── */

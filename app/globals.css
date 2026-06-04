@@ -375,11 +375,23 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    overflow: hidden;
+    -webkit-mask: radial-gradient(70% 55% at 50% 35%, #000 0%, transparent 75%);
+    mask: radial-gradient(70% 55% at 50% 35%, #000 0%, transparent 75%);
+  }
+  /* The grid lines live on an oversized ::after so they can DRIFT diagonally
+     via transform (GPU-only) without disturbing the parent's radial mask.
+     One full 40px tile per loop → seamless, very slow (60s), only noticeable
+     if you fix your gaze. */
+  .dr-grid-bg::after {
+    content: "";
+    position: absolute;
+    inset: -40px;
     background-image:
       repeating-linear-gradient(to right, rgba(120, 160, 255, 0.05) 0 1px, transparent 1px 40px),
       repeating-linear-gradient(to bottom, rgba(120, 160, 255, 0.05) 0 1px, transparent 1px 40px);
-    -webkit-mask: radial-gradient(70% 55% at 50% 35%, #000 0%, transparent 75%);
-    mask: radial-gradient(70% 55% at 50% 35%, #000 0%, transparent 75%);
+    will-change: transform;
+    animation: dr-grid-drift 60s linear infinite;
   }
   /* Ambient living glow — a faint Base-blue light that breathes & drifts
      slowly behind everything. transform/opacity only → GPU compositable,
@@ -417,6 +429,58 @@
 @keyframes dr-sweep {
   0% { transform: translateX(-120%); }
   60%, 100% { transform: translateX(320%); }
+}
+
+/* Slow diagonal drift of the background grid — exactly one 40px tile so it
+   loops seamlessly. transform-only → composited, no layout/paint per frame. */
+@keyframes dr-grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(40px, 40px, 0); }
+}
+
+/* Page transition — replays on every navigation via app/template.tsx.
+   fade + lift + slight scale-settle, snappy ease-out. */
+@keyframes dr-page-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ampler entry rise for feed/list cards — more visible than dr-rise's 10px. */
+@keyframes dr-rise-lg {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Soft breathing glow for tier badges / accents — opacity-only on the halo. */
+@keyframes dr-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* Reusable live status dot — a Base-blue point that pulses (scale+opacity). */
+@layer utilities {
+  .dr-live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--base-300);
+    box-shadow: 0 0 8px var(--base-glow);
+    will-change: transform, opacity;
+    animation: dr-live-pulse 2.6s var(--ease-in-out) infinite;
+  }
+}
+@keyframes dr-live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.45; }
+}
+
+/* Page transition wrapper (template.tsx) */
+@layer utilities {
+  .dr-template {
+    animation: dr-page-enter 0.32s var(--ease-out) both;
+    transform-origin: 50% 0;
+  }
 }
 
 /* Page entry stagger — same vocabulary on every route.
@@ -466,4 +530,6 @@
   }
   .dr-cursor { opacity: 1; }
   .dr-grid-bg::before { animation: none; opacity: 0.9; }
+  .dr-grid-bg::after { animation: none; transform: none; }
+  .dr-template { animation: none; }
 }

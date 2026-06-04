@@ -117,6 +117,7 @@
   color: var(--text-faint);
 }
 .tier {
+  position: relative;
   margin-left: 8px;
   align-self: center;
   font-family: var(--font-mono);
@@ -128,9 +129,21 @@
   border-radius: 999px;
   padding: 3px 8px;
 }
+/* Softly breathing glow on the tier pill — opacity-only halo, ~3.4s. */
+.tier::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  box-shadow: 0 0 16px 1px color-mix(in srgb, var(--tier, var(--base-300)) 50%, transparent);
+  pointer-events: none;
+  z-index: -1;
+  animation: dr-breathe 3.4s var(--ease-in-out) infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .glow { animation: none; }
+  .tier::after { animation: none; opacity: 0.7; }
 }
 @media (max-width: 420px) {
   .tier { display: none; }

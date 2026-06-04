@@ -129,8 +129,32 @@
 }
 
 .connect {
+  position: relative;
   display: flex;
   justify-content: center;
+}
+/* Discreet breathing glow behind the Connect button — opacity-only pulse on a
+   blurred Base-blue halo, never moves or covers the button (pointer-events off,
+   sits behind via z-index). Draws the eye to the primary action. */
+.connect::before {
+  content: "";
+  position: absolute;
+  inset: 2px 12%;
+  z-index: -1;
+  border-radius: var(--r-md);
+  background: var(--base-glow);
+  filter: blur(16px);
+  opacity: 0.5;
+  pointer-events: none;
+  will-change: opacity;
+  animation: connectGlow 3.4s var(--ease-in-out) infinite;
+}
+@keyframes connectGlow {
+  0%, 100% { opacity: 0.32; }
+  50% { opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connect::before { animation: none; opacity: 0.4; }
 }
 
 .divider {

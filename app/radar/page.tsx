@@ -45,6 +45,26 @@ function RadarInner() {
   const doneCount = data ? data.quests.filter((q) => q.done).length : 0;
   const pct = data ? Math.round((data.earned / data.total) * 100) : 0;
 
+  // Animate the progress fill from 0 → pct on mount: paint at 0 first, then
+  // flip to pct next frame so the existing `transition: width` plays. Snaps
+  // straight to pct under reduced motion.
+  const [fillPct, setFillPct] = useState(0);
+  useEffect(() => {
+    if (!data) {
+      setFillPct(0);
+      return;
+    }
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setFillPct(pct);
+      return;
+    }
+    const id = requestAnimationFrame(() => setFillPct(pct));
+    return () => cancelAnimationFrame(id);
+  }, [data, pct]);
+
   return (
     <>
       <div className="dr-grid-bg" />
@@ -89,12 +109,12 @@ function RadarInner() {
                   <span className={styles.total}>{t("pts", { total: data.total })}</span>
                 </span>
                 <span className={styles.completed}>
-                  <span className="mono">{doneCount}</span>
+                  <Counter value={doneCount} duration={900} />
                   <span className="syn-punct">/{data.quests.length}</span> {t("done")}
                 </span>
               </div>
               <div className={styles.track}>
-                <i style={{ width: `${pct}%` }} />
+                <i style={{ width: `${fillPct}%` }} />
               </div>
             </section>
 
@@ -105,7 +125,12 @@ function RadarInner() {
                   <li
                     key={q.id}
                     className={`${styles.quest} ${q.done ? styles.questDone : ""}`}
-                    style={{ animationDelay: `${i * 0.04}s` }}
+                    style={
+                      {
+                        animationDelay: `${i * 0.04}s`,
+                        "--check-delay": `${i * 0.04 + 0.18}s`,
+                      } as CSSProperties
+                    }
                   >
                     <span className={styles.check} aria-hidden>
                       {q.done ? "✓" : "○"}

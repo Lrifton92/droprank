@@ -101,7 +101,8 @@
   border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
 }
 
-/* One-time light sweep on mount. */
+/* Periodic light sweep — traces across, then idles off-screen for a long beat
+   before the next pass (the pause is baked into the keyframe's tail). */
 .sweep {
   position: absolute;
   top: 0;
@@ -109,11 +110,13 @@
   width: 40%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
   z-index: -1;
-  animation: bannerSweep 2.4s var(--ease-out) 0.4s 1 both;
+  animation: bannerSweep 7s var(--ease-out) 0.4s infinite;
 }
 @keyframes bannerSweep {
-  from { transform: translateX(-150%); }
-  to { transform: translateX(350%); }
+  0% { transform: translateX(-150%); }
+  /* ~34% of the cycle is the visible pass… */
+  34%, 100% { transform: translateX(350%); }
+  /* …the rest holds off-screen as the pause between cycles. */
 }
 
 @media (prefers-reduced-motion: reduce) {
