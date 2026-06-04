@@ -121,7 +121,9 @@
     "pts": "/{total} pts",
     "done": "faites",
     "cleared": "validée",
-    "dash": "—"
+    "dash": "—",
+    "programs": "// programmes de récompense base",
+    "programsNote": "off-chain · non scoré"
   },
   "news": {
     "baseFeed": "// flux base",

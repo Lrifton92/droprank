@@ -201,6 +201,48 @@
   color: var(--ok);
 }
 
+/* Base reward programs — external links, not scored quests. */
+.programs {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.programsNote {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+.programLinks {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.programLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: var(--base-300);
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--base-300) 26%, transparent);
+  background: rgba(12, 17, 28, 0.5);
+  transition:
+    background var(--hover-dur) var(--ease-out),
+    color var(--hover-dur) var(--ease-out),
+    transform 0.12s var(--ease-snap);
+}
+.programLink:hover {
+  background: var(--base-soft);
+  color: var(--text);
+}
+.programLink:active {
+  transform: scale(0.96);
+}
+
 /* States */
 .state {
   margin: 64px auto;

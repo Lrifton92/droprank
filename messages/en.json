@@ -121,7 +121,9 @@
     "pts": "/{total} pts",
     "done": "done",
     "cleared": "cleared",
-    "dash": "—"
+    "dash": "—",
+    "programs": "// base reward programs",
+    "programsNote": "off-chain · not scored"
   },
   "news": {
     "baseFeed": "// base feed",

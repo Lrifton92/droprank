@@ -132,6 +132,27 @@ function RadarInner() {
                 );
               })}
             </ul>
+
+            <section
+              className={`dr-enter ${styles.programs}`}
+              style={{ "--i": 4 } as CSSProperties}
+            >
+              <span className="dr-eyebrow">{t("programs")}</span>
+              <span className={`mono ${styles.programsNote}`}>
+                {t("programsNote")}
+              </span>
+              <div className={styles.programLinks}>
+                <a className={styles.programLink} href="https://guild.xyz/base" target="_blank" rel="noopener noreferrer">
+                  Base Guild ↗
+                </a>
+                <a className={styles.programLink} href="https://www.builderscore.xyz" target="_blank" rel="noopener noreferrer">
+                  Builder Rewards ↗
+                </a>
+                <a className={styles.programLink} href="https://www.base.org/onchain-summer" target="_blank" rel="noopener noreferrer">
+                  Onchain Summer ↗
+                </a>
+              </div>
+            </section>
           </>
         )}
       </main>
