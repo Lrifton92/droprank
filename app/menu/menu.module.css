@@ -150,3 +150,10 @@
 .hint {
   margin-top: auto;
 }
+
+/* XL (shell 1320): the 4 destination cards sit on one row — no side voids. */
+@media (min-width: 1600px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

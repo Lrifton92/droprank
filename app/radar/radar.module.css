@@ -301,3 +301,10 @@
   0% { background-position: 120% 0; }
   100% { background-position: -120% 0; }
 }
+
+/* XL (shell 1320): 4th column keeps card width ~300px instead of stretching. */
+@media (min-width: 1600px) {
+  .list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

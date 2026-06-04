@@ -446,6 +446,13 @@
       max-width: var(--shell-w-lg);
     }
   }
+  /* XL desktops: widen further so very large screens don't read as a thin
+     centered strip between two voids. Pages' own grids add a 4th column here. */
+  @media (min-width: 1600px) {
+    .dr-wide {
+      max-width: 1320px;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
