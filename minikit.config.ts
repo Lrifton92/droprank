@@ -24,9 +24,11 @@ export const minikitConfig = {
   miniapp: {
     version: "1",
     name: "DropRank",
-    subtitle: "Base airdrop score & quest radar",
+    // Manifest validator rules: subtitle/tagline/ogTitle <= 30 chars, no
+    // special characters (@ # $ % ^ & * + = / \ | ~) anywhere in copy.
+    subtitle: "Base airdrop score and quests",
     description:
-      "Check your Base wallet airdrop score /100 and scan onchain quests. Mint a soulbound badge.",
+      "Check your Base wallet airdrop score out of 100 and scan onchain quests. Mint a soulbound badge.",
     screenshotUrls: [],
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
@@ -36,9 +38,9 @@ export const minikitConfig = {
     primaryCategory: "utility",
     tags: ["base", "airdrop", "score", "quests", "onchain"],
     heroImageUrl: `${ROOT_URL}/hero.png`,
-    tagline: "Your Base airdrop score, ranked.",
-    ogTitle: "DropRank — your Base airdrop score",
-    ogDescription: "Score your Base wallet /100 and scan onchain quests.",
+    tagline: "Your Base score, ranked",
+    ogTitle: "DropRank - Base airdrop score",
+    ogDescription: "Score your Base wallet out of 100 and scan onchain quests.",
     ogImageUrl: `${ROOT_URL}/hero.png`,
   },
 };
