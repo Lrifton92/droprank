@@ -1,0 +1,106 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--base-300) 24%, transparent);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--base) 22%, transparent), transparent 55%),
+    rgba(10, 15, 26, 0.6);
+  isolation: isolate;
+}
+.glow {
+  position: absolute;
+  inset: -60% auto -60% -10%;
+  width: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--base) 50%, transparent),
+    transparent
+  );
+  z-index: -1;
+  animation: cardGlow 12s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes cardGlow {
+  0%, 100% { transform: translateX(0) scale(1); opacity: 0.7; }
+  50% { transform: translateX(12%) scale(1.12); opacity: 1; }
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 0 22px -8px var(--base-glow);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.name {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.addr {
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.scoreBox {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  position: relative;
+}
+.score {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--tier, var(--base)) 55%, transparent);
+}
+.max {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+}
+.tier {
+  margin-left: 8px;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--tier, var(--base-300));
+  border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 45%, transparent);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow { animation: none; }
+}
+@media (max-width: 420px) {
+  .tier { display: none; }
+  .score { font-size: 26px; }
+}
