@@ -5,6 +5,7 @@ import {
   dedupe,
   aggregate,
   cleanText,
+  extractOgImage,
   fetchAllNews,
   FEEDS,
   type NewsItem,
@@ -166,6 +167,49 @@ describe("parseFeed image extraction", () => {
   });
 });
 
+// --- extractOgImage ---------------------------------------------------------
+
+describe("extractOgImage", () => {
+  it("reads og:image (property before content)", () => {
+    const html = `<head><meta property="og:image" content="https://cdn.example/og.jpg"></head>`;
+    expect(extractOgImage(html)).toBe("https://cdn.example/og.jpg");
+  });
+
+  it("reads og:image when content comes before property", () => {
+    const html = `<head><meta content="https://cdn.example/og2.jpg" property="og:image"/></head>`;
+    expect(extractOgImage(html)).toBe("https://cdn.example/og2.jpg");
+  });
+
+  it("prefers og:image over twitter:image when both are present", () => {
+    const html =
+      `<head>` +
+      `<meta name="twitter:image" content="https://cdn.example/tw.jpg">` +
+      `<meta property="og:image" content="https://cdn.example/og.jpg">` +
+      `</head>`;
+    expect(extractOgImage(html)).toBe("https://cdn.example/og.jpg");
+  });
+
+  it("falls back to twitter:image (name=) when og:image is absent", () => {
+    const html = `<head><meta name="twitter:image" content="https://cdn.example/tw.jpg"></head>`;
+    expect(extractOgImage(html)).toBe("https://cdn.example/tw.jpg");
+  });
+
+  it("upgrades an http og:image to https", () => {
+    const html = `<head><meta property="og:image" content="http://cdn.example/og.jpg"></head>`;
+    expect(extractOgImage(html)).toBe("https://cdn.example/og.jpg");
+  });
+
+  it("drops a non-http(s) og:image (e.g. data:)", () => {
+    const html = `<head><meta property="og:image" content="data:image/png;base64,AAAA"></head>`;
+    expect(extractOgImage(html)).toBeUndefined();
+  });
+
+  it("returns undefined when the head has no og/twitter image", () => {
+    const html = `<head><title>No image here</title><meta name="description" content="x"></head>`;
+    expect(extractOgImage(html)).toBeUndefined();
+  });
+});
+
 // --- isBaseRelated ----------------------------------------------------------
 
 describe("isBaseRelated (filter heuristic)", () => {
@@ -180,6 +224,17 @@ describe("isBaseRelated (filter heuristic)", () => {
     expect(isBaseRelated("Base network upgrade ships", "")).toBe(true);
   });
 
+  it("keeps Base-ecosystem items (expanded coverage)", () => {
+    // Real headlines the strict filter missed (verified against live feeds
+    // 2026-06-04): "Base <verb>" as the sentence subject is the L2.
+    expect(isBaseRelated("Base Launches Azul Upgrade, Takes Step Toward Stage 2", "")).toBe(true);
+    expect(isBaseRelated("Base Adds MCP Agent Gateway for onchain portfolios", "")).toBe(true);
+    // Coinbase onchain ecosystem terms from the app's scope.
+    expect(isBaseRelated("Coinbase Wallet ships smart wallet support", "")).toBe(true);
+    expect(isBaseRelated("Farcaster frames hit new highs", "")).toBe(true);
+    expect(isBaseRelated("New rollup ships on the OP Stack", "")).toBe(true);
+  });
+
   it("rejects false positives (generic 'base' word)", () => {
     expect(isBaseRelated("SpaceX expands its user base", "Growing the user base")).toBe(false);
     expect(isBaseRelated("This is based on new data", "")).toBe(false);
@@ -187,6 +242,11 @@ describe("isBaseRelated (filter heuristic)", () => {
     expect(isBaseRelated("New database for analytics", "")).toBe(false);
     expect(isBaseRelated("Bitcoin steadies near 70k", "Macro recap")).toBe(false);
     expect(isBaseRelated("A solid base for the team", "")).toBe(false);
+    // The "Base <verb>" rule is anchored to the title start: a mid-sentence
+    // "user base launches a new tier" must NOT qualify.
+    expect(isBaseRelated("Startup grows user base launches new tier", "")).toBe(false);
+    // A regulatory headline that merely names Coinbase the company is not Base.
+    expect(isBaseRelated("Banks pushed Congress to kill stablecoin yield, says Coinbase", "")).toBe(false);
   });
 });
 
@@ -226,6 +286,57 @@ describe("dedupe", () => {
       mk({ title: "Story two", link: "https://x.io/2" }),
     ]);
     expect(out).toHaveLength(2);
+  });
+
+  it("on a title-prefix collision keeps the copy WITH an image (over a newer image-less one)", () => {
+    // Same story, different links (Google News vs the direct publisher). They
+    // share the first 60+ chars and diverge only in the tail (the aggregator
+    // appends "- Publisher"). The direct copy carries an image; the aggregator
+    // copy is newer but image-less -> the image copy must win.
+    const out = dedupe([
+      mk({
+        title: "Base Launches Azul Upgrade Toward Stage 2 Decentralization Today",
+        link: "https://thedefiant.io/base-azul",
+        date: 100,
+        image: "https://cdn.example/azul.jpg",
+      }),
+      mk({
+        title: "Base Launches Azul Upgrade Toward Stage 2 Decentralization - The Defiant",
+        link: "https://news.google.com/rss/articles/xyz",
+        date: 200,
+      }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.image).toBe("https://cdn.example/azul.jpg");
+    expect(out[0]!.link).toBe("https://thedefiant.io/base-azul");
+  });
+
+  it("collapses reworded titles that share the first ~60 chars (differ only in the tail)", () => {
+    const out = dedupe([
+      mk({
+        title: "Aerodrome Finance overtakes Uniswap as the largest DEX on Base by weekly volume",
+        link: "https://a.io/1",
+        date: 50,
+      }),
+      mk({
+        title: "Aerodrome Finance overtakes Uniswap as the largest DEX on Base, data shows",
+        link: "https://b.io/2",
+        date: 60,
+        image: "https://cdn.example/aero.jpg",
+      }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.image).toBe("https://cdn.example/aero.jpg");
+  });
+
+  it("when both duplicates have an image, the newer one wins", () => {
+    const out = dedupe([
+      mk({ title: "Base ships v2", link: "https://a.io/1", date: 10, image: "https://i/old.jpg" }),
+      mk({ title: "BASE ships v2!", link: "https://b.io/2", date: 20, image: "https://i/new.jpg" }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.date).toBe(20);
+    expect(out[0]!.image).toBe("https://i/new.jpg");
   });
 });
 
@@ -281,6 +392,28 @@ describe("aggregate", () => {
     // Newest first.
     expect(out[0]!.date).toBe(79);
   });
+
+  it("keeps imaged items through the cap, then renders newest-first", () => {
+    // 40 fresh image-less items (dates 100..139) plus a handful of older imaged
+    // ones (dates 1..3). The cap must keep the imaged items even though they are
+    // older, dropping the oldest image-less ones instead — but display order
+    // stays chronological.
+    const imageless = Array.from({ length: 40 }, (_, i) =>
+      mk({ title: `il${i}`, date: 100 + i }),
+    );
+    const imaged = [
+      mk({ title: "old imaged a", date: 1, image: "https://i/a.jpg" }),
+      mk({ title: "old imaged b", date: 2, image: "https://i/b.jpg" }),
+      mk({ title: "old imaged c", date: 3, image: "https://i/c.jpg" }),
+    ];
+    const out = aggregate([{ baseOnly: true, items: [...imageless, ...imaged] }]);
+    expect(out).toHaveLength(40);
+    // All three imaged survivors are present despite being the oldest.
+    expect(out.filter((i) => i.image)).toHaveLength(3);
+    // Output is newest-first (chronological), not imaged-first.
+    const dates = out.map((i) => i.date);
+    expect(dates).toEqual([...dates].sort((a, b) => b - a));
+  });
 });
 
 // --- cleanText --------------------------------------------------------------
@@ -297,6 +430,24 @@ describe("cleanText", () => {
   });
   it("returns empty string for undefined", () => {
     expect(cleanText(undefined)).toBe("");
+  });
+});
+
+// --- FEEDS roster -----------------------------------------------------------
+
+describe("FEEDS", () => {
+  it("includes the image-rich direct feeds added for coverage", () => {
+    const sources = FEEDS.map((f) => f.source);
+    for (const s of ["CoinDesk", "Cointelegraph", "Decrypt", "The Defiant", "CryptoPotato", "CryptoSlate", "BeInCrypto", "NewsBTC"]) {
+      expect(sources).toContain(s);
+    }
+  });
+
+  it("marks Base-only sources and leaves generalist feeds keyword-filtered", () => {
+    const baseOnly = FEEDS.filter((f) => f.baseOnly).map((f) => f.source);
+    expect(baseOnly).toContain("Base News");
+    // CoinDesk & co are generalist: they must be keyword-filtered, not baseOnly.
+    expect(FEEDS.find((f) => f.source === "CoinDesk")!.baseOnly).toBeFalsy();
   });
 });
 
@@ -343,5 +494,51 @@ describe("fetchAllNews", () => {
   it("treats a non-ok HTTP response as an empty feed", async () => {
     fetchMock.mockResolvedValue({ ok: false, status: 429, text: async () => "" } as Response);
     await expect(fetchAllNews()).resolves.toEqual([]);
+  });
+
+  it("enriches an image-less item with its article's og:image", async () => {
+    // Unique link so the module-level og cache can't be pre-warmed by another test.
+    const link = `https://news.example/article-${Date.now()}-${Math.random()}`;
+    const feedXml = `<rss><channel><item><title>Aerodrome on Base ships v2</title><link>${link}</link><pubDate>Wed, 03 Jun 2026 10:00:00 +0000</pubDate></item></channel></rss>`;
+    const articleHtml = `<html><head><meta property="og:image" content="https://cdn.example/hero.jpg"></head></html>`;
+
+    fetchMock.mockImplementation((url: string) => {
+      const isFeed = FEEDS.some((f) => f.url === url);
+      if (isFeed) {
+        // Only the Base blog feed serves the item; the rest are empty.
+        return Promise.resolve({
+          ok: true,
+          text: async () => (url === FEEDS[0]!.url ? feedXml : "<rss><channel></channel></rss>"),
+        } as Response);
+      }
+      // Article page fetch (og:image scrape).
+      return Promise.resolve({ ok: true, text: async () => articleHtml } as Response);
+    });
+
+    const items = await fetchAllNews();
+    const enriched = items.find((i) => i.link === link);
+    expect(enriched?.image).toBe("https://cdn.example/hero.jpg");
+  });
+
+  it("leaves an item image-less when the article fetch fails (never throws)", async () => {
+    const link = `https://news.example/dead-${Date.now()}-${Math.random()}`;
+    const feedXml = `<rss><channel><item><title>Base network upgrade lands today</title><link>${link}</link><pubDate>Wed, 03 Jun 2026 10:00:00 +0000</pubDate></item></channel></rss>`;
+
+    fetchMock.mockImplementation((url: string) => {
+      const isFeed = FEEDS.some((f) => f.url === url);
+      if (isFeed) {
+        return Promise.resolve({
+          ok: true,
+          text: async () => (url === FEEDS[0]!.url ? feedXml : "<rss><channel></channel></rss>"),
+        } as Response);
+      }
+      // Article fetch rejects (simulated timeout/network error).
+      return Promise.reject(new Error("timeout"));
+    });
+
+    const items = await fetchAllNews();
+    const it = items.find((i) => i.link === link);
+    expect(it).toBeDefined();
+    expect(it?.image).toBeUndefined();
   });
 });

@@ -1,4 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
+import { LruCache } from "./cache";
+import { getOrSetCached } from "./shared-cache";
 
 /**
  * Base news aggregator.
@@ -57,12 +59,23 @@ export const FEEDS: NewsFeed[] = [
     url: "https://news.google.com/rss/search?q=(%22Base%20chain%22%20OR%20%22Base%20network%22%20OR%20%22Base%20L2%22%20OR%20Aerodrome%20OR%20Basenames%20OR%20%22onchain%20summer%22%20OR%20%22Coinbase%20Base%22%20OR%20%22Coinbase%20onchain%22%20OR%20%22Coinbase%20wallet%22%20OR%20%22smart%20wallet%22)%20crypto&hl=en-US&gl=US&ceid=US:en",
     baseOnly: true,
   },
-  // Generalist crypto press (firehose -> keyword-filtered for Base).
+  // Generalist crypto press (firehose -> keyword-filtered for Base). All of the
+  // feeds below were fetched on 2026-06-04: HTTP 200, valid RSS, and ~100% of
+  // their items carry a feed image (media:content or an <img> in the body), so
+  // every Base item they yield arrives with a thumbnail — no og:image scrape
+  // needed. This is the lever for image coverage: the Google-News aggregator is
+  // image-less by construction, these direct feeds are not.
+  // (The Block https://www.theblock.co/rss.xml returns 403 to this runtime and
+  //  Blockworks https://blockworks.co/feed exposes no images, so neither is
+  //  worth adding.)
   { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss" },
   { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
   { source: "Decrypt", url: "https://decrypt.co/feed" },
-  { source: "The Block", url: "https://www.theblock.co/rss.xml" },
   { source: "The Defiant", url: "https://thedefiant.io/feed" },
+  { source: "CryptoPotato", url: "https://cryptopotato.com/feed/" },
+  { source: "CryptoSlate", url: "https://cryptoslate.com/feed/" },
+  { source: "BeInCrypto", url: "https://beincrypto.com/feed/" },
+  { source: "NewsBTC", url: "https://www.newsbtc.com/feed/" },
 ];
 
 const FEED_TIMEOUT_MS = 5_000;
@@ -132,6 +145,14 @@ const STRONG_KEYWORDS = [
   "base blockchain",
   "built on base",
   "base sepolia",
+  // Base/Coinbase onchain ecosystem terms. Each is specific enough to the Base
+  // world that it is not a generic-"base" false positive (verified 2026-06-04
+  // against the live direct feeds: no leak into non-Base headlines):
+  "coinbase onchain",
+  "coinbase wallet",
+  "smart wallet",
+  "farcaster",
+  "op stack",
 ];
 
 /** Phrases that pin the bare word "base" to the L2 meaning. */
@@ -139,6 +160,11 @@ const BASE_PHRASES = [
   /\bbase\b[^.]{0,40}\b(l2|layer\s?2|chain|network|blockchain|mainnet|ecosystem|onchain|defi|tvl|coinbase)\b/i,
   /\b(coinbase|onchain|l2|layer\s?2|tvl|defi)\b[^.]{0,40}\bbase\b/i,
   /\bon base\b/i,
+  // Title-leading "Base <verb>": when "Base" is the sentence subject of an
+  // announcement verb it is unambiguously the L2 (e.g. "Base Launches Azul
+  // Upgrade", "Base Adds...", "Base hits 100M tx"). Anchored to start so it
+  // never fires on "user base launches" or mid-sentence noise.
+  /^base\s+(launch|upgrade|add|ship|hit|reach|surpass|cross|integrat|enabl|expand|roll|introduc|deploy|onboard)/i,
 ];
 
 /**
@@ -194,12 +220,19 @@ function normalizeLink(link: string): string {
   }
 }
 
-/** Normalize a title for de-dup: lowercase, strip non-alphanumerics, collapse. */
+/**
+ * Normalize a title for de-dup: lowercase, strip non-alphanumerics, collapse,
+ * then keep only the first ~60 chars. The prefix match catches the same story
+ * republished with a slightly different tail (e.g. Google News appends/rewords
+ * the publisher's headline) which a full-title compare would miss.
+ */
+const TITLE_KEY_LEN = 60;
 function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+    .trim()
+    .slice(0, TITLE_KEY_LEN);
 }
 
 /** An attribute-bearing media element (or array of them) from fast-xml-parser. */
@@ -358,12 +391,28 @@ export function parseFeed(xml: string, source: string): NewsItem[] {
 }
 
 /**
- * De-dupe by normalized title OR normalized link; keep the newest of a group.
+ * Pick the better of two duplicate items.
+ *
+ * The Google-News aggregator and the direct publisher feeds often carry the
+ * same story under different links, and the aggregator's copy is image-less.
+ * So an item that *has* an image always beats one that doesn't (that is the
+ * whole point of de-duping across feeds — keep the rich copy). When both or
+ * neither carry an image, the newer one wins.
+ */
+function preferred(a: NewsItem, b: NewsItem): NewsItem {
+  const aImg = !!a.image;
+  const bImg = !!b.image;
+  if (aImg !== bImg) return aImg ? a : b;
+  return a.date >= b.date ? a : b;
+}
+
+/**
+ * De-dupe by normalized title-prefix OR normalized link; keep the best of a group.
  *
  * An item is a duplicate of any already-kept item that shares its title-key OR
- * its link-key. On collision the newer item wins and *replaces* the older one,
- * re-pointing both keys at the winner (so the loser is fully evicted even when
- * the two items differ on the other key).
+ * its link-key. On collision the item *with an image* wins (newest as tie-break)
+ * and *replaces* the other, re-pointing both keys at the winner (so the loser is
+ * fully evicted even when the two items differ on the other key).
  */
 export function dedupe(items: NewsItem[]): NewsItem[] {
   const byKey = new Map<string, NewsItem>();
@@ -375,7 +424,7 @@ export function dedupe(items: NewsItem[]): NewsItem[] {
     const prior = byKey.get(tKey) ?? byKey.get(uKey);
 
     if (prior) {
-      const winner = it.date > prior.date ? it : prior;
+      const winner = preferred(it, prior);
       const loser = winner === it ? prior : it;
       kept.delete(loser);
       kept.add(winner);
@@ -397,6 +446,14 @@ export function dedupe(items: NewsItem[]): NewsItem[] {
 /**
  * Aggregate, filter, dedupe, sort and cap a set of parsed feeds.
  * `baseOnly` feeds bypass the keyword filter. Pure — given raw parsed feeds.
+ *
+ * Capping is image-aware: items are sorted by date desc, but when more than
+ * ITEM_CAP survive, the cap keeps imaged items first (then the freshest
+ * image-less ones backfill the rest). The direct publisher feeds carry images,
+ * the Google-News aggregator never does (it has no media element — only a link),
+ * so without this an unusually busy news day could push every imaged item out of
+ * the cap behind a wall of image-less aggregator items. Within each group the
+ * order stays newest-first, so recency is preserved per-group.
  */
 export function aggregate(
   feeds: Array<{ items: NewsItem[]; baseOnly?: boolean }>,
@@ -411,7 +468,13 @@ export function aggregate(
   }
   const unique = dedupe(collected);
   unique.sort((a, b) => b.date - a.date);
-  return unique.slice(0, ITEM_CAP);
+  if (unique.length <= ITEM_CAP) return unique;
+  // Choose WHICH items survive the cap with image priority (imaged kept first,
+  // then freshest image-less backfill), but render the survivors newest-first so
+  // the UI order stays chronological.
+  const imaged = unique.filter((i) => i.image);
+  const imageless = unique.filter((i) => !i.image);
+  return [...imaged, ...imageless].slice(0, ITEM_CAP).sort((a, b) => b.date - a.date);
 }
 
 /** Fetch one feed with its own timeout, chained to the caller's AbortSignal. */
@@ -443,10 +506,129 @@ async function fetchOne(
   }
 }
 
+// --- og:image enrichment ----------------------------------------------------
+//
+// Some feeds (notably the "Base News" Google-News aggregator, ~38/40 items)
+// carry NO image in their RSS, so extractImage returns nothing. For those items
+// we fetch the article page server-side and scrape its og:image (the social
+// preview every publisher sets). This is the only way to get a thumbnail when
+// the feed itself exposes none.
+//
+// Same never-fail discipline as the feed layer: a timeout, block or missing tag
+// just leaves the item image-less, never throws.
+
+/** Per-article og:image cache (L1). Resolved URL or the "none" sentinel. */
+const ogCache = new LruCache<string>(500, 24 * 60 * 60 * 1000);
+/** Sentinel cached for articles with no resolvable og:image (skip re-fetch). */
+const OG_NONE = "none";
+const OG_TTL_S = 86_400;
+const OG_TIMEOUT_MS = 2_500;
+/** Max concurrent article fetches during one enrichment pass. */
+const OG_CONCURRENCY = 8;
+/** og: scraping only needs the <head>; cap the read so we never buffer a page. */
+const OG_MAX_BYTES = 50 * 1024;
+
+/** FNV-1a 32-bit hash -> short hex. Stable cache key from an article link. */
+function hashLink(link: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < link.length; i++) {
+    h ^= link.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+
+/**
+ * Pull og:image (preferred) or twitter:image from an HTML <head> blob.
+ * Tolerant of attribute order (content before/after property) and quote style.
+ * Returns a normalized https URL, or undefined.
+ */
+export function extractOgImage(html: string): string | undefined {
+  const head = html.slice(0, OG_MAX_BYTES);
+  const find = (key: string): string | null => {
+    // property|name = "<key>" with content="..." in either attribute order.
+    const after =
+      new RegExp(
+        `<meta[^>]+(?:property|name)\\s*=\\s*["']${key}["'][^>]*?\\bcontent\\s*=\\s*["']([^"']+)["']`,
+        "i",
+      ).exec(head);
+    if (after) return after[1] ?? null;
+    const before =
+      new RegExp(
+        `<meta[^>]+\\bcontent\\s*=\\s*["']([^"']+)["'][^>]*?(?:property|name)\\s*=\\s*["']${key}["']`,
+        "i",
+      ).exec(head);
+    return before ? before[1] ?? null : null;
+  };
+  const raw = find("og:image") ?? find("twitter:image");
+  return normalizeImage(raw ?? undefined) ?? undefined;
+}
+
+/** Fetch one article and scrape its og:image; never throws. Returns OG_NONE on any miss. */
+async function fetchOgImage(link: string, signal: AbortSignal | undefined): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), OG_TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  signal?.addEventListener("abort", onAbort);
+  try {
+    const res = await fetch(link, {
+      signal: ctrl.signal,
+      headers: { "user-agent": UA, accept: "text/html,application/xhtml+xml,*/*" },
+      redirect: "follow",
+    });
+    if (!res.ok) return OG_NONE;
+    const html = await readCapped(res, OG_MAX_BYTES * 4);
+    if (html === null) return OG_NONE;
+    return extractOgImage(html) ?? OG_NONE;
+  } catch {
+    return OG_NONE;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/**
+ * Fill in `image` for items that have none, by scraping each article's og:image.
+ * Results (URL or the "none" sentinel) are cached per-article for 24h via the
+ * shared L1+Redis cache, so a given article is fetched at most once a day even
+ * though the feed itself refreshes every 15 min. Runs OG_CONCURRENCY at a time.
+ */
+async function enrichWithOgImages(items: NewsItem[], signal: AbortSignal | undefined): Promise<NewsItem[]> {
+  const todo = items.filter((it) => !it.image);
+  if (todo.length === 0) return items;
+
+  const resolved = new Map<string, string>();
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < todo.length) {
+      const it = todo[cursor++]!;
+      const value = await getOrSetCached(
+        ogCache,
+        "news",
+        `og:${hashLink(it.link)}`,
+        OG_TTL_S,
+        () => fetchOgImage(it.link, signal),
+      );
+      resolved.set(it.link, value);
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(OG_CONCURRENCY, todo.length) }, () => worker()),
+  );
+
+  return items.map((it) => {
+    if (it.image) return it;
+    const og = resolved.get(it.link);
+    return og && og !== OG_NONE ? { ...it, image: og } : it;
+  });
+}
+
 /**
  * Fetch all feeds in parallel and return the aggregated Base news list.
  * Never rejects on individual feed failures (Promise.allSettled): a dead or
- * rate-limited feed simply contributes no items.
+ * rate-limited feed simply contributes no items. Items that arrive without a
+ * feed image are enriched server-side with their article's og:image.
  */
 export async function fetchAllNews(signal?: AbortSignal): Promise<NewsItem[]> {
   const settled = await Promise.allSettled(
@@ -455,7 +637,7 @@ export async function fetchAllNews(signal?: AbortSignal): Promise<NewsItem[]> {
   const feeds = settled.map((s) =>
     s.status === "fulfilled" ? s.value : { items: [] as NewsItem[] },
   );
-  return aggregate(feeds);
+  return enrichWithOgImages(aggregate(feeds), signal);
 }
 
 /** Internal exports for unit tests only. */
