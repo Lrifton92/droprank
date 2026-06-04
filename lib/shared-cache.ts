@@ -33,15 +33,22 @@ function getRedis(): Redis | null {
 }
 
 /** Namespaced Redis key so cache entries can't collide with other features. */
-function redisKey(key: string): string {
-  return `droprank:cache:${key}`;
+function redisKey(ns: string, key: string): string {
+  return `droprank:cache:${ns}:${key}`;
 }
 
 /**
- * Resolve `key` through L1 -> L2 -> `compute`, populating both tiers on a miss.
+ * Resolve `ns:key` through L1 -> L2 -> `compute`, populating both tiers on a miss.
  *
  * @param l1 the route's in-memory LruCache (its own TTL governs L1 freshness).
- * @param key cache key, unique per result (callers fold lang/address into it).
+ * @param ns REQUIRED route namespace ("score", "quests", ...). L1 caches are
+ *   per-route module instances so they never collide, but L2 (Redis) is shared
+ *   across ALL routes: two routes caching under the same raw key (e.g. a wallet
+ *   address) would poison each other's payloads. Baking the namespace into the
+ *   signature makes that collision impossible by construction (bug 2026-06-04:
+ *   /api/score and /api/quests both keyed on the bare address -> "Cannot read
+ *   properties of undefined (reading 'filter')" on whichever route lost the race).
+ * @param key cache key within the namespace (callers fold lang/address into it).
  * @param ttlSeconds L2 (Redis) TTL. L1's TTL is whatever the LruCache was built with.
  * @param compute called only on a full miss; its result is cached in both tiers.
  *
@@ -49,6 +56,7 @@ function redisKey(key: string): string {
  */
 export async function getOrSetCached<V>(
   l1: LruCache<V>,
+  ns: string,
   key: string,
   ttlSeconds: number,
   compute: () => Promise<V>,
@@ -60,7 +68,7 @@ export async function getOrSetCached<V>(
   if (client) {
     try {
       // @upstash/redis auto-deserializes JSON values written via `set`.
-      const cached = await client.get<V>(redisKey(key));
+      const cached = await client.get<V>(redisKey(ns, key));
       if (cached != null) {
         l1.set(key, cached);
         return cached;
@@ -75,7 +83,7 @@ export async function getOrSetCached<V>(
 
   if (client) {
     try {
-      await client.set(redisKey(key), value, { ex: ttlSeconds });
+      await client.set(redisKey(ns, key), value, { ex: ttlSeconds });
     } catch {
       // Ignore: the value is already in L1 and was returned to the caller.
     }

@@ -30,7 +30,7 @@ export async function GET(
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
-    const result = await getOrSetCached(cache, key, QUESTS_TTL_S, async () => {
+    const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
       const data = await fetchWalletData(key, req.signal);
       return computeQuests(data.txs, key, {
         isSmartWallet: data.usedSmartWallet,

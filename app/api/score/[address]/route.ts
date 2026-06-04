@@ -31,7 +31,7 @@ export async function GET(
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
-    const result = await getOrSetCached(cache, key, SCORE_TTL_S, async () => {
+    const result = await getOrSetCached(cache, "score", key, SCORE_TTL_S, async () => {
       const r = await scoreAddress(key, req.signal);
       // Record + rank in the percentile store (never throws; static fallback).
       r.percentile = await recordAndRankScore(key, r.score);

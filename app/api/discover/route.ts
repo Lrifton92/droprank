@@ -41,11 +41,9 @@ export async function GET(req: NextRequest) {
     "cache-control": "public, s-maxage=1800, stale-while-revalidate=3600",
   };
 
-  const cacheKey = `new-on-base:${lang}`;
-
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
-    const items = await getOrSetCached(cache, cacheKey, DISCOVER_TTL_S, async () => {
+    const items = await getOrSetCached(cache, "discover", lang, DISCOVER_TTL_S, async () => {
       const base = await fetchDiscover(req.signal);
       return lang === "fr" ? await translateDiscover(base) : base;
     });

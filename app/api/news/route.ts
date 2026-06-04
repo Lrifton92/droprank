@@ -42,11 +42,9 @@ export async function GET(req: NextRequest) {
     "cache-control": "public, s-maxage=900, stale-while-revalidate=1800",
   };
 
-  const cacheKey = `base-news:${lang}`;
-
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
-    const items = await getOrSetCached(cache, cacheKey, NEWS_TTL_S, async () => {
+    const items = await getOrSetCached(cache, "news", lang, NEWS_TTL_S, async () => {
       const base = await fetchAllNews(req.signal);
       return lang === "fr" ? await translateNews(base) : base;
     });
