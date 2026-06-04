@@ -22,6 +22,8 @@ export interface NewsItem {
   source: string;
   /** Short plain-text snippet (HTML stripped, truncated). May be empty. */
   description: string;
+  /** Article thumbnail (https). Absent when the feed exposed no usable image. */
+  image?: string;
 }
 
 export interface NewsFeed {
@@ -200,12 +202,24 @@ function normalizeTitle(title: string): string {
     .trim();
 }
 
+/** An attribute-bearing media element (or array of them) from fast-xml-parser. */
+type MediaNode =
+  | { "@_url"?: string; "@_type"?: string; "@_medium"?: string }
+  | Array<{ "@_url"?: string; "@_type"?: string; "@_medium"?: string }>;
+
 interface RawItem {
   title?: string | { "#text"?: string };
   link?: string | { "#text"?: string; "@_href"?: string } | Array<unknown>;
   description?: string | { "#text"?: string };
   summary?: string | { "#text"?: string };
   content?: string | { "#text"?: string };
+  /** RSS content module: full HTML body, often carries the lead <img>. */
+  "content:encoded"?: string | { "#text"?: string };
+  /** Media RSS: explicit image element (preferred). */
+  "media:content"?: MediaNode;
+  "media:thumbnail"?: MediaNode;
+  /** RSS enclosure: an attached file; only image/* types are usable. */
+  enclosure?: MediaNode;
   pubDate?: string;
   published?: string;
   updated?: string;
@@ -249,6 +263,64 @@ function dateOf(it: RawItem): number {
 }
 
 /**
+ * Coerce a raw image URL to a safe https thumbnail, or null.
+ * Drops protocol-relative ambiguity, upgrades http -> https (mixed-content
+ * would be blocked in the webview), and rejects anything not http(s).
+ */
+function normalizeImage(url: string | undefined): string | null {
+  const u = (url ?? "").trim();
+  if (!u) return null;
+  if (u.startsWith("https://")) return u;
+  if (u.startsWith("http://")) return "https://" + u.slice("http://".length);
+  return null;
+}
+
+/** First {@_url} of a media node whose type/medium isn't explicitly non-image. */
+function imageFromMedia(node: MediaNode | undefined, imageOnly: boolean): string | null {
+  if (!node) return null;
+  const arr = Array.isArray(node) ? node : [node];
+  for (const m of arr) {
+    const type = (m["@_type"] ?? "").toLowerCase();
+    const medium = (m["@_medium"] ?? "").toLowerCase();
+    // For <enclosure>, type MUST be image/*; media:* default to image when unset.
+    if (imageOnly && !type.startsWith("image/")) continue;
+    if (!imageOnly && (type ? !type.startsWith("image/") : false)) continue;
+    if (medium && medium !== "image") continue;
+    const url = normalizeImage(m["@_url"]);
+    if (url) return url;
+  }
+  return null;
+}
+
+/** First <img src> found in an HTML blob, or null. */
+function imageFromHtml(html: string): string | null {
+  const m = /<img[^>]+\bsrc\s*=\s*["']([^"']+)["']/i.exec(html);
+  return m ? normalizeImage(m[1]) : null;
+}
+
+/**
+ * Extract a thumbnail URL for an item, by priority:
+ *   1. media:content / media:thumbnail (explicit image elements)
+ *   2. enclosure with an image/* type
+ *   3. first <img> inside content:encoded / content / description (raw HTML)
+ * http URLs are upgraded to https; anything non-http(s) is dropped. Returns
+ * undefined when no usable image exists (the UI then renders without a thumb).
+ */
+export function extractImage(it: RawItem): string | undefined {
+  const fromMedia =
+    imageFromMedia(it["media:content"], false) ??
+    imageFromMedia(it["media:thumbnail"], false);
+  if (fromMedia) return fromMedia;
+
+  const fromEnclosure = imageFromMedia(it.enclosure, true);
+  if (fromEnclosure) return fromEnclosure;
+
+  const html =
+    textOf(it["content:encoded"]) || textOf(it.content) || textOf(it.description);
+  return imageFromHtml(html) ?? undefined;
+}
+
+/**
  * Parse one feed's XML into NewsItems (no Base filtering here — caller filters).
  * Tolerant: handles RSS 2.0 (<rss><channel><item>) and Atom (<feed><entry>).
  * Returns [] on unparseable input rather than throwing.
@@ -279,7 +351,8 @@ export function parseFeed(xml: string, source: string): NewsItem[] {
     const description = cleanText(
       textOf(it.description) || textOf(it.summary) || textOf(it.content),
     );
-    out.push({ title, link, date: dateOf(it), source, description });
+    const image = extractImage(it);
+    out.push({ title, link, date: dateOf(it), source, description, ...(image ? { image } : {}) });
   }
   return out;
 }

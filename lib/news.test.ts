@@ -88,6 +88,84 @@ describe("parseFeed", () => {
   });
 });
 
+// --- image extraction (via parseFeed) ---------------------------------------
+
+describe("parseFeed image extraction", () => {
+  const one = (inner: string): NewsItem =>
+    parseFeed(
+      `<rss xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><item>${inner}</item></channel></rss>`,
+      "X",
+    )[0]!;
+
+  const base = `<title>T</title><link>https://x.io/a</link>`;
+
+  it("leaves image undefined when the item carries no image", () => {
+    const it = one(`${base}<description>Just text, no pictures.</description>`);
+    expect(it.image).toBeUndefined();
+  });
+
+  it("reads media:content (preferred source)", () => {
+    const it = one(
+      `${base}<media:content url="https://img.example/a.jpg" medium="image"/>`,
+    );
+    expect(it.image).toBe("https://img.example/a.jpg");
+  });
+
+  it("reads media:thumbnail when media:content is absent", () => {
+    const it = one(`${base}<media:thumbnail url="https://img.example/t.jpg"/>`);
+    expect(it.image).toBe("https://img.example/t.jpg");
+  });
+
+  it("reads an image enclosure (type image/*)", () => {
+    const it = one(
+      `${base}<enclosure url="https://img.example/b.png" type="image/png"/>`,
+    );
+    expect(it.image).toBe("https://img.example/b.png");
+  });
+
+  it("ignores a non-image enclosure (e.g. audio)", () => {
+    const it = one(
+      `${base}<enclosure url="https://x.io/pod.mp3" type="audio/mpeg"/>`,
+    );
+    expect(it.image).toBeUndefined();
+  });
+
+  it("falls back to the first <img> in content:encoded", () => {
+    const it = one(
+      `${base}<content:encoded><![CDATA[<p>Lead <img src="https://img.example/c.webp"/> body</p>]]></content:encoded>`,
+    );
+    expect(it.image).toBe("https://img.example/c.webp");
+  });
+
+  it("falls back to the first <img> in description", () => {
+    const it = one(
+      `${base}<description><![CDATA[<img src="https://img.example/d.png"> text]]></description>`,
+    );
+    expect(it.image).toBe("https://img.example/d.png");
+  });
+
+  it("upgrades an http image URL to https", () => {
+    const it = one(
+      `${base}<media:content url="http://img.example/a.jpg" medium="image"/>`,
+    );
+    expect(it.image).toBe("https://img.example/a.jpg");
+  });
+
+  it("drops a non-http(s) image URL (e.g. data:)", () => {
+    const it = one(
+      `${base}<description><![CDATA[<img src="data:image/png;base64,AAAA"> x]]></description>`,
+    );
+    expect(it.image).toBeUndefined();
+  });
+
+  it("prefers media:content over an <img> in the description", () => {
+    const it = one(
+      `${base}<media:content url="https://img.example/win.jpg" medium="image"/><description><![CDATA[<img src="https://img.example/lose.jpg">]]></description>`,
+    );
+    expect(it.image).toBe("https://img.example/win.jpg");
+  });
+});
+
 // --- isBaseRelated ----------------------------------------------------------
 
 describe("isBaseRelated (filter heuristic)", () => {

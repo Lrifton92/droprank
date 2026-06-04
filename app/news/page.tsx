@@ -89,6 +89,20 @@ function NewsInner() {
                   className={styles.item}
                   style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}
                 >
+                  {it.image && (
+                    /* Thumbnail. onError hides it so a dead URL leaves no broken
+                       icon — the card falls back to its text-only layout. */
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      className={styles.thumb}
+                      src={it.image}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
                   <div className={styles.meta}>
                     <span className={`mono ${styles.source}`}>{it.source}</span>
                     <span className={`mono ${styles.date}`}>{timeAgo(it.date)}</span>

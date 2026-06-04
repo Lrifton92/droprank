@@ -82,6 +82,16 @@
   box-shadow: inset 2px 0 0 var(--base-300), 0 14px 38px -24px var(--base-glow);
 }
 
+.thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: rgba(120, 160, 255, 0.05);
+}
+
 .meta {
   display: flex;
   align-items: center;
