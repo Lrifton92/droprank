@@ -15,6 +15,7 @@ import {
   EXTRA_FINANCE_LENDING_POOL,
   PANCAKESWAP_SMART_ROUTER,
   SEAPORT_1_6,
+  TALENT_PASSPORT_REGISTRY,
 } from "./contracts-registry";
 import type { Tx } from "./types";
 
@@ -33,8 +34,8 @@ function tx(over: Partial<Tx>): Tx {
 }
 
 describe("quests registry", () => {
-  it("has 18 quests (11 v1 + 7 v2; Zora removed — shifted off Base)", () => {
-    expect(QUESTS.length).toBe(18);
+  it("has 19 quests (11 v1 + 7 v2 + Talent Builder Score; Zora removed)", () => {
+    expect(QUESTS.length).toBe(19);
   });
 
   it("keeps the original v1 quest ids intact (minus Zora)", () => {
@@ -174,6 +175,11 @@ describe("computeQuests", () => {
     expect(done("leverage-extra")).toBe(true);
     expect(done("swap-pancakeswap")).toBe(true);
     expect(done("trade-opensea")).toBe(true);
+  });
+
+  it("detects a Talent Builder Score (PassportRegistry interaction)", () => {
+    const r = computeQuests([tx({ to: TALENT_PASSPORT_REGISTRY })], ADDR);
+    expect(r.quests.find((q) => q.id === "talent-builder-score")!.done).toBe(true);
   });
 
   it("clamps earned at total when more than 20 pts of quests are completed", () => {

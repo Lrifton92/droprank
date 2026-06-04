@@ -1,0 +1,122 @@
+.banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 22px 24px;
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--base-300) 22%, transparent);
+  background:
+    linear-gradient(110deg, color-mix(in srgb, var(--base) 18%, transparent), transparent 60%),
+    rgba(10, 15, 26, 0.6);
+  isolation: isolate;
+}
+
+/* Soft Base-blue glow drifting behind the content. */
+.glow {
+  position: absolute;
+  inset: -40% -10% auto -10%;
+  height: 200%;
+  background: radial-gradient(
+    420px 180px at 18% 30%,
+    color-mix(in srgb, var(--base) 45%, transparent),
+    transparent 70%
+  );
+  z-index: -1;
+  animation: bannerGlow 14s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes bannerGlow {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+  50% { transform: translate3d(3%, 0, 0) scale(1.1); opacity: 1; }
+}
+
+/* Faint grid texture. */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--base-300) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--base-300) 9%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(120% 100% at 0% 50%, #000, transparent 75%);
+  mask-image: radial-gradient(120% 100% at 0% 50%, #000, transparent 75%);
+}
+
+/* Base square mark. */
+.mark {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, var(--base-200), var(--base));
+  box-shadow: 0 0 26px -6px var(--base-glow);
+}
+.markInner {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.title {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text);
+}
+.sub {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+.chip {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--base-300);
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
+}
+
+/* One-time light sweep on mount. */
+.sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  z-index: -1;
+  animation: bannerSweep 2.4s var(--ease-out) 0.4s 1 both;
+}
+@keyframes bannerSweep {
+  from { transform: translateX(-150%); }
+  to { transform: translateX(350%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow, .sweep { animation: none; }
+}
+
+@media (max-width: 480px) {
+  .banner { padding: 18px; gap: 14px; }
+  .chip { display: none; }
+  .title { font-size: 15px; }
+}

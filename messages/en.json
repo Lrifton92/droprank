@@ -21,7 +21,7 @@
     "eyebrow": "// onchain reputation engine",
     "titleLine1": "Your Base airdrop score,",
     "titleAccent": "ranked.",
-    "sub": "Scan any wallet. Get a /100 score, your percentile and an 18-quest radar. Mint your rank as a soulbound badge.",
+    "sub": "Scan any wallet. Get a /100 score, your percentile and a 19-quest radar. Mint your rank as a soulbound badge.",
     "orScan": "or scan read-only",
     "walletAddress": "wallet address",
     "addressPlaceholder": "0x…",
@@ -42,7 +42,7 @@
   },
   "menu": {
     "score": { "title": "SCORE", "sub": "your /100 rank, breakdown & tier" },
-    "radar": { "title": "RADAR", "sub": "18 onchain quests & progress" },
+    "radar": { "title": "RADAR", "sub": "19 onchain quests & progress" },
     "news": { "title": "NEWS", "sub": "latest base ecosystem signals" },
     "discover": { "title": "DISCOVER", "sub": "new projects & protocols on base" },
     "term": {
@@ -159,6 +159,7 @@
     "perps-avantis": "Trade perps on Avantis",
     "leverage-extra": "Leverage farm on Extra Finance",
     "swap-pancakeswap": "Swap on PancakeSwap (Base)",
-    "trade-opensea": "Trade an NFT on OpenSea"
+    "trade-opensea": "Trade an NFT on OpenSea",
+    "talent-builder-score": "Create a Talent Builder Score"
   }
 }

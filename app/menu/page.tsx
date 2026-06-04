@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import BaseBanner from "../_components/BaseBanner";
 import styles from "./menu.module.css";
 
 function MenuInner() {
@@ -93,7 +94,11 @@ function MenuInner() {
           </Link>
         </nav>
 
-        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 6 } as CSSProperties}>
+        <div className="dr-enter" style={{ "--i": 6 } as CSSProperties}>
+          <BaseBanner />
+        </div>
+
+        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 7 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />

@@ -155,3 +155,16 @@ export const BASENAMES_CONTROLLERS = new Set([
   BASENAMES_EA_CONTROLLER,
   BASENAMES_UPGRADEABLE_CONTROLLER,
 ]);
+
+/**
+ * Talent Protocol on Base — powers the Builder Score behind Base Builder Rewards.
+ * Verified on base.blockscout.com 2026-06-04:
+ *  - PassportRegistry: name "PassportRegistry", verified (create a Talent profile).
+ *  - PassportBuilderScore: name "PassportBuilderScore", verified (score onchain).
+ */
+export const TALENT_PASSPORT_REGISTRY = lc("0xb477A9BD2547ad61f4Ac22113172Dd909E5B2331");
+export const TALENT_BUILDER_SCORE = lc("0xBBFeDA7c4d8d9Df752542b03CdD715F790B32D0B");
+export const TALENT_CONTRACTS = new Set([
+  TALENT_PASSPORT_REGISTRY,
+  TALENT_BUILDER_SCORE,
+]);

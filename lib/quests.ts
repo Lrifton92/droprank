@@ -14,6 +14,7 @@ import {
   EXTRA_FINANCE_LENDING_POOL,
   PANCAKESWAP_SMART_ROUTER,
   SEAPORT_1_6,
+  TALENT_CONTRACTS,
 } from "./contracts-registry";
 
 /**
@@ -186,6 +187,13 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 1,
     link: "https://opensea.io",
     check: (txs) => txs.some((t) => to(t) === SEAPORT_1_6),
+  },
+  {
+    id: "talent-builder-score",
+    label: "Create a Talent Builder Score",
+    points: 2,
+    link: "https://talent.app",
+    check: (txs) => txs.some((t) => { const a = to(t); return a !== null && TALENT_CONTRACTS.has(a); }),
   },
 ];
 

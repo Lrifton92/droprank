@@ -21,7 +21,7 @@
     "eyebrow": "// moteur de réputation onchain",
     "titleLine1": "Ton score airdrop Base,",
     "titleAccent": "classé.",
-    "sub": "Scanne n'importe quel wallet. Obtiens un score /100, ton percentile et un radar de 18 quêtes. Mint ton rang en badge soulbound.",
+    "sub": "Scanne n'importe quel wallet. Obtiens un score /100, ton percentile et un radar de 19 quêtes. Mint ton rang en badge soulbound.",
     "orScan": "ou scan en lecture seule",
     "walletAddress": "adresse du wallet",
     "addressPlaceholder": "0x…",
@@ -42,7 +42,7 @@
   },
   "menu": {
     "score": { "title": "SCORE", "sub": "ton rang /100, le détail & le palier" },
-    "radar": { "title": "RADAR", "sub": "18 quêtes onchain & progression" },
+    "radar": { "title": "RADAR", "sub": "19 quêtes onchain & progression" },
     "news": { "title": "NEWS", "sub": "derniers signaux de l'écosystème base" },
     "discover": { "title": "DISCOVER", "sub": "nouveaux projets & protocoles sur base" },
     "term": {
@@ -159,6 +159,7 @@
     "perps-avantis": "Trader des perps sur Avantis",
     "leverage-extra": "Leverage farming sur Extra Finance",
     "swap-pancakeswap": "Swap sur PancakeSwap (Base)",
-    "trade-opensea": "Trader un NFT sur OpenSea"
+    "trade-opensea": "Trader un NFT sur OpenSea",
+    "talent-builder-score": "Créer un Builder Score Talent"
   }
 }
