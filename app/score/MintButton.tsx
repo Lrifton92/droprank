@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   useAccount,
+  useChainId,
   useReadContract,
+  useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
@@ -45,6 +47,8 @@ export default function MintButton({
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
 
   const { writeContractAsync } = useWriteContract();
+  const currentChainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const { data: balance } = useReadContract({
     abi: DROPRANK_BADGE_ABI,
     address: CONTRACT ?? undefined,
@@ -98,6 +102,11 @@ export default function MintButton({
     }
     setErrMsg("");
     try {
+      // Ensure the wallet is on the target chain before signing/writing,
+      // otherwise the tx reverts on a chain mismatch (wallet may be on mainnet).
+      if (currentChainId !== BADGE_CHAIN_ID) {
+        await switchChainAsync({ chainId: BADGE_CHAIN_ID });
+      }
       setPhase("signing");
       const res = await fetch("/api/sign-score", {
         method: "POST",
