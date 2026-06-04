@@ -67,6 +67,14 @@
     "startYourJourney": "LANCE-TOI",
     "freshWalletPost": " — complète des quêtes sur le radar pour grimper.",
     "breakdownTitle": "score.breakdown[]",
+    "improve": {
+      "maxed": "au max",
+      "time": "monte avec le temps",
+      "basename": "obtenir un Basename",
+      "smartWallet": "utiliser un Smart Wallet",
+      "quests": "faire des quêtes",
+      "activity": "être actif sur Base"
+    },
     "linkCopied": "✓ lien copié",
     "shareRank": "Partager le rang",
     "shareScoreText": "Mon score Base : {score}/100 — scanné avec DropRank par @lrifton6240",

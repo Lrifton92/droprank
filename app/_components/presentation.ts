@@ -24,6 +24,36 @@ export function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
+/**
+ * How to improve a given score criterion, for the one-click action shown on
+ * each non-maxed breakdown row.
+ *  - "link"  : external page (open in new tab)
+ *  - "radar" : internal /radar (doing quests generates this activity)
+ *  - "time"  : age-based, nothing to click — grows with time
+ * labelKey indexes the score.improve.* i18n namespace.
+ */
+export type ScoreImprove =
+  | { kind: "link"; href: string; labelKey: "basename" | "smartWallet" }
+  | { kind: "radar"; labelKey: "quests" | "activity" }
+  | { kind: "time"; labelKey: "time" };
+
+export function improveFor(key: string): ScoreImprove {
+  switch (key) {
+    case "basename":
+      return { kind: "link", href: "https://www.base.org/names", labelKey: "basename" };
+    case "smartWallet":
+      return { kind: "link", href: "https://www.smartwallet.dev", labelKey: "smartWallet" };
+    case "quests":
+      return { kind: "radar", labelKey: "quests" };
+    case "activeMonths":
+    case "firstTxAge":
+      return { kind: "time", labelKey: "time" };
+    // txCount, activeDays, volumeEth, uniqueContracts + fallback: do quests across protocols.
+    default:
+      return { kind: "radar", labelKey: "activity" };
+  }
+}
+
 /** Compact USD: 1_240_000 -> "$1.2M", 104_000_000 -> "$104M", 0/invalid -> "". */
 export function formatUsd(n: number | undefined): string {
   if (!n || !Number.isFinite(n) || n <= 0) return "";

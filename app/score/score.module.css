@@ -122,6 +122,56 @@
   color: var(--text-faint);
   letter-spacing: 0.02em;
 }
+
+/* One-click "how to gain points" hint under each non-maxed criterion. */
+.improve {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.gain {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--base-300);
+  font-variant-numeric: tabular-nums;
+}
+.improveLink {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--base-300);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--base-300) 28%, transparent);
+  transition:
+    background var(--hover-dur) var(--ease-out),
+    color var(--hover-dur) var(--ease-out),
+    transform 0.12s var(--ease-snap);
+  white-space: nowrap;
+}
+.improveLink:hover {
+  background: var(--base-soft);
+  color: var(--text);
+}
+.improveLink:active {
+  transform: scale(0.94);
+  transition-duration: 0.05s;
+}
+.improveTime {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+}
+.maxed {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--ok);
+  margin-top: 4px;
+}
 .rowPts {
   display: flex;
   align-items: center;

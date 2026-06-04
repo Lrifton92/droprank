@@ -7,7 +7,7 @@ import { isAddress } from "viem";
 import type { ScoreResult } from "@/lib/types";
 import { parseDetail } from "@/i18n/config";
 import Counter from "../_components/Counter";
-import { tierFor, shortAddr } from "../_components/presentation";
+import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import MintButton from "./MintButton";
 import styles from "./score.module.css";
@@ -156,6 +156,38 @@ function ScoreInner() {
                           return d ? td(d.key, d.values) : b.detail;
                         })()}
                       </span>
+                      {b.points < b.max ? (
+                        (() => {
+                          const imp = improveFor(b.key);
+                          return (
+                            <span className={styles.improve}>
+                              <span className={styles.gain}>+{b.max - b.points}</span>
+                              {imp.kind === "link" && (
+                                <a
+                                  className={styles.improveLink}
+                                  href={imp.href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {t(`improve.${imp.labelKey}`)} ↗
+                                </a>
+                              )}
+                              {imp.kind === "radar" && (
+                                <Link className={styles.improveLink} href={`/radar${qs}`}>
+                                  {t(`improve.${imp.labelKey}`)} →
+                                </Link>
+                              )}
+                              {imp.kind === "time" && (
+                                <span className={styles.improveTime}>
+                                  ⏳ {t("improve.time")}
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })()
+                      ) : (
+                        <span className={styles.maxed}>✓ {t("improve.maxed")}</span>
+                      )}
                     </span>
                     <span className={styles.rowPts}>
                       <span className={styles.bar}>

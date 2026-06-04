@@ -67,6 +67,14 @@
     "startYourJourney": "START YOUR JOURNEY",
     "freshWalletPost": " — complete quests on the radar to climb the ranks.",
     "breakdownTitle": "score.breakdown[]",
+    "improve": {
+      "maxed": "maxed",
+      "time": "grows over time",
+      "basename": "get a Basename",
+      "smartWallet": "use a Smart Wallet",
+      "quests": "do quests",
+      "activity": "be active on Base"
+    },
     "linkCopied": "✓ link copied",
     "shareRank": "Share rank",
     "shareScoreText": "My Base score: {score}/100 — scanned with DropRank by @lrifton6240",
