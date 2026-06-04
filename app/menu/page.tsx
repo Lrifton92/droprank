@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -19,7 +19,7 @@ function MenuInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell ${styles.wide}`}>
-        <header className={styles.head}>
+        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <button
             className={styles.back}
             onClick={() => router.replace("/")}
@@ -33,13 +33,13 @@ function MenuInner() {
           <LocaleSwitcher />
         </header>
 
-        <div className={styles.target}>
+        <div className={`dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>
           <span className="dr-eyebrow">{tc("activeTarget")}</span>
           <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
         </div>
 
         <nav className={styles.grid}>
-          <Link href={`/score${qs}`} className={`dr-panel ${styles.card}`}>
+          <Link href={`/score${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 2 } as CSSProperties}>
             <span className={styles.idx}>01</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -51,7 +51,7 @@ function MenuInner() {
             <span className={styles.arrow}>→</span>
           </Link>
 
-          <Link href={`/radar${qs}`} className={`dr-panel ${styles.card}`}>
+          <Link href={`/radar${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 3 } as CSSProperties}>
             <span className={styles.idx}>02</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -65,7 +65,7 @@ function MenuInner() {
             <span className={styles.arrow}>→</span>
           </Link>
 
-          <Link href={`/news${qs}`} className={`dr-panel ${styles.card}`}>
+          <Link href={`/news${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 4 } as CSSProperties}>
             <span className={styles.idx}>03</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -79,7 +79,7 @@ function MenuInner() {
             <span className={styles.arrow}>→</span>
           </Link>
 
-          <Link href={`/discover${qs}`} className={`dr-panel ${styles.card}`}>
+          <Link href={`/discover${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 5 } as CSSProperties}>
             <span className={styles.idx}>04</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -93,7 +93,7 @@ function MenuInner() {
           </Link>
         </nav>
 
-        <div className={`dr-term ${styles.hint}`}>
+        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 6 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />

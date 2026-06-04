@@ -25,11 +25,17 @@
   letter-spacing: inherit;
   color: var(--text-faint);
   cursor: pointer;
-  transition: color 0.15s var(--ease-out);
+  transition: color 0.15s var(--ease-out), transform 0.12s var(--ease-snap);
 }
 
 .opt:hover:not(:disabled) {
   color: var(--text-dim);
+}
+
+.opt:active:not(:disabled) {
+  transform: scale(0.86);
+  color: var(--base-200);
+  transition-duration: 0.05s;
 }
 
 .opt[data-active="true"] {

@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useMessages } from "next-intl";
@@ -49,7 +49,7 @@ function RadarInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell ${styles.wide}`}>
-        <header className={styles.head}>
+        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
           </Link>
@@ -80,9 +80,9 @@ function RadarInner() {
 
         {valid && data && (
           <>
-            <p className={`mono ${styles.target}`}>{shortAddr(address)}</p>
+            <p className={`mono dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>{shortAddr(address)}</p>
 
-            <section className={styles.progress}>
+            <section className={`dr-enter ${styles.progress}`} style={{ "--i": 2 } as CSSProperties}>
               <div className={styles.progressTop}>
                 <span>
                   <Counter value={data.earned} className={styles.big} duration={1100} />
@@ -98,7 +98,7 @@ function RadarInner() {
               </div>
             </section>
 
-            <ul className={styles.list}>
+            <ul className={`dr-enter ${styles.list}`} style={{ "--i": 3 } as CSSProperties}>
               {data.quests.map((q, i) => {
                 const link = q.link;
                 return (

@@ -60,11 +60,17 @@
   border-radius: var(--r-md);
   background: rgba(12, 17, 28, 0.5);
   animation: dr-rise 0.4s var(--ease-out) both;
-  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out);
+  transition:
+    border-color var(--hover-dur) var(--ease-out),
+    background var(--hover-dur) var(--ease-out),
+    transform var(--hover-dur) var(--ease-out),
+    box-shadow var(--hover-dur) var(--ease-out);
 }
 .item:hover {
   border-color: var(--border-strong);
   background: rgba(14, 20, 33, 0.62);
+  transform: translateY(-2px);
+  box-shadow: inset 2px 0 0 var(--base-300), 0 14px 38px -24px var(--base-glow);
 }
 
 .meta {

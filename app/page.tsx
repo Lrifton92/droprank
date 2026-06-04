@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
@@ -44,7 +44,7 @@ export default function Home() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell ${styles.main}`}>
-        <header className={styles.head}>
+        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
           </span>

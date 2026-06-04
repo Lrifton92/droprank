@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -39,7 +39,7 @@ function DiscoverInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell ${styles.wide}`}>
-        <header className={styles.head}>
+        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
           </Link>
@@ -77,10 +77,10 @@ function DiscoverInner() {
 
         {items && items.length > 0 && (
           <>
-            <p className={`mono ${styles.count}`}>
+            <p className={`mono dr-enter ${styles.count}`} style={{ "--i": 1 } as CSSProperties}>
               <span className="syn-num">{items.length}</span> {t("found")}
             </p>
-            <ul className={styles.list}>
+            <ul className={`dr-enter ${styles.list}`} style={{ "--i": 2 } as CSSProperties}>
               {items.map((it, i) => (
                 <li
                   key={`${it.type}:${it.link || it.title}`}

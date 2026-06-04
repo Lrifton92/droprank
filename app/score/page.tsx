@@ -69,7 +69,7 @@ function ScoreInner() {
     <>
       <div className="dr-grid-bg" />
       <main className="dr-shell">
-        <header className={styles.head}>
+        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
             ←
           </Link>
@@ -104,11 +104,11 @@ function ScoreInner() {
 
         {valid && data && tier && (
           <>
-            <p className={`mono ${styles.target}`}>{shortAddr(address)}</p>
+            <p className={`mono dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>{shortAddr(address)}</p>
 
             <section
-              className={`${styles.hero} ${empty ? styles.heroEmpty : ""}`}
-              style={{ "--tier": tier.color } as CSSProperties}
+              className={`dr-enter ${styles.hero} ${empty ? styles.heroEmpty : ""}`}
+              style={{ "--tier": tier.color, "--i": 2 } as CSSProperties}
             >
               <div className={styles.scoreWrap}>
                 <Counter value={data.score} className={styles.score} duration={1400} />
@@ -134,7 +134,7 @@ function ScoreInner() {
               )}
             </section>
 
-            <section className={`dr-term ${styles.breakdown}`}>
+            <section className={`dr-term dr-enter ${styles.breakdown}`} style={{ "--i": 3 } as CSSProperties}>
               <div className="dr-term__bar">
                 <i className="dr-term__dot" />
                 <i className="dr-term__dot" />
@@ -177,7 +177,7 @@ function ScoreInner() {
               </div>
             </section>
 
-            <section className={styles.cta}>
+            <section className={`dr-enter ${styles.cta}`} style={{ "--i": 4 } as CSSProperties}>
               <MintButton scannedAddress={address} empty={empty} />
               <button className="dr-btn dr-btn--ghost" onClick={onShare}>
                 {shared ? t("linkCopied") : t("shareRank")}

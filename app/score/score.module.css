@@ -129,6 +129,7 @@
   flex-shrink: 0;
 }
 .bar {
+  position: relative;
   width: 54px;
   height: 4px;
   border-radius: 999px;
@@ -136,11 +137,27 @@
   overflow: hidden;
 }
 .bar i {
+  position: relative;
   display: block;
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--base), var(--base-300));
   transition: width 0.7s var(--ease-out);
+  overflow: hidden;
+}
+/* One-time light sweep that traces along the filled bar */
+.bar i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  width: 40%;
+  animation: dr-sweep 1.6s var(--ease-out) 0.6s 1 both;
 }
 
 /* CTA */

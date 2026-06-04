@@ -67,12 +67,28 @@
   overflow: hidden;
 }
 .track i {
+  position: relative;
   display: block;
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--base), var(--base-200));
   box-shadow: 0 0 12px var(--base-glow);
   transition: width 0.9s var(--ease-out);
+  overflow: hidden;
+}
+/* One-time light sweep tracing along the progress fill */
+.track i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: dr-sweep 1.8s var(--ease-out) 0.7s 1 both;
 }
 
 .list {
@@ -105,10 +121,19 @@
   border-radius: var(--r-md);
   background: rgba(12, 17, 28, 0.5);
   animation: dr-rise 0.4s var(--ease-out) both;
-  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out);
+  transition:
+    border-color var(--hover-dur) var(--ease-out),
+    background var(--hover-dur) var(--ease-out),
+    transform var(--hover-dur) var(--ease-out),
+    box-shadow var(--hover-dur) var(--ease-out);
 }
 .quest:hover {
   border-color: var(--border-strong);
+  transform: translateX(2px);
+  box-shadow: inset 2px 0 0 var(--base-300), 0 10px 30px -22px var(--base-glow);
+}
+.questDone:hover {
+  box-shadow: inset 2px 0 0 var(--ok), 0 10px 30px -22px rgba(53, 224, 138, 0.4);
 }
 .check {
   width: 22px;
