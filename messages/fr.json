@@ -30,27 +30,28 @@
     "footerCredit": "// built on base by @lrifton6240"
   },
   "enter": {
-    "step.initCore": "INITIALISATION DU CŒUR DROPRANK",
-    "step.baseLink": "ÉTABLISSEMENT DU LIEN BASE",
-    "step.scanWallet": "SCAN DU WALLET",
-    "step.indexing": "INDEXATION DE L'ACTIVITÉ ONCHAIN",
-    "step.accessGranted": "ACCÈS AUTORISÉ",
+    "step": {
+      "initCore": "INITIALISATION DU CŒUR DROPRANK",
+      "baseLink": "ÉTABLISSEMENT DU LIEN BASE",
+      "scanWallet": "SCAN DU WALLET",
+      "indexing": "INDEXATION DE L'ACTIVITÉ ONCHAIN",
+      "accessGranted": "ACCÈS AUTORISÉ"
+    },
     "skip": "appuie pour passer →"
   },
   "menu": {
-    "score.title": "SCORE",
-    "score.sub": "ton rang /100, le détail & le palier",
-    "radar.title": "RADAR",
-    "radar.sub": "18 quêtes onchain & progression",
-    "news.title": "NEWS",
-    "news.sub": "derniers signaux de l'écosystème base",
-    "term.title": "droprank://session",
-    "term.chain": "chain",
-    "term.chainValue": "\"base-mainnet\"",
-    "term.mode": "mode",
-    "term.modeValue": "\"read-only\"",
-    "term.badge": "badge",
-    "term.badgeValue": "\"soulbound · 1/adresse\""
+    "score": { "title": "SCORE", "sub": "ton rang /100, le détail & le palier" },
+    "radar": { "title": "RADAR", "sub": "18 quêtes onchain & progression" },
+    "news": { "title": "NEWS", "sub": "derniers signaux de l'écosystème base" },
+    "term": {
+      "title": "droprank://session",
+      "chain": "chain",
+      "chainValue": "\"base-mainnet\"",
+      "mode": "mode",
+      "modeValue": "\"read-only\"",
+      "badge": "badge",
+      "badgeValue": "\"soulbound · 1/adresse\""
+    }
   },
   "score": {
     "report": "// rapport de score",

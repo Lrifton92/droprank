@@ -30,27 +30,28 @@
     "footerCredit": "// built on base by @lrifton6240"
   },
   "enter": {
-    "step.initCore": "INITIALIZING DROPRANK CORE",
-    "step.baseLink": "ESTABLISHING BASE LINK",
-    "step.scanWallet": "SCANNING WALLET",
-    "step.indexing": "INDEXING ONCHAIN ACTIVITY",
-    "step.accessGranted": "ACCESS GRANTED",
+    "step": {
+      "initCore": "INITIALIZING DROPRANK CORE",
+      "baseLink": "ESTABLISHING BASE LINK",
+      "scanWallet": "SCANNING WALLET",
+      "indexing": "INDEXING ONCHAIN ACTIVITY",
+      "accessGranted": "ACCESS GRANTED"
+    },
     "skip": "tap to skip →"
   },
   "menu": {
-    "score.title": "SCORE",
-    "score.sub": "your /100 rank, breakdown & tier",
-    "radar.title": "RADAR",
-    "radar.sub": "18 onchain quests & progress",
-    "news.title": "NEWS",
-    "news.sub": "latest base ecosystem signals",
-    "term.title": "droprank://session",
-    "term.chain": "chain",
-    "term.chainValue": "\"base-mainnet\"",
-    "term.mode": "mode",
-    "term.modeValue": "\"read-only\"",
-    "term.badge": "badge",
-    "term.badgeValue": "\"soulbound · 1/address\""
+    "score": { "title": "SCORE", "sub": "your /100 rank, breakdown & tier" },
+    "radar": { "title": "RADAR", "sub": "18 onchain quests & progress" },
+    "news": { "title": "NEWS", "sub": "latest base ecosystem signals" },
+    "term": {
+      "title": "droprank://session",
+      "chain": "chain",
+      "chainValue": "\"base-mainnet\"",
+      "mode": "mode",
+      "modeValue": "\"read-only\"",
+      "badge": "badge",
+      "badgeValue": "\"soulbound · 1/address\""
+    }
   },
   "score": {
     "report": "// score report",
