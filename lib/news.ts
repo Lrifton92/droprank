@@ -70,7 +70,7 @@ const DESC_MAX = 240;
 const FEED_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 /** Read a response body as text, aborting if it exceeds `maxBytes`. Returns null if over cap. */
-async function readCapped(res: Response, maxBytes: number): Promise<string | null> {
+export async function readCapped(res: Response, maxBytes: number): Promise<string | null> {
   const len = Number(res.headers?.get?.("content-length") ?? 0);
   if (len > maxBytes) return null;
   // No streamable body (e.g. test mocks): fall back to buffered text, still capped.
