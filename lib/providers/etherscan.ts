@@ -28,6 +28,37 @@ import {
 const BASE_URL = "https://api.etherscan.io/v2/api";
 
 /**
+ * Blockscout's Etherscan-compatible API (Base, keyless). Same `module=account&
+ * action=txlist` envelope (status/message/result) and the same `module=proxy&
+ * action=eth_getCode` proxy as Etherscan, so the entire client below is reused
+ * verbatim with this base URL — only the URL and the (absent) API key differ.
+ *
+ * Why: it returns ~1255 txs in ONE ~500ms call vs Blockscout v2's cursor
+ * pagination (25+ sequential round-trips, ~34s cold). See score-address.ts chain.
+ * Note: it does NOT return `functionName`, but `deriveMethod` already falls back
+ * to `methodId`, so the normalized Tx is unaffected.
+ */
+export const BLOCKSCOUT_COMPAT_URL = "https://base.blockscout.com/api";
+
+/** Per-call options to retarget the client at a different Etherscan-compatible host. */
+interface ClientOptions {
+  /** Override the API base URL (default: Etherscan v2). */
+  baseUrl?: string;
+  /** When false, no apikey param is sent and a missing key is not an error. */
+  requireApiKey?: boolean;
+  /**
+   * Resolve eth_getCode via a direct JSON-RPC POST to {@link BASE_RPC_URL} instead
+   * of the `module=proxy&action=eth_getCode` endpoint. Blockscout's Etherscan-compat
+   * API rejects that proxy module ("Unknown module"), so the keyless compat path
+   * uses the public Base RPC instead. Etherscan's own path keeps module=proxy.
+   */
+  getCodeViaRpc?: boolean;
+}
+
+/** Public Base mainnet JSON-RPC, used for eth_getCode on the keyless compat path. */
+export const BASE_RPC_URL = "https://mainnet.base.org";
+
+/**
  * Cap on fetched txs in one call. Etherscan caps a single page at 10000; scoring
  * tiers saturate far below this (txCount maxes at 1000, contracts at 30, etc.), so
  * a wallet with >10000 txs is truncated WITHOUT affecting its score. Documented
@@ -211,8 +242,8 @@ function normalizeTx(v: EsTx): Tx {
 /** Internal export for tests only. */
 export const __test = { normalizeTx, deriveMethod, hasCallData };
 
-function buildTxlistUrl(address: string): string {
-  const u = new URL(BASE_URL);
+function buildTxlistUrl(address: string, opts: ClientOptions): string {
+  const u = new URL(opts.baseUrl ?? BASE_URL);
   u.searchParams.set("chainid", String(chainId()));
   u.searchParams.set("module", "account");
   u.searchParams.set("action", "txlist");
@@ -222,18 +253,18 @@ function buildTxlistUrl(address: string): string {
   u.searchParams.set("page", "1");
   u.searchParams.set("offset", String(ETHERSCAN_PAGE_CAP));
   u.searchParams.set("sort", "desc");
-  u.searchParams.set("apikey", apiKey());
+  if (opts.requireApiKey !== false) u.searchParams.set("apikey", apiKey());
   return u.toString();
 }
 
-function buildGetCodeUrl(address: string): string {
-  const u = new URL(BASE_URL);
+function buildGetCodeUrl(address: string, opts: ClientOptions): string {
+  const u = new URL(opts.baseUrl ?? BASE_URL);
   u.searchParams.set("chainid", String(chainId()));
   u.searchParams.set("module", "proxy");
   u.searchParams.set("action", "eth_getCode");
   u.searchParams.set("address", address);
   u.searchParams.set("tag", "latest");
-  u.searchParams.set("apikey", apiKey());
+  if (opts.requireApiKey !== false) u.searchParams.set("apikey", apiKey());
   return u.toString();
 }
 
@@ -244,9 +275,10 @@ function buildGetCodeUrl(address: string): string {
 async function fetchTxs(
   address: string,
   signal: AbortSignal | undefined,
+  opts: ClientOptions,
 ): Promise<Tx[]> {
   const env = await getEnvelope<EsTx[] | string>(
-    buildTxlistUrl(address),
+    buildTxlistUrl(address, opts),
     signal,
   );
   if (env.status === "1") {
@@ -269,41 +301,88 @@ async function fetchTxs(
 }
 
 /**
- * Is the scanned address itself a contract? Uses eth_getCode via the proxy module
- * (same Etherscan source — no Blockscout dependency). Empty code ("0x") = EOA.
- * eth_getCode envelopes carry the bytecode directly in `result` (no status "1").
+ * eth_getCode via a direct JSON-RPC POST to the public Base RPC. Used by the keyless
+ * Blockscout-compat path, whose Etherscan-compat host rejects `module=proxy`.
+ * Honors the caller's AbortSignal and the same request timeout; on any transport
+ * failure it returns "" (treated as EOA) so a flaky RPC never fails the whole scan.
+ */
+async function fetchCodeViaRpc(
+  address: string,
+  signal: AbortSignal | undefined,
+): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  signal?.addEventListener("abort", onAbort);
+  try {
+    const res = await fetch(BASE_RPC_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getCode",
+        params: [address, "latest"],
+        id: 1,
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return "";
+    const body = (await res.json()) as { result?: string };
+    return typeof body.result === "string" ? body.result : "";
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/**
+ * Is the scanned address itself a contract? Uses eth_getCode — via the Etherscan
+ * proxy module by default, or a direct Base JSON-RPC POST when `getCodeViaRpc` is
+ * set (the keyless compat path). Empty code ("0x") = EOA. eth_getCode envelopes
+ * carry the bytecode directly in `result` (no status "1").
  */
 async function fetchIsContract(
   address: string,
   signal: AbortSignal | undefined,
+  opts: ClientOptions,
 ): Promise<boolean> {
-  const env = await getEnvelope<string>(buildGetCodeUrl(address), signal);
-  // JSON-RPC proxy: success => result is the hex bytecode; error => result absent.
-  const code = typeof env.result === "string" ? env.result : "";
+  let code: string;
+  if (opts.getCodeViaRpc) {
+    code = await fetchCodeViaRpc(address, signal);
+  } else {
+    const env = await getEnvelope<string>(buildGetCodeUrl(address, opts), signal);
+    code = typeof env.result === "string" ? env.result : "";
+  }
   return code !== "" && code !== "0x";
 }
 
 /**
  * Fetch and aggregate everything scoring/quests need, via Etherscan v2.
  * Shape-identical to blockscout.fetchWalletData.
+ *
+ * `opts` lets the caller retarget the same client at another Etherscan-compatible
+ * host (e.g. keyless Blockscout-compat — see fetchWalletDataViaBlockscoutCompat).
  * @throws EtherscanError on invalid address, missing key, API error, timeout, abort.
  */
 export async function fetchWalletData(
   address: string,
   signal?: AbortSignal,
+  opts: ClientOptions = {},
 ): Promise<WalletData> {
   if (!isAddress(address)) {
     throw new EtherscanError(`Invalid address: ${address}`, "invalid_address");
   }
-  // Fail fast (and let the caller fall back) when no key is configured.
-  apiKey();
+  // Fail fast (and let the caller fall back) when a key is required but absent.
+  if (opts.requireApiKey !== false) apiKey();
 
   const addr = address.toLowerCase();
 
   // Two parallel calls: the tx list (heavy) and the code check (light).
   const [txs, isContract] = await Promise.all([
-    fetchTxs(addr, signal),
-    fetchIsContract(addr, signal),
+    fetchTxs(addr, signal, opts),
+    fetchIsContract(addr, signal, opts),
   ]);
 
   let usedSmartWallet = false;
@@ -326,4 +405,22 @@ export async function fetchWalletData(
     // Basename ownership is resolved at the route level (quest-derived in v1).
     hasBasename: false,
   };
+}
+
+/**
+ * Same client, pointed at keyless Blockscout-compat (Base). Fast single-call path
+ * tried between official Etherscan and the v2 cursor fallback (see score-address.ts).
+ * No API key is sent or required. Errors still surface as EtherscanError so the
+ * caller can fall back to the v2 cursor client.
+ */
+export function fetchWalletDataViaBlockscoutCompat(
+  address: string,
+  signal?: AbortSignal,
+): Promise<WalletData> {
+  return fetchWalletData(address, signal, {
+    baseUrl: BLOCKSCOUT_COMPAT_URL,
+    requireApiKey: false,
+    // Blockscout-compat rejects module=proxy&action=eth_getCode; use Base RPC.
+    getCodeViaRpc: true,
+  });
 }

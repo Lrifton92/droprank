@@ -1,4 +1,7 @@
-import { fetchWalletData as fetchViaEtherscan } from "./providers/etherscan";
+import {
+  fetchWalletData as fetchViaEtherscan,
+  fetchWalletDataViaBlockscoutCompat as fetchViaBlockscoutCompat,
+} from "./providers/etherscan";
 import { fetchWalletData as fetchViaBlockscout } from "./providers/blockscout";
 import { computeScore } from "./scoring";
 import { computeQuests } from "./quests";
@@ -31,23 +34,49 @@ export function __resetEtherscanBreaker(): void {
 }
 
 /**
- * Fetch wallet data with Etherscan v2 as the PRIMARY source (single-call, fast)
- * and keyless Blockscout as the FALLBACK.
+ * Keyless fallback chain: fast Blockscout etherscan-compat (~1 call, ~500ms),
+ * then the slow v2 cursor client (25+ sequential pages, ~34s) as last resort.
  *
- * Etherscan is skipped or abandoned when ETHERSCAN_API_KEY is missing, or the
- * Etherscan call throws/times out — in which case we transparently fall back to
- * Blockscout. It is ALSO skipped for ~1h once it reports the active chain isn't
- * supported by the plan (circuit breaker above). The aggregated WalletData shape
- * is identical for both sources, so scoring/quests are unaffected by which one
- * served the request. An aborted request (caller cancelled) is NOT retried on
- * the fallback.
+ * Why this order: both are keyless and serve Base, but the etherscan-compat
+ * endpoint returns up to 10000 txs in ONE call, collapsing the cold-scan latency
+ * that the v2 cursor pagination causes. The v2 client stays the safety net for
+ * the rare case the compat endpoint is degraded. An aborted request is NOT
+ * retried on the next link.
+ */
+async function fetchViaKeylessChain(
+  address: string,
+  signal?: AbortSignal,
+): Promise<WalletData> {
+  try {
+    return await fetchViaBlockscoutCompat(address, signal);
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    console.warn(
+      "[score] Blockscout etherscan-compat unavailable, using v2 cursor:",
+      e instanceof Error ? e.message : e,
+    );
+    return await fetchViaBlockscout(address, signal);
+  }
+}
+
+/**
+ * Fetch wallet data through a three-link chain, each shape-identical so
+ * scoring/quests are unaffected by which source served the request:
+ *   1. Etherscan v2 official (single-call, fast) — needs a key, skipped when the
+ *      key is missing or the circuit breaker is armed (chain not on plan).
+ *   2. Blockscout etherscan-compat (keyless, ~500ms single call) — the cold-scan
+ *      win; see fetchViaKeylessChain.
+ *   3. Blockscout v2 cursor (keyless, slow) — last resort.
+ *
+ * Etherscan failures (throw/timeout/chain-not-supported) transparently drop to
+ * the keyless chain. An aborted request (caller cancelled) is NOT retried.
  */
 async function fetchWalletData(
   address: string,
   signal?: AbortSignal,
 ): Promise<WalletData> {
   if (Date.now() < etherscanUnavailableUntil) {
-    return await fetchViaBlockscout(address, signal);
+    return await fetchViaKeylessChain(address, signal);
   }
   try {
     return await fetchViaEtherscan(address, signal);
@@ -57,15 +86,15 @@ async function fetchWalletData(
       etherscanUnavailableUntil = Date.now() + ETHERSCAN_SKIP_TTL_MS;
       console.warn(
         "[score] Etherscan does not cover this chain on the current plan; " +
-          "skipping it for 1h and using Blockscout.",
+          "skipping it for 1h and using keyless Blockscout.",
       );
     } else {
       console.warn(
-        "[score] Etherscan unavailable, falling back to Blockscout:",
+        "[score] Etherscan unavailable, falling back to keyless Blockscout:",
         e instanceof Error ? e.message : e,
       );
     }
-    return await fetchViaBlockscout(address, signal);
+    return await fetchViaKeylessChain(address, signal);
   }
 }
 

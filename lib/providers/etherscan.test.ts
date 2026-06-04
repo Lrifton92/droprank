@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   fetchWalletData,
+  fetchWalletDataViaBlockscoutCompat,
+  BLOCKSCOUT_COMPAT_URL,
+  BASE_RPC_URL,
   EtherscanError,
   __test,
 } from "./etherscan";
@@ -41,6 +44,11 @@ function txlistOk(items: unknown[]) {
 /** eth_getCode envelope (proxy module returns bytecode directly). */
 function getCode(code: string) {
   return envelope({ jsonrpc: "2.0", id: 1, result: code });
+}
+
+/** True when this fetch call is the keyless eth_getCode JSON-RPC POST to Base. */
+function isRpcGetCode(url: string, init?: RequestInit): boolean {
+  return url === BASE_RPC_URL && init?.method === "POST";
 }
 
 describe("deriveMethod", () => {
@@ -188,5 +196,112 @@ describe("fetchWalletData", () => {
   it("throws a typed EtherscanError on a non-ok HTTP response", async () => {
     fetchMock.mockResolvedValue(envelope({}, 500));
     await expect(fetchWalletData(ADDR)).rejects.toBeInstanceOf(EtherscanError);
+  });
+});
+
+describe("fetchWalletDataViaBlockscoutCompat (keyless)", () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  const prevKey = process.env.ETHERSCAN_API_KEY;
+
+  beforeEach(() => {
+    // No key in env: the compat path must NOT require one.
+    delete process.env.ETHERSCAN_API_KEY;
+    fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    if (prevKey === undefined) delete process.env.ETHERSCAN_API_KEY;
+    else process.env.ETHERSCAN_API_KEY = prevKey;
+  });
+
+  it("fetches txs from the Blockscout host (no apikey) and code from Base RPC", async () => {
+    const txlistUrls: string[] = [];
+    let rpcPost: { url: string; init?: RequestInit } | null = null;
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) {
+        rpcPost = { url, init };
+        return Promise.resolve(getCode("0x"));
+      }
+      txlistUrls.push(url);
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.txCount).toBe(1);
+    // txlist goes to the keyless Blockscout-compat host, never carrying an apikey.
+    expect(txlistUrls.length).toBe(1);
+    expect(txlistUrls[0].startsWith(BLOCKSCOUT_COMPAT_URL)).toBe(true);
+    expect(txlistUrls[0]).not.toContain("apikey=");
+    // eth_getCode is a JSON-RPC POST to Base, NOT the Blockscout proxy module.
+    expect(rpcPost).not.toBeNull();
+    expect(rpcPost!.url).toBe(BASE_RPC_URL);
+    const sentBody = JSON.parse(String(rpcPost!.init!.body));
+    expect(sentBody.method).toBe("eth_getCode");
+    expect(sentBody.params).toEqual([ADDR.toLowerCase(), "latest"]);
+  });
+
+  it("reports a contract via the Base RPC eth_getCode (bytecode present)", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x60806040"));
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.isContract).toBe(true);
+    expect(data.usedSmartWallet).toBe(true);
+  });
+
+  it("reports an EOA via the Base RPC eth_getCode ('0x')", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.isContract).toBe(false);
+  });
+
+  it("treats a flaky Base RPC (non-ok) as EOA rather than failing the scan", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(envelope({}, 503));
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.txCount).toBe(1);
+    expect(data.isContract).toBe(false);
+  });
+
+  it("derives method from methodId when functionName is absent (compat lacks it)", async () => {
+    // Blockscout-compat omits functionName; methodId carries the selector.
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      return Promise.resolve(
+        txlistOk([{ ...esTx(), functionName: undefined, methodId: "0xa9059cbb" }]),
+      );
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.txs[0].method).toBe("0xa9059cbb");
+  });
+
+  it("treats status 0 / 'No transactions found' as an empty wallet", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      return Promise.resolve(
+        envelope({ status: "0", message: "No transactions found", result: [] }),
+      );
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.txCount).toBe(0);
+    expect(data.isContract).toBe(false);
+  });
+
+  it("surfaces a real API error (status 0, other message) as EtherscanError", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      return Promise.resolve(
+        envelope({ status: "0", message: "NOTOK", result: "rate limited" }),
+      );
+    });
+    await expect(
+      fetchWalletDataViaBlockscoutCompat(ADDR),
+    ).rejects.toMatchObject({ kind: "api" });
   });
 });
