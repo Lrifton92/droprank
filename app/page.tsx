@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useAccountEffect } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BaseCube from "./_components/BaseCube";
@@ -27,11 +27,14 @@ export default function Home() {
     if (!isMiniAppReady) setMiniAppReady();
   }, [setMiniAppReady, isMiniAppReady]);
 
-  useEffect(() => {
-    if (isConnected && address) {
-      router.push(`/enter?address=${address}`);
-    }
-  }, [isConnected, address, router]);
+  // Redirect to the entrance ONLY on a fresh user connect — not on autoConnect
+  // reconnection at page load (isReconnected). On reload, the wallet silently
+  // reconnects and the user stays on the landing (with an "Enter" CTA below).
+  useAccountEffect({
+    onConnect({ address: addr, isReconnected }) {
+      if (!isReconnected && addr) router.push(`/enter?address=${addr}`);
+    },
+  });
 
   const trimmed = pasted.trim();
   const pastedValid = isAddress(trimmed);
@@ -71,6 +74,15 @@ export default function Home() {
           <div className={`ockWrap ${styles.connect}`}>
             <Wallet />
           </div>
+
+          {isConnected && address && (
+            <button
+              className="dr-btn"
+              onClick={() => router.push(`/enter?address=${address}`)}
+            >
+              {t("enter")}
+            </button>
+          )}
 
           <div className={styles.divider}>
             <span>{t("orScan")}</span>

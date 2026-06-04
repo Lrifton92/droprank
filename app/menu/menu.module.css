@@ -43,6 +43,17 @@
   gap: 14px;
 }
 
+/* Desktop: widen the menu and lay the cards out in 2 columns.
+   Mobile/webview (< 768px) stays a single 424px-wide column. */
+@media (min-width: 768px) {
+  .wide {
+    max-width: 780px;
+  }
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .card {
   position: relative;
   display: grid;

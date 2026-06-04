@@ -27,6 +27,7 @@
     "addressPlaceholder": "0x…",
     "invalidAddress": "! not a valid address",
     "scanThisWallet": "Scan this wallet →",
+    "enter": "Enter →",
     "footerCredit": "// built on base by @lrifton6240"
   },
   "enter": {
