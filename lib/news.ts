@@ -47,6 +47,14 @@ export const FEEDS: NewsFeed[] = [
   { source: "Base", url: "https://blog.base.org/feed", baseOnly: true },
   // Base's Mirror/Paragraph publication. All Base.
   { source: "Base Mirror", url: "https://base.mirror.xyz/feed/atom", baseOnly: true },
+  // Google News search aggregating Base coverage from all publishers. The query
+  // IS the Base filter, so baseOnly bypasses the keyword pass. High recall, works
+  // server-side (no Cloudflare TLS block, unlike blog.base.org/mirror).
+  {
+    source: "Base News",
+    url: "https://news.google.com/rss/search?q=(%22Base%20chain%22%20OR%20%22Base%20network%22%20OR%20%22Base%20L2%22%20OR%20Aerodrome%20OR%20Basenames%20OR%20%22onchain%20summer%22%20OR%20%22Coinbase%20Base%22%20OR%20%22Coinbase%20onchain%22%20OR%20%22Coinbase%20wallet%22%20OR%20%22smart%20wallet%22)%20crypto&hl=en-US&gl=US&ceid=US:en",
+    baseOnly: true,
+  },
   // Generalist crypto press (firehose -> keyword-filtered for Base).
   { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss" },
   { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
