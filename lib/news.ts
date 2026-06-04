@@ -271,7 +271,9 @@ export function parseFeed(xml: string, source: string): NewsItem[] {
   const out: NewsItem[] = [];
   for (const it of items) {
     if (!it) continue;
-    const title = cleanText(textOf(it.title), 200);
+    let title = cleanText(textOf(it.title), 200);
+    // Google News titles are "Headline - Publisher"; drop the publisher suffix.
+    if (source === "Base News") title = title.replace(/\s[-–—]\s[^-–—]+$/, "").trim();
     const link = linkOf(it.link).trim();
     if (!title || !link) continue;
     const description = cleanText(

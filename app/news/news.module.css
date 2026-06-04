@@ -38,6 +38,19 @@
   gap: 10px;
 }
 
+/* Desktop: widen + 2 columns. Mobile/webview (< 768px) stays single column. */
+@media (min-width: 768px) {
+  .wide {
+    max-width: 780px;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12px;
+    align-items: start;
+  }
+}
+
 .item {
   display: flex;
   flex-direction: column;
