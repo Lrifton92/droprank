@@ -33,22 +33,27 @@ export function shortAddr(addr: string): string {
  * labelKey indexes the score.improve.* i18n namespace.
  */
 export type ScoreImprove =
-  | { kind: "link"; href: string; labelKey: "basename" | "smartWallet" }
+  | { kind: "link"; href: string; labelKey: "basename" | "bridge" }
   | { kind: "radar"; labelKey: "quests" | "activity" }
-  | { kind: "time"; labelKey: "time" };
+  | { kind: "time"; labelKey: "time" | "spread" };
 
 export function improveFor(key: string): ScoreImprove {
   switch (key) {
-    case "basename":
+    // v2 identity row regroups Basename + Smart Wallet; point at the Basename mint.
+    case "identity":
       return { kind: "link", href: "https://www.base.org/names", labelKey: "basename" };
-    case "smartWallet":
-      return { kind: "link", href: "https://www.smartwallet.dev", labelKey: "smartWallet" };
+    case "bridge":
+      return { kind: "link", href: "https://bridge.base.org", labelKey: "bridge" };
     case "quests":
       return { kind: "radar", labelKey: "quests" };
+    case "protocolDiversity":
+      return { kind: "radar", labelKey: "activity" };
+    case "activitySpread":
+      return { kind: "time", labelKey: "spread" };
     case "activeMonths":
     case "firstTxAge":
       return { kind: "time", labelKey: "time" };
-    // txCount, activeDays, volumeEth, uniqueContracts + fallback: do quests across protocols.
+    // txCount, volumeEth, uniqueContracts + fallback: do quests across protocols.
     default:
       return { kind: "radar", labelKey: "activity" };
   }

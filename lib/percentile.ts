@@ -15,7 +15,14 @@ import { SCORE_MAX } from "./scoring";
 /** Below this many tracked wallets a live percentile is noise -> use static. */
 const MIN_POPULATION = 30;
 
-const ZSET_KEY = "droprank:scores:v1";
+/**
+ * v2: the score barème changed (docs/wallet-score-v2-spec.md), so v2 scores must
+ * not mix with v1 in the distribution. The store is a per-address sorted-set
+ * (ZADD overwrites a re-scanned address), but addresses never re-scanned would
+ * keep their v1 score and skew the percentile during the transition. A fresh key
+ * starts the v2 population clean; the v1 set is left untouched (no migration).
+ */
+const ZSET_KEY = "droprank:scores:v2";
 
 /**
  * Compute a percentile from raw sorted-set counts.

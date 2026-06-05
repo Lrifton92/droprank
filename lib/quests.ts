@@ -1,4 +1,4 @@
-import type { Tx, QuestsResult, QuestResult } from "./types";
+import type { Tx, QuestsResult, QuestResult, ProtocolCategory } from "./types";
 import {
   AERODROME_ROUTER,
   UNISWAP_ROUTERS,
@@ -49,6 +49,12 @@ interface QuestDef {
   points: number;
   /** How to complete it (shown in the UI as a direct link/hint). */
   link?: string;
+  /**
+   * Protocol family, for the v2 diversity metric (scoring.ts M4). Quests without
+   * a family (token transfer, contract deploy, an activity-count milestone) are
+   * left undefined and don't contribute to diversity.
+   */
+  category?: ProtocolCategory;
   check: (txs: Tx[], address: string, ctx: QuestContext) => boolean;
 }
 
@@ -60,6 +66,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Swap on Aerodrome",
     points: 2,
     link: "https://aerodrome.finance",
+    category: "DEX",
     check: (txs) => txs.some((t) => to(t) === AERODROME_ROUTER),
   },
   {
@@ -67,6 +74,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Swap on Uniswap (Base)",
     points: 2,
     link: "https://app.uniswap.org",
+    category: "DEX",
     check: (txs) => txs.some((t) => { const a = to(t); return a !== null && UNISWAP_ROUTERS.has(a); }),
   },
   {
@@ -74,6 +82,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Lend / borrow on Moonwell",
     points: 2,
     link: "https://moonwell.fi",
+    category: "Lending",
     check: (txs) => txs.some((t) => { const a = to(t); return a !== null && MOONWELL_CONTRACTS.has(a); }),
   },
   {
@@ -81,12 +90,14 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Supply on Aave v3 (Base)",
     points: 2,
     link: "https://app.aave.com",
+    category: "Lending",
     check: (txs) => txs.some((t) => to(t) === AAVE_V3_POOL),
   },
   {
     id: "mint-nft",
     label: "Mint any NFT",
     points: 1,
+    category: "NFT",
     check: (txs) =>
       txs.some(
         (t) =>
@@ -100,6 +111,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Register a Basename",
     points: 2,
     link: "https://base.org/names",
+    category: "Identity",
     check: (txs) => txs.some((t) => { const a = to(t); return a !== null && BASENAMES_CONTROLLERS.has(a); }),
   },
   {
@@ -107,6 +119,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Use a Smart Wallet",
     points: 2,
     link: "https://www.smartwallet.dev",
+    category: "Identity",
     check: (_txs, _address, ctx) => ctx.isSmartWallet === true,
   },
   {
@@ -114,6 +127,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Use the canonical Base bridge",
     points: 2,
     link: "https://bridge.base.org",
+    category: "Bridge",
     check: (txs) => txs.some((t) => to(t) === L2_STANDARD_BRIDGE),
   },
   {
@@ -144,6 +158,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Lend / borrow on Morpho",
     points: 2,
     link: "https://app.morpho.org",
+    category: "Lending",
     check: (txs) => txs.some((t) => to(t) === MORPHO_BLUE),
   },
   {
@@ -151,6 +166,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Supply on Compound v3",
     points: 2,
     link: "https://app.compound.finance",
+    category: "Lending",
     check: (txs) => txs.some((t) => to(t) === COMPOUND_V3_USDC),
   },
   {
@@ -158,6 +174,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Trade yield on Pendle",
     points: 2,
     link: "https://app.pendle.finance",
+    category: "Lending",
     check: (txs) => txs.some((t) => to(t) === PENDLE_ROUTER_V4),
   },
   {
@@ -165,6 +182,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Trade perps on Avantis",
     points: 2,
     link: "https://www.avantisfi.com",
+    category: "Perps",
     check: (txs) => txs.some((t) => to(t) === AVANTIS_TRADING),
   },
   {
@@ -172,6 +190,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Leverage farm on Extra Finance",
     points: 1,
     link: "https://app.extrafi.io",
+    category: "Lending",
     check: (txs) => txs.some((t) => to(t) === EXTRA_FINANCE_LENDING_POOL),
   },
   {
@@ -179,6 +198,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Swap on PancakeSwap (Base)",
     points: 1,
     link: "https://pancakeswap.finance",
+    category: "DEX",
     check: (txs) => txs.some((t) => to(t) === PANCAKESWAP_SMART_ROUTER),
   },
   {
@@ -186,6 +206,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Trade an NFT on OpenSea",
     points: 1,
     link: "https://opensea.io",
+    category: "NFT",
     check: (txs) => txs.some((t) => to(t) === SEAPORT_1_6),
   },
   {
@@ -193,6 +214,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Create a Talent Builder Score",
     points: 2,
     link: "https://talent.app",
+    category: "Social",
     check: (txs) => txs.some((t) => { const a = to(t); return a !== null && TALENT_CONTRACTS.has(a); }),
   },
 ];
@@ -211,10 +233,19 @@ export function computeQuests(
   // Clamp: the radar offers >20 pts of paths, but the criterion caps at 20.
   const earned = clamp(rawEarned, 0, QUESTS_MAX_POINTS);
 
+  // Distinct protocol families among completed quests (v2 diversity metric).
+  const categories = new Set<ProtocolCategory>();
+  for (const def of QUESTS) {
+    if (def.category && quests.find((q) => q.id === def.id)!.done) {
+      categories.add(def.category);
+    }
+  }
+
   return {
     address,
     total: QUESTS_MAX_POINTS,
     earned,
     quests,
+    categoriesTouched: [...categories],
   };
 }

@@ -93,9 +93,49 @@ describe("parseDetail", () => {
         { hash: "0x2", from: "0xa", to: "0xc", value: "0", timestamp: 1_690_000_000, toIsContract: true },
       ],
     };
-    const result = computeScore(data, 12);
+    const result = computeScore(data, 12, {
+      categoriesTouched: ["DEX", "Lending"],
+      bridgeDone: true,
+    });
     for (const b of result.breakdown) {
       expect(parseDetail(b.key, b.detail), `key=${b.key} detail="${b.detail}"`).not.toBeNull();
+    }
+  });
+
+  it("covers the v2 sybil-flag detail formats and they exist in every locale", () => {
+    // A burst+dust wallet emits the "sybilFlags" row; check its detail maps and
+    // that EVERY parseDetail key produced is present in en.json/fr.json detail.
+    const now = Math.floor(Date.now() / 1000);
+    const burstDust: WalletData = {
+      address: "0xabc",
+      txCount: 30,
+      isContract: false,
+      hasBasename: false,
+      usedSmartWallet: false,
+      txs: Array.from({ length: 30 }, (_, i) => ({
+        hash: `0x${i}`,
+        from: "0xa",
+        to: "0xc0000000000000000000000000000000000000c0",
+        value: "0",
+        timestamp: now - 86400 + i * 600, // all within ~5h -> burst
+        toIsContract: true,
+      })),
+    };
+    const result = computeScore(burstDust, 0, {
+      categoriesTouched: ["DEX"],
+      bridgeDone: false,
+      balanceWei: "1000000000000000", // 0.001 ETH -> dust
+    });
+    const sybil = result.breakdown.find((b) => b.key === "sybilFlags");
+    expect(sybil, "sybilFlags row should be present").toBeDefined();
+
+    const detailEn = (en as { detail: Record<string, string> }).detail;
+    const detailFr = (fr as { detail: Record<string, string> }).detail;
+    for (const b of result.breakdown) {
+      const d = parseDetail(b.key, b.detail);
+      if (!d) continue;
+      expect(detailEn[d.key], `en.json detail.${d.key}`).toBeTruthy();
+      expect(detailFr[d.key], `fr.json detail.${d.key}`).toBeTruthy();
     }
   });
 });

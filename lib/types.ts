@@ -32,6 +32,36 @@ export interface WalletData {
   hasBasename: boolean;
   /** True if the wallet used a Coinbase Smart Wallet (factory detection). */
   usedSmartWallet: boolean;
+  /**
+   * Live ETH balance in wei (decimal string), read via eth_getBalance.
+   * Optional/never-fail: absent when the RPC read failed — the dust malus is
+   * then NOT applied (we don't invent a balance). See scoring.ts §4.3.
+   */
+  balanceWei?: string;
+}
+
+/**
+ * Protocol families used for the v2 "protocol diversity" metric (spec M4).
+ * Derived from the quest engine; a wallet that touches 5 distinct families is
+ * scored higher than one that spams a single protocol.
+ */
+export type ProtocolCategory =
+  | "DEX"
+  | "Lending"
+  | "Perps"
+  | "Identity"
+  | "Bridge"
+  | "NFT"
+  | "Social";
+
+/** Extra signals the data layer derives from quests, fed to computeScore (v2). */
+export interface ScoreExtra {
+  /** Distinct protocol families touched (from completed quests). */
+  categoriesTouched: ProtocolCategory[];
+  /** True if the wallet interacted with the canonical L2 bridge (bridge quest). */
+  bridgeDone: boolean;
+  /** Live ETH balance in wei; absent when the RPC read failed (no dust malus). */
+  balanceWei?: string;
 }
 
 export interface ScoreBreakdownItem {
@@ -65,4 +95,9 @@ export interface QuestsResult {
   total: number;
   earned: number;
   quests: QuestResult[];
+  /**
+   * Distinct protocol families among completed quests (v2 diversity metric).
+   * Additive field: existing /api/quests consumers (radar UI) ignore it.
+   */
+  categoriesTouched?: ProtocolCategory[];
 }

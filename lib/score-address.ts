@@ -1,6 +1,7 @@
 import {
   fetchWalletData as fetchViaEtherscan,
   fetchWalletDataViaBlockscoutCompat as fetchViaBlockscoutCompat,
+  fetchBalanceViaRpc,
 } from "./providers/etherscan";
 import { fetchWalletData as fetchViaBlockscout } from "./providers/blockscout";
 import { computeScore } from "./scoring";
@@ -120,5 +121,15 @@ export async function scoreAddress(
   // v1: Basename ownership is approximated from the registration quest.
   // TODO: replace with a true Basenames reverse resolution read.
   const hasBasename = quests.quests.find((q) => q.id === "basename")!.done;
-  return computeScore({ ...data, hasBasename }, quests.earned);
+  const bridgeDone = quests.quests.find((q) => q.id === "bridge-canonical")!.done;
+
+  // v2 enrichment: one keyless eth_getBalance for the dust malus (spec §4.3).
+  // Never-fail: null balance -> the dust malus simply won't fire.
+  const balanceWei = await fetchBalanceViaRpc(addr, signal);
+
+  return computeScore({ ...data, hasBasename }, quests.earned, {
+    categoriesTouched: quests.categoriesTouched ?? [],
+    bridgeDone,
+    balanceWei: balanceWei ?? undefined,
+  });
 }

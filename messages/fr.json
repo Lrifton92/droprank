@@ -70,12 +70,14 @@
     "startYourJourney": "LANCE-TOI",
     "freshWalletPost": " — complète des quêtes sur le radar pour grimper.",
     "breakdownTitle": "score.breakdown[]",
-    "about": "Ton score DropRank (/100) évalue à quel point ce wallet est prêt pour un airdrop Base — d'après le détail ci-dessous (transactions, jours actifs, volume, contrats, Basename, Smart Wallet, quêtes). C'est notre propre score transparent, calculé différemment de l'Onchain Score de base.org (Coinbase, propriétaire) — d'où des chiffres différents.",
+    "about": "Ton score DropRank (/100) évalue à quel point ce wallet est prêt pour un airdrop Base — d'après le détail ci-dessous (transactions, mois actifs, régularité d'activité, volume, contrats, diversité de protocoles, bridge, identité, quêtes). Inspiré de critères d'airdrop publiés (Arbitrum, Optimism), il signale aussi les patterns sybil (burst, dust). C'est notre propre score transparent, calculé différemment de l'Onchain Score de base.org (Coinbase, propriétaire) — d'où des chiffres différents.",
     "improve": {
       "maxed": "au max",
       "time": "monte avec le temps",
+      "spread": "étale ton activité",
       "basename": "obtenir un Basename",
       "smartWallet": "utiliser un Smart Wallet",
+      "bridge": "utiliser le bridge Base",
       "quests": "faire des quêtes",
       "activity": "être actif sur Base"
     },
@@ -96,7 +98,17 @@
     "none": "aucun",
     "used": "utilisé",
     "no": "non",
-    "questsPts": "{earned}/{max} pts"
+    "questsPts": "{earned}/{max} pts",
+    "spread": "régularité {value}",
+    "categories": "{count} catégories",
+    "bridged": "bridgé",
+    "noBridge": "pas de bridge",
+    "idBoth": "basename + smart wallet",
+    "idBasename": "basename",
+    "idSmartWallet": "smart wallet",
+    "sybilBurst": "burst",
+    "sybilDust": "dust",
+    "sybilBurstDust": "burst + dust"
   },
   "mint": {
     "badgeSoon": "Badge bientôt",

@@ -27,14 +27,19 @@ export async function GET(
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  const key = address.toLowerCase();
+  const addr = address.toLowerCase();
+  // v2 barème: the breakdown shape changed (new keys, identity regrouped, malus
+  // line). A "v2:" cache key prefix starts a clean L1/L2 namespace so a v1 payload
+  // cached under the bare address (TTL 5min) can't be served post-deploy. v1
+  // payloads expire on their own; the UI tolerates either shape regardless.
+  const key = `v2:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
     const result = await getOrSetCached(cache, "score", key, SCORE_TTL_S, async () => {
-      const r = await scoreAddress(key, req.signal);
+      const r = await scoreAddress(addr, req.signal);
       // Record + rank in the percentile store (never throws; static fallback).
-      r.percentile = await recordAndRankScore(key, r.score);
+      r.percentile = await recordAndRankScore(addr, r.score);
       return r;
     });
     return NextResponse.json(result, {

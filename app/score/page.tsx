@@ -145,7 +145,27 @@ function ScoreInner() {
                 <span className="dr-term__title">{t("breakdownTitle")}</span>
               </div>
               <div className="dr-term__body">
-                {data.breakdown.map((b, i) => (
+                {data.breakdown.map((b, i) =>
+                  b.key === "sybilFlags" ? (
+                    <div
+                      key={b.key}
+                      className={`dr-term__row ${styles.row} ${styles.sybilRow}`}
+                      style={{ animationDelay: `${0.05 * i + 0.2}s` }}
+                    >
+                      <span className={styles.rowLabel}>
+                        <span className="syn-key">{b.key}</span>
+                        <span className={styles.detail}>
+                          {(() => {
+                            const d = parseDetail(b.key, b.detail);
+                            return d ? td(d.key, d.values) : b.detail;
+                          })()}
+                        </span>
+                      </span>
+                      <span className={styles.rowPts}>
+                        <span className={`mono ${styles.sybilPts}`}>{b.points}</span>
+                      </span>
+                    </div>
+                  ) : (
                   <div
                     key={b.key}
                     className={`dr-term__row ${styles.row}`}
@@ -182,7 +202,7 @@ function ScoreInner() {
                               )}
                               {imp.kind === "time" && (
                                 <span className={styles.improveTime}>
-                                  ⏳ {t("improve.time")}
+                                  ⏳ {t(`improve.${imp.labelKey}`)}
                                 </span>
                               )}
                             </span>
@@ -208,7 +228,8 @@ function ScoreInner() {
                       </span>
                     </span>
                   </div>
-                ))}
+                  ),
+                )}
               </div>
             </section>
 

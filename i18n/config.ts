@@ -63,7 +63,18 @@ export type DetailMessage = {
     | "none"
     | "used"
     | "no"
-    | "questsPts";
+    | "questsPts"
+    // v2 criteria
+    | "spread"
+    | "categories"
+    | "bridged"
+    | "noBridge"
+    | "idBoth"
+    | "idBasename"
+    | "idSmartWallet"
+    | "sybilBurst"
+    | "sybilDust"
+    | "sybilBurstDust";
   values?: Record<string, string | number>;
 };
 
@@ -119,6 +130,44 @@ export function parseDetail(
         ? { key: "questsPts", values: { earned: Number(m[1]), max: Number(m[2]) } }
         : null;
     }
+    case "activitySpread": {
+      const m = detail.match(/^([\d.]+)\s+spread$/);
+      return m ? { key: "spread", values: { value: m[1] } } : null;
+    }
+    case "protocolDiversity": {
+      const n = num(/^(\d+)\s+categories$/);
+      return n === null ? null : { key: "categories", values: { count: n } };
+    }
+    case "bridge":
+      return detail === "bridged"
+        ? { key: "bridged" }
+        : detail === "no bridge"
+          ? { key: "noBridge" }
+          : null;
+    case "identity":
+      switch (detail) {
+        case "basename + smart wallet":
+          return { key: "idBoth" };
+        case "basename":
+          return { key: "idBasename" };
+        case "smart wallet":
+          return { key: "idSmartWallet" };
+        case "none":
+          return { key: "none" };
+        default:
+          return null;
+      }
+    case "sybilFlags":
+      switch (detail) {
+        case "burst":
+          return { key: "sybilBurst" };
+        case "dust":
+          return { key: "sybilDust" };
+        case "burst + dust":
+          return { key: "sybilBurstDust" };
+        default:
+          return null;
+      }
     default:
       return null;
   }

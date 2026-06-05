@@ -231,6 +231,18 @@
   color: var(--ok);
   margin-top: 4px;
 }
+/* Anti-sybil malus row (v2): a discreet red line shown only when a flag fires.
+   Honest, not hidden — no progress bar, no "+pts" hint (it's a penalty). */
+.sybilRow .detail {
+  color: color-mix(in srgb, #ff5d6c 70%, var(--text-faint));
+}
+.sybilPts {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff5d6c;
+  font-variant-numeric: tabular-nums;
+}
 .rowPts {
   display: flex;
   align-items: center;

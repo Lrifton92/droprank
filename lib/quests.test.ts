@@ -213,4 +213,33 @@ describe("computeQuests", () => {
     expect(r.earned).toBe(QUESTS_MAX_POINTS);
     expect(r.earned).toBeLessThanOrEqual(r.total);
   });
+
+  it("derives distinct protocol categories from completed quests (v2)", () => {
+    const r = computeQuests(
+      [
+        tx({ to: AERODROME_ROUTER }), // DEX
+        tx({ to: PANCAKESWAP_SMART_ROUTER }), // DEX (same family)
+        tx({ to: AAVE_V3_POOL }), // Lending
+        tx({ to: SEAPORT_1_6 }), // NFT
+        tx({ to: USDC_NATIVE }), // hold-usdc: no category
+      ],
+      ADDR,
+    );
+    const cats = new Set(r.categoriesTouched);
+    expect(cats).toEqual(new Set(["DEX", "Lending", "NFT"]));
+  });
+
+  it("reports no categories for a wallet with no protocol quests", () => {
+    const r = computeQuests([tx({ to: USDC_NATIVE })], ADDR);
+    expect(r.categoriesTouched).toEqual([]);
+  });
+
+  it("every quest with a category maps to one of the 7 protocol families", () => {
+    const FAMILIES = new Set([
+      "DEX", "Lending", "Perps", "Identity", "Bridge", "NFT", "Social",
+    ]);
+    for (const q of QUESTS) {
+      if (q.category) expect(FAMILIES.has(q.category)).toBe(true);
+    }
+  });
 });

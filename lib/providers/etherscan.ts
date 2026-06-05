@@ -338,6 +338,47 @@ async function fetchCodeViaRpc(
 }
 
 /**
+ * Live ETH balance (wei, decimal string) via eth_getBalance on the public Base
+ * RPC. Never-fail like {@link fetchCodeViaRpc}: any transport/parse failure (or a
+ * non-hex result) returns null so a flaky RPC never breaks a scan — the caller
+ * then skips the balance-dependent dust malus (scoring.ts §4.3). Exported for the
+ * v2 score enrichment in score-address.ts.
+ */
+export async function fetchBalanceViaRpc(
+  address: string,
+  signal: AbortSignal | undefined,
+): Promise<string | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  signal?.addEventListener("abort", onAbort);
+  try {
+    const res = await fetch(BASE_RPC_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getBalance",
+        params: [address, "latest"],
+        id: 1,
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { result?: string };
+    if (typeof body.result !== "string" || !body.result.startsWith("0x")) {
+      return null;
+    }
+    return BigInt(body.result).toString();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/**
  * Is the scanned address itself a contract? Uses eth_getCode — via the Etherscan
  * proxy module by default, or a direct Base JSON-RPC POST when `getCodeViaRpc` is
  * set (the keyless compat path). Empty code ("0x") = EOA. eth_getCode envelopes
