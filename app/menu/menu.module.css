@@ -224,7 +224,8 @@
 }
 .card:hover .arrow,
 .card:focus-visible .arrow {
-  transform: translateX(7px);
+  /* Gentler slide than before: the drawing shaft already adds motion. */
+  transform: translateX(4px);
   color: var(--base-200);
 }
 .card:hover .glyph {
@@ -290,9 +291,23 @@
   align-items: center;
   justify-content: flex-end;
   width: 30px;
-  font-size: 20px;
   color: var(--text-faint);
   transition: transform 0.26s var(--ease-out), color 0.2s var(--ease-out);
+}
+.arrow svg {
+  display: block;
+}
+/* Shaft hidden at rest (chevron alone), drawn from the head leftward on
+   hover/focus — the arrow "grows" instead of two stacked strokes. */
+.arrowShaft {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: right center;
+  transition: transform 0.26s var(--ease-out);
+}
+.card:hover .arrowShaft,
+.card:focus-visible .arrowShaft {
+  transform: scaleX(1);
 }
 .card:active .arrow {
   transform: translateX(3px);

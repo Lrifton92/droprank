@@ -10,6 +10,32 @@ import BasenameCard from "../_components/BasenameCard";
 import SessionTicker from "./SessionTicker";
 import styles from "./menu.module.css";
 
+/* Card arrow: a single SVG — chevron head at rest, the shaft draws in on
+   card hover (origin at the head, grows leftward) while the whole arrow
+   slides right. One element, nothing can overlap the glyph. */
+function CardArrow() {
+  return (
+    <span className={styles.arrow} aria-hidden>
+      <svg viewBox="0 0 20 12" width="20" height="12" fill="none">
+        <path
+          className={styles.arrowShaft}
+          d="M2 6h14"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M12.5 1.5 17 6l-4.5 4.5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 function MenuInner() {
   const router = useRouter();
   const params = useSearchParams();
@@ -67,7 +93,7 @@ function MenuInner() {
             </span>
             <span className={styles.cardTitle}>{t("score.title")}</span>
             <span className={styles.cardSub}>{t("score.sub")}</span>
-            <span className={styles.arrow}>→</span>
+            <CardArrow />
           </Link>
 
           <Link href={`/radar${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 3 } as CSSProperties}>
@@ -81,7 +107,7 @@ function MenuInner() {
             </span>
             <span className={styles.cardTitle}>{t("radar.title")}</span>
             <span className={styles.cardSub}>{t("radar.sub")}</span>
-            <span className={styles.arrow}>→</span>
+            <CardArrow />
           </Link>
 
           <Link href={`/news${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 4 } as CSSProperties}>
@@ -95,7 +121,7 @@ function MenuInner() {
             </span>
             <span className={styles.cardTitle}>{t("news.title")}</span>
             <span className={styles.cardSub}>{t("news.sub")}</span>
-            <span className={styles.arrow}>→</span>
+            <CardArrow />
           </Link>
 
           <Link href={`/discover${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 5 } as CSSProperties}>
@@ -108,7 +134,7 @@ function MenuInner() {
             </span>
             <span className={styles.cardTitle}>{t("discover.title")}</span>
             <span className={styles.cardSub}>{t("discover.sub")}</span>
-            <span className={styles.arrow}>→</span>
+            <CardArrow />
           </Link>
 
           {/* 5th card. With 2 cols (md) and 4 cols (xl) it would dangle alone on a
@@ -124,7 +150,7 @@ function MenuInner() {
             </span>
             <span className={styles.cardTitle}>{t("yield.title")}</span>
             <span className={styles.cardSub}>{t("yield.sub")}</span>
-            <span className={styles.arrow}>→</span>
+            <CardArrow />
           </Link>
         </nav>
 
