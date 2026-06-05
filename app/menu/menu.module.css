@@ -227,11 +227,6 @@
   transform: translateX(7px);
   color: var(--base-200);
 }
-.card:hover .arrow::before,
-.card:focus-visible .arrow::before {
-  transform: scaleX(1);
-  opacity: 1;
-}
 .card:hover .glyph {
   transform: scale(1.06);
   border-color: color-mix(in srgb, var(--base-300) 36%, transparent);
@@ -298,21 +293,6 @@
   font-size: 20px;
   color: var(--text-faint);
   transition: transform 0.26s var(--ease-out), color 0.2s var(--ease-out);
-}
-/* Tech "rail" that the arrow rides on: a thin accent track sliding in from the
-   left, revealed on hover/focus. scaleX from the left edge = it draws itself. */
-.arrow::before {
-  content: "";
-  position: absolute;
-  right: 13px;
-  width: 18px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--base-300));
-  opacity: 0;
-  transform: scaleX(0.2);
-  transform-origin: left center;
-  transition: transform 0.26s var(--ease-out), opacity 0.2s var(--ease-out);
-  pointer-events: none;
 }
 .card:active .arrow {
   transform: translateX(3px);
