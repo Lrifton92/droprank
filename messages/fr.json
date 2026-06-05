@@ -142,6 +142,18 @@
     "done": "faites",
     "cleared": "validée",
     "dash": "—",
+    "diversityTitle": "{count}/7 catégories touchées",
+    "diversityNote": "chaque nouvelle catégorie compte dans le critère diversité de votre score",
+    "bridgeBonus": "+4 score",
+    "cat": {
+      "DEX": "DEX",
+      "Lending": "LENDING",
+      "Perps": "PERPS",
+      "Identity": "IDENTITÉ",
+      "Bridge": "BRIDGE",
+      "NFT": "NFT",
+      "Social": "SOCIAL"
+    },
     "programs": "// programmes de récompense base",
     "programsNote": "off-chain · non scoré"
   },

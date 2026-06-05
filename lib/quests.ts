@@ -226,7 +226,10 @@ export function computeQuests(
 ): QuestsResult {
   const quests: QuestResult[] = QUESTS.map((q) => {
     const done = q.check(txs, address, ctx);
-    return { id: q.id, label: q.label, points: q.points, done, link: q.link };
+    // category flows to the API payload so the radar UI never needs its own
+    // quest→category map (drift risk: a quest added here would silently miss
+    // its tag there).
+    return { id: q.id, label: q.label, points: q.points, done, link: q.link, category: q.category };
   });
 
   const rawEarned = quests.reduce((s, q) => s + (q.done ? q.points : 0), 0);

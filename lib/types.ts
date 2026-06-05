@@ -88,6 +88,8 @@ export interface QuestResult {
   done: boolean;
   /** External "how to complete" link, if any. Single source of truth: lib/quests.ts. */
   link?: string;
+  /** Protocol family for the v2 diversity criterion (absent on uncategorized quests). */
+  category?: ProtocolCategory;
 }
 
 export interface QuestsResult {
