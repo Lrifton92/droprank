@@ -7,6 +7,7 @@ import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BaseBanner from "../_components/BaseBanner";
 import BasenameCard from "../_components/BasenameCard";
+import SessionTicker from "./SessionTicker";
 import styles from "./menu.module.css";
 
 function MenuInner() {
@@ -27,7 +28,8 @@ function MenuInner() {
             onClick={() => router.replace("/")}
             aria-label={tc("back")}
           >
-            ← <span className={styles.backLabel}>WALLET</span>
+            <span className={styles.backArrow} aria-hidden>←</span>
+            <span className={styles.backLabel}>WALLET</span>
           </button>
           <span className="dr-brand">
             Drop<span className="dot">·</span>Rank
@@ -39,6 +41,8 @@ function MenuInner() {
           <span className="dr-eyebrow">{tc("activeTarget")}</span>
           <span className={styles.addrRow}>
             <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
+            {/* Practical-info ticker fills the gap and fades out before LIVE. */}
+            <SessionTicker address={address} />
             {/* "LIVE" universel, pas de clé i18n nécessaire */}
             <span className={`mono ${styles.liveBadge}`} aria-hidden>
               <i className={styles.liveDot} />
@@ -132,7 +136,7 @@ function MenuInner() {
           <BaseBanner />
         </div>
 
-        <div className={`dr-term dr-enter ${styles.hint}`} style={{ "--i": 9 } as CSSProperties}>
+        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 9 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />
@@ -140,17 +144,17 @@ function MenuInner() {
             <span className="dr-term__title">{t("term.title")}</span>
           </div>
           <div className="dr-term__body">
-            <div className="dr-term__row">
+            <div className={`dr-term__row ${styles.termRow}`} style={{ "--row": 0 } as CSSProperties}>
               <span className="syn-key">{t("term.chain")}</span>
-              <span className="syn-str">{t("term.chainValue")}</span>
+              <span className={`syn-str ${styles.termVal}`}>{t("term.chainValue")}</span>
             </div>
-            <div className="dr-term__row">
+            <div className={`dr-term__row ${styles.termRow}`} style={{ "--row": 1 } as CSSProperties}>
               <span className="syn-key">{t("term.mode")}</span>
-              <span className="syn-str">{t("term.modeValue")}</span>
+              <span className={`syn-str ${styles.termVal}`}>{t("term.modeValue")}</span>
             </div>
-            <div className="dr-term__row">
+            <div className={`dr-term__row ${styles.termRow}`} style={{ "--row": 2 } as CSSProperties}>
               <span className="syn-key">{t("term.badge")}</span>
-              <span className="syn-str">{t("term.badgeValue")}</span>
+              <span className={`syn-str ${styles.termVal}`}>{t("term.badgeValue")}</span>
             </div>
           </div>
         </div>

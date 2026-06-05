@@ -73,6 +73,16 @@
       "badgeValue": "\"soulbound · 1/adresse\""
     }
   },
+  "ticker": {
+    "score": "score",
+    "percentile": "rang",
+    "topPct": "top {pct}%",
+    "txs": "txs",
+    "active": "actif",
+    "months": "{count}mo",
+    "volume": "vol",
+    "quests": "quêtes"
+  },
   "score": {
     "report": "// rapport de score",
     "invalidTarget": "! CIBLE INVALIDE",

@@ -17,15 +17,30 @@
 }
 
 .opt {
+  position: relative;
   appearance: none;
   background: none;
   border: none;
-  padding: 2px 4px;
+  padding: 2px 4px 4px;
   font: inherit;
   letter-spacing: inherit;
   color: var(--text-faint);
   cursor: pointer;
   transition: color 0.15s var(--ease-out), transform 0.12s var(--ease-snap);
+}
+/* Accent underline for the active locale — draws from center on activation. */
+.opt::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 1px;
+  background: var(--base-300);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform 0.22s var(--ease-out), opacity 0.18s var(--ease-out);
 }
 
 .opt:hover:not(:disabled) {
@@ -41,7 +56,22 @@
 .opt[data-active="true"] {
   color: var(--base-200);
 }
+.opt[data-active="true"]::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.opt:focus-visible {
+  outline: 2px solid var(--base-300);
+  outline-offset: 2px;
+  border-radius: 3px;
+  color: var(--text-dim);
+}
 
 .opt:disabled {
   cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opt::after { transition: none; }
 }

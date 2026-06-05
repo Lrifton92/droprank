@@ -1,0 +1,96 @@
+/* Practical-info ticker that occupies the empty stretch between the wallet
+   address and the LIVE badge. flex:1 + min-width:0 lets it absorb the free
+   space without ever pushing the badge; the symmetric fade mask guarantees the
+   text dissolves before it could reach either edge, so it never touches LIVE. */
+.wrap {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 16px;
+  overflow: hidden;
+  /* Fade both ends — the right fade is what visually "stops before" the badge. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 18px,
+    #000 calc(100% - 22px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 18px,
+    #000 calc(100% - 22px),
+    transparent
+  );
+}
+
+/* Two identical runs laid side by side; translating the track by -50% lands
+   run B exactly where run A started → seamless loop, no visible jump. */
+.track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+  animation: ticker-scroll 48s linear infinite;
+}
+.wrap:hover .track {
+  animation-play-state: paused;
+}
+.run {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.value {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--base-200);
+  font-variant-numeric: tabular-nums;
+}
+.sep {
+  margin: 0 12px;
+  font-size: 11px;
+  color: var(--border-strong);
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* No spare room in the 424px webview column — hide the strip entirely there
+   (the LIVE badge keeps its place, the mini-app column is untouched). */
+@media (max-width: 767px) {
+  .wrap {
+    display: none;
+  }
+}
+
+/* Reduced motion: the global rule forces animation-iteration-count:1, which
+   would leave the marquee frozen mid-scroll. Pin it to the start, keep the
+   fade mask so the (static) overflow still dissolves cleanly before the badge. */
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
