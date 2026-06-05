@@ -52,11 +52,32 @@
   align-items: baseline;
   justify-content: space-between;
 }
+/* Hero points figure — strongly dominant (Soufian 2026-06-05), alive on two
+   layers: the existing Counter count-up (0→12) plus a breathing Base glow.
+   tabular-nums keeps the climbing digits from shifting layout. */
 .big {
-  font-size: 40px;
+  font-size: 76px;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 38px var(--base-glow);
+  animation: big-glow 3s var(--ease-in-out) infinite;
+}
+@media (min-width: 768px) {
+  .big {
+    font-size: 96px;
+  }
+}
+@keyframes big-glow {
+  0%, 100% { text-shadow: 0 0 26px var(--base-glow); }
+  50% { text-shadow: 0 0 56px var(--base-glow), 0 0 110px color-mix(in srgb, var(--base) 35%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .big {
+    animation: none;
+  }
 }
 .total {
   font-family: var(--font-mono);
