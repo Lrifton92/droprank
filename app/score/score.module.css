@@ -291,9 +291,14 @@
 .cta {
   margin-top: 22px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   align-items: start;
+}
+/* Mint button hoisted into the hero, centered under the tier badge. */
+.heroMint {
+  margin: 20px auto 0;
+  max-width: 300px;
 }
 .mintWrap {
   display: flex;

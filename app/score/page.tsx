@@ -128,6 +128,9 @@ function ScoreInner() {
                 </span>
                 <InfoTip label={t("about")} />
               </div>
+              <div className={styles.heroMint}>
+                <MintButton scannedAddress={address} empty={empty} score={data.score} max={data.max} />
+              </div>
               {empty && (
                 <p className={styles.startMsg}>
                   {t("freshWalletPre")}
@@ -234,7 +237,6 @@ function ScoreInner() {
             </section>
 
             <section className={`dr-enter ${styles.cta}`} style={{ "--i": 4 } as CSSProperties}>
-              <MintButton scannedAddress={address} empty={empty} score={data.score} max={data.max} />
               <button className="dr-btn dr-btn--ghost" onClick={onShare}>
                 {shared ? t("linkCopied") : t("shareRank")}
               </button>
