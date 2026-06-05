@@ -99,10 +99,6 @@ function EnterInner() {
           </li>
         ))}
       </ul>
-
-      <button className={styles.skip} onClick={go}>
-        {t("skip")}
-      </button>
     </main>
   );
 }

@@ -13,8 +13,11 @@
   user-select: none;
 }
 
+/* Scanline texture goes FULL VIEWPORT (fixed), not absolute-in-wrap: clipped
+   to the 424px column its vertical edges read as "separation lines" on the
+   sides (Soufian 2026-06-05). */
 .scan {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
 }
@@ -110,23 +113,7 @@
   color: var(--ok);
 }
 
-.skip {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: none;
-  border: none;
-  color: var(--text-faint);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  cursor: pointer;
-  transition: color 0.16s var(--ease-out);
-}
-.skip:hover {
-  color: var(--text);
-}
+
 
 @keyframes spin {
   to { transform: rotate(360deg); }
