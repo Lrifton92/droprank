@@ -205,7 +205,9 @@ function RadarInner() {
                       {q.done ? "✓" : "○"}
                     </span>
                     <span className={styles.qLabel}>
-                      {questLabel(q.id, q.label, messages.quests)}
+                      <span className={styles.qLabelText}>
+                        {questLabel(q.id, q.label, messages.quests)}
+                      </span>
                       {cat && (
                         <span className={`mono ${styles.qTag}`}>{t(`cat.${cat}`)}</span>
                       )}

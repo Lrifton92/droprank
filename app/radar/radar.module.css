@@ -161,23 +161,12 @@
   gap: 8px;
 }
 
-/* Desktop: split the quest list into 2 columns. The progress header + the
-   programs footer stay full-width above/below. Shell width comes from the
-   shared `.dr-wide`. Mobile/webview (< 768px) stays single column. */
-@media (min-width: 768px) {
-  .list {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 14px;
-    row-gap: 8px;
-    align-items: start;
-  }
-}
-@media (min-width: 1240px) {
-  .list {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
+/* The quest list stays a single full-width column at every breakpoint — rows
+   are terminal-aligned (same direction as /yields). The earlier 2/3/4-column
+   masonry grid (cards of uneven height that "danced") was rejected. On desktop
+   (≥768px) the rows gain shared fixed columns so check / link / points
+   tabulate down a clean grid; mobile (<768px) keeps the compact stacked row
+   below untouched. */
 .quest {
   display: grid;
   grid-template-columns: 22px 1fr auto auto;
@@ -410,9 +399,57 @@
   100% { background-position: -120% 0; }
 }
 
-/* XL (shell 1320): 4th column keeps card width ~300px instead of stretching. */
-@media (min-width: 1600px) {
-  .list {
-    grid-template-columns: repeat(4, 1fr);
+/* ── Desktop terminal rows (≥768px) ──────────────────────────────────────────
+   At and above 768px the rows become full-width aligned terminal lines — never
+   a multi-column card grid (.dr-wide caps the shell width so they never stretch
+   to an unreadable length, including XL ≥1600px). Shared fixed columns:
+     check (28px) | label (1fr, ellipsis, no wrap) | go-link (fixed, reserved
+     even for cleared quests so the column stays aligned) | points (fixed,
+     right-aligned, tabular). The bridge "+4 score" sits INLINE next to the
+     points (not stacked) so every row keeps the exact same height. */
+@media (min-width: 768px) {
+  .quest {
+    grid-template-columns: 28px minmax(0, 1fr) var(--go-col, 92px) var(--pts-col, 96px);
+    gap: 16px;
+    min-height: 56px;
+    padding: 12px 16px;
+  }
+  /* Validated rows: a green inset rail (left) instead of a full green fill —
+     cleaner in a row, lets the green read as a status accent not a block. */
+  .questDone {
+    background: rgba(12, 17, 28, 0.5);
+    border-color: var(--border);
+    box-shadow: inset 3px 0 0 var(--ok);
+  }
+  .questDone:hover {
+    box-shadow: inset 3px 0 0 var(--ok), 0 10px 30px -22px rgba(53, 224, 138, 0.4);
+  }
+  /* Label is one ellipsised line — no wrapping (the wrap was a big part of the
+     uneven-height dance). The category tag stays inline and never shrinks. */
+  .qLabel {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .qLabelText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  /* "Go" link / status both pinned to the same fixed column, right-edge aligned,
+     so cleared quests (no button, just a status) line up under the buttons. */
+  .qLink,
+  .qStatus {
+    justify-self: end;
+    text-align: right;
+  }
+  /* Points pinned to the right column, tabular so the +N values tabulate down.
+     Bridge's "+4 score" goes inline (row direction) — reserves no extra height. */
+  .qPts {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
   }
 }
