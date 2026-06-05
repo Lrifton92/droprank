@@ -145,6 +145,74 @@
   }
 }
 
+/* Generated placeholder: shares the .thumbBox frame (border/radius/16:9) but
+   swaps the shimmer for a static seeded gradient. Index-driven colors come in
+   via --g-from / --g-to inline. A faint technical grid + a soft corner glow give
+   it terminal-tile materiality; the source name sits centered in mono. */
+.genThumb {
+  animation: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, var(--g-from), var(--g-to));
+}
+/* ~5% technical grid */
+.genThumb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(138, 176, 255, 0.05) 0 1px,
+      transparent 1px 13px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(138, 176, 255, 0.05) 0 1px,
+      transparent 1px 13px
+    );
+}
+/* soft corner light so the gradient isn't flat */
+.genThumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 18% 12%,
+    color-mix(in srgb, var(--base-300) 16%, transparent),
+    transparent 60%
+  );
+}
+.genLabel {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0 12px;
+  color: color-mix(in srgb, var(--base-200) 82%, #fff);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.genTick {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--base-300);
+  box-shadow: 0 0 7px var(--base-glow);
+  z-index: 1;
+}
+
 .meta {
   display: flex;
   align-items: center;

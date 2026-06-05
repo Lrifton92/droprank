@@ -89,7 +89,11 @@ function NewsInner() {
                   className={styles.item}
                   style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}
                 >
-                  {it.image && <NewsThumb src={it.image} eager={i < 3} />}
+                  {it.image ? (
+                    <NewsThumb src={it.image} eager={i < 3} source={it.source} />
+                  ) : (
+                    <NewsPlaceholder source={it.source} seed={it.title} />
+                  )}
                   <div className={styles.meta}>
                     <span className={`mono ${styles.source}`}>{it.source}</span>
                     <span className={`mono ${styles.date}`}>{timeAgo(it.date)}</span>
@@ -123,12 +127,21 @@ function NewsInner() {
  *    ref `complete` check (cached images can fire load before hydration);
  *  - first row (`eager`) loads at high priority, the rest stays lazy;
  *  - `no-referrer` dodges hotlink blocks on common RSS CDNs;
- *  - a dead URL unmounts the box entirely — text-only card, no broken icon.
+ *  - a dead URL falls back to the generated placeholder (same 16/9 frame),
+ *    so the card never goes thumbnail-less.
  */
-function NewsThumb({ src, eager }: { src: string; eager: boolean }) {
+function NewsThumb({
+  src,
+  eager,
+  source,
+}: {
+  src: string;
+  eager: boolean;
+  source: string;
+}) {
   const [loaded, setLoaded] = useState(false);
   const [dead, setDead] = useState(false);
-  if (dead) return null;
+  if (dead) return <NewsPlaceholder source={source} seed={source + src} />;
   return (
     <span className={`${styles.thumbBox} ${loaded ? styles.thumbReady : ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -146,6 +159,45 @@ function NewsThumb({ src, eager }: { src: string; eager: boolean }) {
           if (el && el.complete && el.naturalWidth > 0 && !loaded) setLoaded(true);
         }}
       />
+    </span>
+  );
+}
+
+/** Six dark gradient pairs drawn from the Base palette — bleu / cyan / violet
+ *  doux / vert mint discret, all desaturated so the card reads like a terminal
+ *  tile, never clipart. Index is picked by a deterministic hash of the seed. */
+const PLACEHOLDER_GRADIENTS = [
+  ["#0a1733", "#142a5c"], // deep Base blue
+  ["#0a1d2e", "#10384d"], // cyan-leaning teal
+  ["#161033", "#28204f"], // soft violet
+  ["#0a2120", "#123833"], // discreet mint green
+  ["#101a30", "#1d2c52"], // slate blue
+  ["#1a1430", "#2a2150"], // indigo
+] as const;
+
+/** djb2 — tiny, deterministic, zero deps. Same title ⇒ same gradient forever. */
+function hashSeed(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+/**
+ * Generated thumbnail for articles with no usable image (the bulk of the feed,
+ * since Google News links carry no og:image). Pure CSS/JSX, zero network:
+ * a seeded dark gradient + technical grid overlay + the source name in mono,
+ * plus a corner tick for materiality. Same 16/9 frame as the real thumb.
+ */
+function NewsPlaceholder({ source, seed }: { source: string; seed: string }) {
+  const [from, to] = PLACEHOLDER_GRADIENTS[hashSeed(seed) % PLACEHOLDER_GRADIENTS.length];
+  return (
+    <span
+      className={`${styles.thumbBox} ${styles.genThumb}`}
+      style={{ "--g-from": from, "--g-to": to } as CSSProperties}
+      aria-hidden="true"
+    >
+      <span className={`mono ${styles.genLabel}`}>{source}</span>
+      <span className={styles.genTick} />
     </span>
   );
 }
