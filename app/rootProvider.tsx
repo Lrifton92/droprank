@@ -1,6 +1,7 @@
 "use client";
 import { ReactNode } from "react";
-import { base, baseSepolia } from "wagmi/chains";
+import { createPublicClient, http } from "viem";
+import { base, baseSepolia, mainnet } from "wagmi/chains";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 
@@ -8,11 +9,20 @@ import "@coinbase/onchainkit/styles.css";
 const activeChain =
   Number(process.env.NEXT_PUBLIC_CHAIN_ID) === baseSepolia.id ? baseSepolia : base;
 
+// Mainnet client for OnchainKit's basename forward-resolution check (<Name>):
+// viem's default mainnet RPC (eth.merkle.io) blocks browser CORS, so the check
+// failed silently and basenames never displayed. publicnode allows cross-origin.
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http("https://ethereum-rpc.publicnode.com"),
+});
+
 export function RootProvider({ children }: { children: ReactNode }) {
   return (
     <OnchainKitProvider
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
       chain={activeChain}
+      defaultPublicClients={{ [mainnet.id]: mainnetClient }}
       config={{
         appearance: {
           mode: "dark",
