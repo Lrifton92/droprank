@@ -334,3 +334,26 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* Date section separator — full grid row, eyebrow label flanked by a hairline. */
+.dateSep {
+  grid-column: 1 / -1;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--base-300);
+  white-space: nowrap;
+}
+.dateSep::before,
+.dateSep::after {
+  content: "";
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  flex: 1;
+}

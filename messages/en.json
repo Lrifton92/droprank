@@ -43,11 +43,26 @@
     "skip": "tap to skip →"
   },
   "menu": {
-    "score": { "title": "SCORE", "sub": "your /100 rank, breakdown & tier" },
-    "radar": { "title": "RADAR", "sub": "19 onchain quests & progress" },
-    "news": { "title": "NEWS", "sub": "latest base ecosystem signals" },
-    "discover": { "title": "DISCOVER", "sub": "new projects & protocols on base" },
-    "yield": { "title": "YIELD", "sub": "ranked base defi yields by risk profile" },
+    "score": {
+      "title": "SCORE",
+      "sub": "your /100 rank, breakdown & tier"
+    },
+    "radar": {
+      "title": "RADAR",
+      "sub": "19 onchain quests & progress"
+    },
+    "news": {
+      "title": "NEWS",
+      "sub": "latest base ecosystem signals"
+    },
+    "discover": {
+      "title": "DISCOVER",
+      "sub": "new projects & protocols on base"
+    },
+    "yield": {
+      "title": "YIELD",
+      "sub": "ranked base defi yields by risk profile"
+    },
     "term": {
       "title": "droprank://session",
       "chain": "chain",
@@ -163,7 +178,13 @@
     "scanningFeed": "SCANNING BASE FEED",
     "noSignal": "∅ NO SIGNAL",
     "noNews": "no base news right now",
-    "signals": "signals · base l2"
+    "signals": "signals · base l2",
+    "bucket": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "week": "this week",
+      "older": "older"
+    }
   },
   "discover": {
     "eyebrow": "// new on base",

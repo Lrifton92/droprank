@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState, type CSSProperties } from "react";
+import { Fragment, Suspense, useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -7,6 +7,23 @@ import { timeAgo } from "../_components/presentation";
 import type { NewsItem } from "@/lib/news";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./news.module.css";
+
+/**
+ * Recency bucket for the date separators. Items render newest-first, so a
+ * bucket change between neighbours marks a section boundary. Buckets (not
+ * exact days) keep the feed scannable: today / yesterday / this week / older.
+ */
+function dateBucket(date: number | string): "today" | "yesterday" | "week" | "older" {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "older";
+  const now = new Date();
+  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.floor((startOfDay(now) - startOfDay(d)) / 86_400_000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days <= 7) return "week";
+  return "older";
+}
 
 function NewsInner() {
   const params = useSearchParams();
@@ -84,8 +101,15 @@ function NewsInner() {
             </p>
             <ul className={`dr-enter ${styles.list}`} style={{ "--i": 2 } as CSSProperties}>
               {items.map((it, i) => (
+                <Fragment key={it.link}>
+                  {/* Date separator whenever the recency bucket changes (items
+                      arrive newest-first). Spans the full grid row. */}
+                  {dateBucket(it.date) !== (i > 0 ? dateBucket(items[i - 1].date) : null) && (
+                    <li className={`mono ${styles.dateSep}`} aria-hidden>
+                      <span>{t(`bucket.${dateBucket(it.date)}`)}</span>
+                    </li>
+                  )}
                 <li
-                  key={it.link}
                   className={styles.item}
                   style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}
                 >
@@ -111,6 +135,7 @@ function NewsInner() {
                     <p className={styles.desc}>{it.description}</p>
                   )}
                 </li>
+                </Fragment>
               ))}
             </ul>
           </>

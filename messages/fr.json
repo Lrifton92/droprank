@@ -43,11 +43,26 @@
     "skip": "appuie pour passer →"
   },
   "menu": {
-    "score": { "title": "SCORE", "sub": "ton rang /100, le détail & le palier" },
-    "radar": { "title": "RADAR", "sub": "19 quêtes onchain & progression" },
-    "news": { "title": "NEWS", "sub": "derniers signaux de l'écosystème base" },
-    "discover": { "title": "DISCOVER", "sub": "nouveaux projets & protocoles sur base" },
-    "yield": { "title": "YIELD", "sub": "rendements defi base classés par profil de risque" },
+    "score": {
+      "title": "SCORE",
+      "sub": "ton rang /100, le détail & le palier"
+    },
+    "radar": {
+      "title": "RADAR",
+      "sub": "19 quêtes onchain & progression"
+    },
+    "news": {
+      "title": "NEWS",
+      "sub": "derniers signaux de l'écosystème base"
+    },
+    "discover": {
+      "title": "DISCOVER",
+      "sub": "nouveaux projets & protocoles sur base"
+    },
+    "yield": {
+      "title": "YIELD",
+      "sub": "rendements defi base classés par profil de risque"
+    },
     "term": {
       "title": "droprank://session",
       "chain": "chain",
@@ -163,7 +178,13 @@
     "scanningFeed": "SCAN DU FLUX BASE",
     "noSignal": "∅ AUCUN SIGNAL",
     "noNews": "aucune news base pour l'instant",
-    "signals": "signaux · base l2"
+    "signals": "signaux · base l2",
+    "bucket": {
+      "today": "aujourd'hui",
+      "yesterday": "hier",
+      "week": "cette semaine",
+      "older": "plus ancien"
+    }
   },
   "discover": {
     "eyebrow": "// new on base",
