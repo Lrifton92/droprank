@@ -441,9 +441,15 @@
 
 /* Page transition — replays on every navigation via app/template.tsx.
    fade + lift + slight scale-settle, snappy ease-out. */
+/* Page transition slides via `top` (NOT transform): any transform on this
+   wrapper — even the retained identity value from fill:both — creates a
+   containing block, which re-anchors the position:fixed .dr-grid-bg to the
+   wrapper's box and clips it (visible seam lines, bug 2026-06-05). `top` on a
+   position:relative element never creates a containing block. One element,
+   0.32s, on navigation only → the layout cost is negligible. */
 @keyframes dr-page-enter {
-  from { opacity: 0; transform: translateY(14px) scale(0.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; top: 14px; }
+  to { opacity: 1; top: 0; }
 }
 
 /* Ampler entry rise for feed/list cards — more visible than dr-rise's 10px. */
@@ -479,8 +485,8 @@
 /* Page transition wrapper (template.tsx) */
 @layer utilities {
   .dr-template {
+    position: relative;
     animation: dr-page-enter 0.32s var(--ease-out) both;
-    transform-origin: 50% 0;
   }
 }
 
