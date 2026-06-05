@@ -161,12 +161,11 @@
   gap: 8px;
 }
 
-/* The quest list stays a single full-width column at every breakpoint — rows
-   are terminal-aligned (same direction as /yields). The earlier 2/3/4-column
-   masonry grid (cards of uneven height that "danced") was rejected. On desktop
-   (≥768px) the rows gain shared fixed columns so check / link / points
-   tabulate down a clean grid; mobile (<768px) keeps the compact stacked row
-   below untouched. */
+/* Terminal-aligned rows (same direction as /yields). The earlier masonry grid
+   of uneven-height cards was rejected. On desktop the rows carry shared fixed
+   internal columns AND flow in a 2-column grid (Soufian 2026-06-05) — safe
+   because every row is the same 56px height, so both columns stay in lockstep
+   (no dancing). Mobile (<768px) keeps the compact stacked single column. */
 .quest {
   display: grid;
   grid-template-columns: 22px 1fr auto auto;
@@ -408,6 +407,13 @@
      right-aligned, tabular). The bridge "+4 score" sits INLINE next to the
      points (not stacked) so every row keeps the exact same height. */
 @media (min-width: 768px) {
+  /* Two columns of uniform-height rows — aligned, never masonry. */
+  .list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    align-items: stretch;
+  }
   .quest {
     grid-template-columns: 28px minmax(0, 1fr) var(--go-col, 92px) var(--pts-col, 96px);
     gap: 16px;
