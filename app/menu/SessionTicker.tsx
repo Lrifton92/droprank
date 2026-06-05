@@ -69,7 +69,7 @@ export default function SessionTicker({ address }: { address: string }) {
         <span className={styles.label}>{it.label}</span>
         <span className={styles.value}>{it.value}</span>
         <span className={styles.sep} aria-hidden>
-          //
+          {"//"}
         </span>
       </span>
     ));
