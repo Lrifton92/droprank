@@ -9,20 +9,38 @@ import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./news.module.css";
 
 /**
- * Recency bucket for the date separators. Items render newest-first, so a
- * bucket change between neighbours marks a section boundary. Buckets (not
- * exact days) keep the feed scannable: today / yesterday / this week / older.
+ * Recency bucket for the date separators — week/month granularity (Soufian
+ * 2026-06-05): current calendar week, last week, then one section per month
+ * ("mai 2026", …). Items render newest-first, so a bucket-key change between
+ * neighbours marks a section boundary.
  */
-function dateBucket(date: number | string): "today" | "yesterday" | "week" | "older" {
+function weekStart(d: Date): number {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); // Monday-start weeks
+  return x.getTime();
+}
+function dateBucket(date: number | string): string {
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return "older";
-  const now = new Date();
-  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-  const days = Math.floor((startOfDay(now) - startOfDay(d)) / 86_400_000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days <= 7) return "week";
-  return "older";
+  const ws = weekStart(d);
+  const wsNow = weekStart(new Date());
+  if (ws === wsNow) return "thisWeek";
+  if (wsNow - ws === 7 * 86_400_000) return "lastWeek";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+/** Separator label: i18n for the week buckets, locale month name otherwise. */
+function bucketLabel(
+  key: string,
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+): string {
+  if (key === "thisWeek" || key === "lastWeek" || key === "older") {
+    return t(`bucket.${key}`);
+  }
+  const [y, m] = key.split("-").map(Number);
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
+    new Date(y, m - 1, 1),
+  );
 }
 
 function NewsInner() {
@@ -106,7 +124,7 @@ function NewsInner() {
                       arrive newest-first). Spans the full grid row. */}
                   {dateBucket(it.date) !== (i > 0 ? dateBucket(items[i - 1].date) : null) && (
                     <li className={`mono ${styles.dateSep}`} aria-hidden>
-                      <span>{t(`bucket.${dateBucket(it.date)}`)}</span>
+                      <span>{bucketLabel(dateBucket(it.date), t, locale)}</span>
                     </li>
                   )}
                 <li

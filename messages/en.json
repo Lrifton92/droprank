@@ -180,9 +180,8 @@
     "noNews": "no base news right now",
     "signals": "signals · base l2",
     "bucket": {
-      "today": "today",
-      "yesterday": "yesterday",
-      "week": "this week",
+      "thisWeek": "this week",
+      "lastWeek": "last week",
       "older": "older"
     }
   },
