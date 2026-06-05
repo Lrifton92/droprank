@@ -54,7 +54,26 @@ function MenuInner() {
             onClick={() => router.replace("/")}
             aria-label={tc("back")}
           >
-            <span className={styles.backArrow} aria-hidden>←</span>
+            {/* Mirrored CardArrow: chevron at rest, shaft draws toward the
+                label on hover while the arrow nudges left. */}
+            <span className={styles.backArrow} aria-hidden>
+              <svg viewBox="0 0 20 12" width="16" height="10" fill="none">
+                <path
+                  className={styles.backShaft}
+                  d="M4 6h14"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M7.5 1.5 3 6l4.5 4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
             <span className={styles.backLabel}>WALLET</span>
           </button>
           <span className="dr-brand">

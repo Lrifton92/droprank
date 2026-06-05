@@ -43,9 +43,25 @@
 }
 .backArrow {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   line-height: 1;
   transition: transform 0.22s var(--ease-out);
+}
+.backArrow svg {
+  display: block;
+}
+/* Left-arrow shaft hidden at rest (chevron alone), drawn from the head
+   rightward on hover/focus — mirror of the card arrows. */
+.backShaft {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 0.22s var(--ease-out);
+}
+.back:hover .backShaft,
+.back:focus-visible .backShaft {
+  transform: scaleX(1);
 }
 .backLabel {
   position: relative;
