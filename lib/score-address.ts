@@ -4,6 +4,7 @@ import {
   fetchBalanceViaRpc,
 } from "./providers/etherscan";
 import { fetchWalletData as fetchViaBlockscout } from "./providers/blockscout";
+import { fetchTalentBuilderScore } from "./providers/talent";
 import { computeScore } from "./scoring";
 import { computeQuests } from "./quests";
 import type { ScoreResult, WalletData } from "./types";
@@ -114,13 +115,19 @@ export async function scoreAddress(
   signal?: AbortSignal,
 ): Promise<ScoreResult> {
   const addr = address.toLowerCase();
-  const data = await fetchWalletData(addr, signal);
+  // The off-chain Talent Builder Score runs in parallel with the on-chain scan so
+  // it never lengthens the cold scan. Never-fail: 0 on any error / missing key.
+  const [data, talentBuilderScore] = await Promise.all([
+    fetchWalletData(addr, signal),
+    fetchTalentBuilderScore(addr, signal),
+  ]);
   const quests = computeQuests(data.txs, addr, {
     isSmartWallet: data.usedSmartWallet,
     inboundBridge: data.inboundBridge,
     internalOutTo: data.internalOutTo,
     receivedUsdc: data.receivedUsdc,
     mintedNft: data.mintedNft,
+    talentBuilderScore,
   });
   // v1: Basename ownership is approximated from the registration quest.
   // TODO: replace with a true Basenames reverse resolution read.

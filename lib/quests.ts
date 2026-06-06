@@ -75,10 +75,10 @@ export interface QuestContext {
    * Talent Protocol Builder Score for the wallet, when the data layer can supply
    * it (> 0 means a score exists). The Builder Score is created OFF-CHAIN via the
    * Talent API — the onchain PassportRegistry/Score interaction is only a partial
-   * signal — so this is the authoritative source when available. FIX F: there is
-   * no KEYLESS Talent wallet→score endpoint (the public API requires an X-API-KEY
-   * we don't carry), so this stays an optional injection point; absent it, the
-   * quest falls back to the onchain TALENT_CONTRACTS signal (documented limit).
+   * signal — so this is the authoritative source when available. The data layer
+   * fetches it via lib/providers/talent.ts using the server-only TALENT_API_KEY;
+   * when that key is absent (or the call fails) this is 0 and the quest falls back
+   * to the onchain TALENT_CONTRACTS signal (documented limit).
    */
   talentBuilderScore?: number;
 }
