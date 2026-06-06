@@ -118,6 +118,9 @@ export async function scoreAddress(
   const quests = computeQuests(data.txs, addr, {
     isSmartWallet: data.usedSmartWallet,
     inboundBridge: data.inboundBridge,
+    internalOutTo: data.internalOutTo,
+    receivedUsdc: data.receivedUsdc,
+    mintedNft: data.mintedNft,
   });
   // v1: Basename ownership is approximated from the registration quest.
   // TODO: replace with a true Basenames reverse resolution read.

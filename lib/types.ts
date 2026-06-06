@@ -40,6 +40,26 @@ export interface WalletData {
    */
   inboundBridge?: boolean;
   /**
+   * Lowercased `to` addresses of the wallet's OUTGOING internal txs (from = the
+   * wallet). For 4337 smart wallets a protocol call is dispatched internally, so
+   * the target shows up here rather than as a normal tx `to`. Feeds the protocol
+   * quests (ctx.internalOutTo, FIX A). Optional/never-fail: absent when the
+   * internal-tx pass was skipped/failed. Deduplicated and capped to keep the
+   * payload small (full coverage isn't needed — one hit per protocol suffices).
+   */
+  internalOutTo?: string[];
+  /**
+   * True if the wallet received native USDC as an inbound ERC-20 transfer. Feeds
+   * hold-usdc (ctx.receivedUsdc, FIX D). Optional/never-fail.
+   */
+  receivedUsdc?: boolean;
+  /**
+   * True if the wallet received an ERC-721/1155 transfer FROM the zero address (a
+   * mint), independent of method name. Feeds mint-nft on BOTH the quests and score
+   * data paths so they agree (ctx.mintedNft, FIX D/E). Optional/never-fail.
+   */
+  mintedNft?: boolean;
+  /**
    * Live ETH balance in wei (decimal string), read via eth_getBalance.
    * Optional/never-fail: absent when the RPC read failed — the dust malus is
    * then NOT applied (we don't invent a balance). See scoring.ts §4.3.

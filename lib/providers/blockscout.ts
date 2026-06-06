@@ -3,8 +3,15 @@ import type { Tx, WalletData } from "../types";
 import {
   COINBASE_SMART_WALLET_FACTORY_V1,
   COINBASE_SMART_WALLET_FACTORY_V1_1,
-  BRIDGE_CONTRACTS,
 } from "../contracts-registry";
+import {
+  detectInboundBridge,
+  collectInternalOutTo,
+  detectReceivedUsdc,
+  detectMintedNft,
+  type InternalRow,
+  type TokenTransferRow,
+} from "./wallet-signals";
 
 /**
  * Keyless Blockscout (Base) API client.
@@ -139,44 +146,102 @@ interface V2InternalPage {
 }
 
 /**
- * Detect an inbound bridge fill from v2 internal txs: an internal tx whose `from`
- * is a known bridge contract delivering value (> 0) to the wallet. Covers
- * canonical deposit finalizations and Across SpokePool fills (neither appears in
- * the normal tx list). Pure; value parse failures count as 0 (no fill).
+ * Blockscout v2 token-transfer item (subset we read).
+ * NB: the item-level `type` is the TRANSFER kind ("token_minting"/"token_transfer"),
+ * NOT the token standard — the standard ("ERC-20"/"ERC-721"/"ERC-1155") lives on
+ * `token.type` (verified live 2026-06-06). We read `token.type` for the standard.
  */
-function detectInboundBridge(items: V2InternalTx[], address: string): boolean {
-  const addr = address.toLowerCase();
-  for (const it of items) {
-    const from = (it.from?.hash ?? "").toLowerCase();
-    if (!BRIDGE_CONTRACTS.has(from)) continue;
-    if ((it.to?.hash ?? "").toLowerCase() !== addr) continue;
-    try {
-      if (BigInt(it.value || "0") > BigInt(0)) return true;
-    } catch {
-      // Malformed value -> treat as 0.
-    }
-  }
-  return false;
+interface V2TokenTransfer {
+  from: V2AddressRef | null;
+  to: V2AddressRef | null;
+  token: { address_hash?: string; address?: string; type?: string } | null;
 }
 
+interface V2TokenTransferPage {
+  items: V2TokenTransfer[];
+}
+
+/** Adapt v2 internal items to the shared {@link InternalRow} shape. */
+function toInternalRows(items: V2InternalTx[]): InternalRow[] {
+  return items.map((it) => ({
+    from: it.from?.hash ?? null,
+    to: it.to?.hash ?? null,
+    value: it.value,
+  }));
+}
+
+/** Adapt v2 token-transfer items to the shared {@link TokenTransferRow} shape. */
+function toTokenRows(items: V2TokenTransfer[]): TokenTransferRow[] {
+  return items.map((it) => ({
+    from: it.from?.hash ?? null,
+    to: it.to?.hash ?? null,
+    token: it.token?.address_hash ?? it.token?.address ?? null,
+    type: it.token?.type ?? null, // token standard, NOT the item-level transfer kind
+  }));
+}
+
+/** Signals derived from the never-fail internal + token-transfer passes. */
+interface ExtraSignals {
+  inboundBridge: boolean;
+  internalOutTo: string[];
+  receivedUsdc: boolean;
+  mintedNft: boolean;
+}
+
+const NO_SIGNALS: ExtraSignals = {
+  inboundBridge: false,
+  internalOutTo: [],
+  receivedUsdc: false,
+  mintedNft: false,
+};
+
 /**
- * Inbound-bridge signal from the v2 internal-transactions endpoint. NEVER-FAIL:
- * one page is enough (bridge fills are few) and any error returns false so a
- * flaky call never breaks the scan. 404 (unused address) -> false.
+ * Internal-tx signals from the v2 internal-transactions endpoint. NEVER-FAIL: one
+ * page is enough (bridge fills are few; one internal hit per protocol suffices) and
+ * any error returns empty signals so a flaky call never breaks the scan.
  */
-async function fetchInboundBridge(
+async function fetchInternalSignals(
   address: string,
   signal: AbortSignal | undefined,
-): Promise<boolean> {
+): Promise<{ inboundBridge: boolean; internalOutTo: string[] }> {
   try {
     const res = await getJson<V2InternalPage>(
       `${BASE_URL}/addresses/${address}/internal-transactions`,
       signal,
       true,
     );
-    return detectInboundBridge(res.body?.items ?? [], address);
+    const rows = toInternalRows(res.body?.items ?? []);
+    return {
+      inboundBridge: detectInboundBridge(rows, address),
+      internalOutTo: collectInternalOutTo(rows, address),
+    };
   } catch {
-    return false;
+    return { inboundBridge: false, internalOutTo: [] };
+  }
+}
+
+/**
+ * Token-transfer signals (FIX D). One unfiltered v2 page mixes ERC-20/721/1155, so
+ * a single call surfaces both a native-USDC receipt and an NFT mint for typical
+ * wallets. NEVER-FAIL: any error returns false signals. 404 -> false.
+ */
+async function fetchTokenSignals(
+  address: string,
+  signal: AbortSignal | undefined,
+): Promise<{ receivedUsdc: boolean; mintedNft: boolean }> {
+  try {
+    const res = await getJson<V2TokenTransferPage>(
+      `${BASE_URL}/addresses/${address}/token-transfers`,
+      signal,
+      true,
+    );
+    const rows = toTokenRows(res.body?.items ?? []);
+    return {
+      receivedUsdc: detectReceivedUsdc(rows, address),
+      mintedNft: detectMintedNft(rows, address),
+    };
+  } catch {
+    return { receivedUsdc: false, mintedNft: false };
   }
 }
 
@@ -221,13 +286,16 @@ export async function fetchWalletData(
   }
   const addr = address.toLowerCase();
 
-  // 1. Address info (contract detection) + inbound-bridge internal pass, parallel.
-  //    404 on info => unused address, treat as EOA. The internal pass never fails.
-  const [info, inboundBridge] = await Promise.all([
+  // 1. Address info (contract detection) + internal-tx pass (bridge + outgoing
+  //    targets) + token-transfer pass (USDC receipt, NFT mint), all parallel.
+  //    404 on info => unused address, treat as EOA. The extra passes never fail.
+  const [info, internalSignals, tokenSignals] = await Promise.all([
     getJson<{ is_contract?: boolean }>(`${BASE_URL}/addresses/${addr}`, signal, true),
-    fetchInboundBridge(addr, signal),
+    fetchInternalSignals(addr, signal),
+    fetchTokenSignals(addr, signal),
   ]);
   const isContract = info.body?.is_contract === true;
+  const extra: ExtraSignals = { ...NO_SIGNALS, ...internalSignals, ...tokenSignals };
 
   // 2. Paginated tx list, capped.
   const txs: Tx[] = [];
@@ -264,7 +332,10 @@ export async function fetchWalletData(
     isContract,
     // A checked address that is itself a smart-wallet contract also counts.
     usedSmartWallet: usedSmartWallet || isContract,
-    inboundBridge,
+    inboundBridge: extra.inboundBridge,
+    internalOutTo: extra.internalOutTo,
+    receivedUsdc: extra.receivedUsdc,
+    mintedNft: extra.mintedNft,
     // Basename ownership is a reverse-resolution read handled by the API route;
     // default false here (the pure data layer stays keyless/tx-only).
     hasBasename: false,
@@ -272,4 +343,4 @@ export async function fetchWalletData(
 }
 
 /** Internal exports for unit tests only. */
-export const __test = { normalizeTx };
+export const __test = { normalizeTx, toInternalRows, toTokenRows };

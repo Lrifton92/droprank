@@ -23,6 +23,16 @@ function emptyInternal() {
   return jsonResponse({ items: [], next_page_params: null });
 }
 
+/** Empty token-transfers page (default for tests that don't assert token signals). */
+function emptyTokens() {
+  return jsonResponse({ items: [], next_page_params: null });
+}
+
+/** True when this URL is the v2 token-transfers endpoint. */
+function isTokenTransfers(url: string) {
+  return url.includes("/token-transfers");
+}
+
 /** Build a Blockscout v2 tx item. */
 function item(over: Record<string, unknown> = {}) {
   return {
@@ -93,6 +103,7 @@ describe("fetchWalletData", () => {
 
   it("aggregates txs across pages up to the cap and reports isContract", async () => {
     fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(emptyTokens());
       if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
       if (url.endsWith(`/addresses/${ADDR}`)) {
         return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
@@ -120,6 +131,7 @@ describe("fetchWalletData", () => {
 
   it("sets inboundBridge from a v2 internal Across fill (from = SpokePool, value > 0)", async () => {
     fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(emptyTokens());
       if (url.includes("/internal-transactions")) {
         return Promise.resolve(
           jsonResponse({
@@ -139,6 +151,7 @@ describe("fetchWalletData", () => {
 
   it("never fails the scan when the internal-tx call errors (inboundBridge falsy)", async () => {
     fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(emptyTokens());
       if (url.includes("/internal-transactions")) return Promise.resolve(jsonResponse({}, 500));
       if (url.endsWith(`/addresses/${ADDR}`)) {
         return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
@@ -157,6 +170,7 @@ describe("fetchWalletData", () => {
 
   it("treats a 404 address as an empty (unused) wallet, not an error", async () => {
     fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(emptyTokens());
       if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
       if (url.endsWith(`/addresses/${ADDR}`)) return Promise.resolve(jsonResponse({}, 404));
       return Promise.resolve(jsonResponse({ items: [], next_page_params: null }));
@@ -164,5 +178,68 @@ describe("fetchWalletData", () => {
     const data = await fetchWalletData(ADDR);
     expect(data.txCount).toBe(0);
     expect(data.isContract).toBe(false);
+  });
+
+  it("collects outgoing internal `to` targets (FIX A) from the internal pass", async () => {
+    const AERO = "0xcf77a3ba9a5ca399b7c97c74d54e5b1beb874e43";
+    fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(emptyTokens());
+      if (url.includes("/internal-transactions")) {
+        return Promise.resolve(
+          jsonResponse({
+            items: [internalItem({ from: { hash: ADDR }, to: { hash: AERO } })],
+            next_page_params: null,
+          }),
+        );
+      }
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      return Promise.resolve(jsonResponse({ items: [item()], next_page_params: null }));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.internalOutTo).toContain(AERO);
+  });
+
+  it("sets receivedUsdc and mintedNft from the v2 token-transfer pass (FIX D)", async () => {
+    const USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+    const ZERO = "0x0000000000000000000000000000000000000000";
+    fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) {
+        return Promise.resolve(
+          jsonResponse({
+            items: [
+              // item-level `type` is the transfer kind; the standard is token.type.
+              { from: { hash: "0x9" }, to: { hash: ADDR }, type: "token_transfer", token: { address_hash: USDC, type: "ERC-20" } },
+              { from: { hash: ZERO }, to: { hash: ADDR }, type: "token_minting", token: { address_hash: "0xnft", type: "ERC-721" } },
+            ],
+            next_page_params: null,
+          }),
+        );
+      }
+      if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      return Promise.resolve(jsonResponse({ items: [item()], next_page_params: null }));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.receivedUsdc).toBe(true);
+    expect(data.mintedNft).toBe(true);
+  });
+
+  it("never fails the scan when the token-transfer call errors (signals falsy)", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (isTokenTransfers(url)) return Promise.resolve(jsonResponse({}, 500));
+      if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      return Promise.resolve(jsonResponse({ items: [item()], next_page_params: null }));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.txCount).toBe(1);
+    expect(data.receivedUsdc).toBe(false);
+    expect(data.mintedNft).toBe(false);
   });
 });

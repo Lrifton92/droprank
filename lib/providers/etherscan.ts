@@ -4,8 +4,15 @@ import { BADGE_CHAIN_ID } from "../badge-abi";
 import {
   COINBASE_SMART_WALLET_FACTORY_V1,
   COINBASE_SMART_WALLET_FACTORY_V1_1,
-  BRIDGE_CONTRACTS,
 } from "../contracts-registry";
+import {
+  detectInboundBridge,
+  collectInternalOutTo,
+  detectReceivedUsdc,
+  detectMintedNft,
+  type InternalRow,
+  type TokenTransferRow,
+} from "./wallet-signals";
 
 /**
  * Etherscan v2 (multichain) API client — PRIMARY data source.
@@ -41,6 +48,14 @@ const BASE_URL = "https://api.etherscan.io/v2/api";
  */
 export const BLOCKSCOUT_COMPAT_URL = "https://base.blockscout.com/api";
 
+/**
+ * Blockscout v2 base, used by the compat path for the token-transfer pass: the
+ * Etherscan-compat `action=tokentx`/`tokennfttx` actions return an error envelope
+ * ("Something went wrong" — verified 2026-06-06) on this host, whereas the v2
+ * `/addresses/{a}/token-transfers` endpoint serves a mixed ERC-20/721/1155 page.
+ */
+export const BLOCKSCOUT_V2_URL = "https://base.blockscout.com/api/v2";
+
 /** Per-call options to retarget the client at a different Etherscan-compatible host. */
 interface ClientOptions {
   /** Override the API base URL (default: Etherscan v2). */
@@ -54,6 +69,13 @@ interface ClientOptions {
    * uses the public Base RPC instead. Etherscan's own path keeps module=proxy.
    */
   getCodeViaRpc?: boolean;
+  /**
+   * Resolve the token-transfer pass (USDC receipt + NFT mint) via the Blockscout v2
+   * `/token-transfers` endpoint instead of the Etherscan `tokentx`/`tokennfttx`
+   * actions. The compat host's tokentx actions error, so the keyless compat path
+   * uses v2; Etherscan's own path keeps the native actions.
+   */
+  tokenSignalsViaV2?: boolean;
 }
 
 /** Public Base mainnet JSON-RPC, used for eth_getCode on the keyless compat path. */
@@ -250,30 +272,30 @@ interface EsInternalTx {
   value: string;
 }
 
+/** Adapt Etherscan internal items to the shared {@link InternalRow} shape. */
+function toInternalRows(items: EsInternalTx[]): InternalRow[] {
+  return items.map((it) => ({ from: it.from ?? null, to: it.to ?? null, value: it.value }));
+}
+
 /**
- * Detect an inbound bridge fill from the internal-tx list: an internal tx whose
- * `from` is a known bridge contract and that delivers value (> 0) to the wallet.
- * Covers canonical deposit finalizations (from = L2StandardBridge) and Across
- * SpokePool fills (from = SpokePool) — neither appears in the normal tx list.
- * Pure; `value` parse failures are treated as 0 (no fill).
+ * Raw Etherscan v2 tokentx (ERC-20) and tokennfttx (ERC-721) item (subset we read).
+ * Etherscan splits token transfers by standard across actions; the ERC-20 action
+ * has no `tokenID`, the NFT actions do. We tag `type` per source action.
  */
-function detectInboundBridge(items: EsInternalTx[], address: string): boolean {
-  const addr = address.toLowerCase();
-  for (const it of items) {
-    const from = (it.from ?? "").toLowerCase();
-    if (!BRIDGE_CONTRACTS.has(from)) continue;
-    if ((it.to ?? "").toLowerCase() !== addr) continue;
-    try {
-      if (BigInt(it.value || "0") > BigInt(0)) return true;
-    } catch {
-      // Malformed value -> treat as 0 (no fill).
-    }
-  }
-  return false;
+interface EsTokenTx {
+  from: string;
+  to: string;
+  contractAddress: string;
 }
 
 /** Internal export for tests only. */
-export const __test = { normalizeTx, deriveMethod, hasCallData, detectInboundBridge };
+export const __test = {
+  normalizeTx,
+  deriveMethod,
+  hasCallData,
+  detectInboundBridge: (items: EsInternalTx[], address: string) =>
+    detectInboundBridge(toInternalRows(items), address),
+};
 
 function buildTxlistUrl(address: string, opts: ClientOptions): string {
   const u = new URL(opts.baseUrl ?? BASE_URL);
@@ -354,16 +376,16 @@ async function fetchTxs(
 }
 
 /**
- * Inbound-bridge signal from the internal-tx list. NEVER-FAIL: any API/transport
- * error returns false (no extra cold-scan failure mode) — a missed fill is a
- * documented false-negative, never a broken scan. "No internal txs" (status 0)
- * is a normal empty wallet, also false.
+ * Internal-tx signals from the internal-tx list: inbound bridge fill (existing) +
+ * the wallet's OUTGOING internal `to` targets (FIX A, smart-wallet protocol calls).
+ * NEVER-FAIL: any API/transport error returns empty signals (no extra cold-scan
+ * failure mode). "No internal txs" (status 0) is a normal empty wallet.
  */
-async function fetchInboundBridge(
+async function fetchInternalSignals(
   address: string,
   signal: AbortSignal | undefined,
   opts: ClientOptions,
-): Promise<boolean> {
+): Promise<{ inboundBridge: boolean; internalOutTo: string[] }> {
   try {
     const env = await getEnvelope<EsInternalTx[] | string>(
       buildTxlistInternalUrl(address, opts),
@@ -374,11 +396,126 @@ async function fetchInboundBridge(
     // processed") with a fully populated array — verified 2026-06-06 on Soufian's
     // wallet (the Across fills are present there). Keying on status "1" only would
     // discard those rows and re-introduce the false negative this fix removes.
-    const items = Array.isArray(env.result) ? env.result : [];
-    return detectInboundBridge(items, address);
+    const rows = toInternalRows(Array.isArray(env.result) ? env.result : []);
+    return {
+      inboundBridge: detectInboundBridge(rows, address),
+      internalOutTo: collectInternalOutTo(rows, address),
+    };
   } catch {
-    return false;
+    return { inboundBridge: false, internalOutTo: [] };
   }
+}
+
+/**
+ * Token-transfer signals (FIX D): native-USDC receipt + NFT mint (ERC-721/1155
+ * transfer from 0x0). NEVER-FAIL: any error returns false signals.
+ *
+ * Two sources, picked by opts.tokenSignalsViaV2:
+ *  - Etherscan native: tokentx (ERC-20) for USDC + tokennfttx (ERC-721) for mints,
+ *    run in parallel (ERC-1155 mints are out of scope on this path — documented).
+ *  - Blockscout v2 (compat path): one /token-transfers page (mixed ERC-20/721/1155).
+ */
+async function fetchTokenSignals(
+  address: string,
+  signal: AbortSignal | undefined,
+  opts: ClientOptions,
+): Promise<{ receivedUsdc: boolean; mintedNft: boolean }> {
+  if (opts.tokenSignalsViaV2) {
+    return fetchTokenSignalsViaV2(address, signal);
+  }
+  try {
+    const [erc20, nft] = await Promise.all([
+      getEnvelope<EsTokenTx[] | string>(buildTokenTxUrl(address, "tokentx", opts), signal),
+      getEnvelope<EsTokenTx[] | string>(buildTokenTxUrl(address, "tokennfttx", opts), signal),
+    ]);
+    const erc20Rows = toTokenRows(erc20.result, "ERC-20");
+    const nftRows = toTokenRows(nft.result, "ERC-721");
+    return {
+      receivedUsdc: detectReceivedUsdc(erc20Rows, address),
+      mintedNft: detectMintedNft(nftRows, address),
+    };
+  } catch {
+    return { receivedUsdc: false, mintedNft: false };
+  }
+}
+
+/** Adapt an Etherscan token-tx result (any-array tolerant) to TokenTransferRow. */
+function toTokenRows(result: EsTokenTx[] | string, type: string): TokenTransferRow[] {
+  const items = Array.isArray(result) ? result : [];
+  return items.map((it) => ({
+    from: it.from ?? null,
+    to: it.to ?? null,
+    token: it.contractAddress ?? null,
+    type,
+  }));
+}
+
+/**
+ * Blockscout v2 token-transfer item (mixed standards), for the compat path.
+ * The token standard is on `token.type` (the item-level `type` is the transfer
+ * kind "token_minting"/"token_transfer"). Verified live 2026-06-06.
+ */
+interface V2TokenTransfer {
+  from: { hash?: string } | null;
+  to: { hash?: string } | null;
+  token: { address_hash?: string; address?: string; type?: string } | null;
+}
+
+/**
+ * Token signals via the Blockscout v2 /token-transfers endpoint (compat path). One
+ * unfiltered page mixes ERC-20/721/1155, so a single call surfaces both signals.
+ * NEVER-FAIL.
+ */
+async function fetchTokenSignalsViaV2(
+  address: string,
+  signal: AbortSignal | undefined,
+): Promise<{ receivedUsdc: boolean; mintedNft: boolean }> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  signal?.addEventListener("abort", onAbort);
+  try {
+    const res = await fetch(`${BLOCKSCOUT_V2_URL}/addresses/${address}/token-transfers`, {
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return { receivedUsdc: false, mintedNft: false };
+    const body = (await res.json()) as { items?: V2TokenTransfer[] };
+    const rows: TokenTransferRow[] = (body.items ?? []).map((it) => ({
+      from: it.from?.hash ?? null,
+      to: it.to?.hash ?? null,
+      token: it.token?.address_hash ?? it.token?.address ?? null,
+      type: it.token?.type ?? null, // token standard, NOT the item-level transfer kind
+    }));
+    return {
+      receivedUsdc: detectReceivedUsdc(rows, address),
+      mintedNft: detectMintedNft(rows, address),
+    };
+  } catch {
+    return { receivedUsdc: false, mintedNft: false };
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/** Token-transfer list URL (Etherscan `module=account&action=tokentx|tokennfttx`). */
+function buildTokenTxUrl(
+  address: string,
+  action: "tokentx" | "tokennfttx",
+  opts: ClientOptions,
+): string {
+  const u = new URL(opts.baseUrl ?? BASE_URL);
+  u.searchParams.set("chainid", String(chainId()));
+  u.searchParams.set("module", "account");
+  u.searchParams.set("action", action);
+  u.searchParams.set("address", address);
+  u.searchParams.set("startblock", "0");
+  u.searchParams.set("endblock", "99999999");
+  u.searchParams.set("page", "1");
+  u.searchParams.set("offset", String(ETHERSCAN_PAGE_CAP));
+  u.searchParams.set("sort", "desc");
+  if (opts.requireApiKey !== false) u.searchParams.set("apikey", apiKey());
+  return u.toString();
 }
 
 /**
@@ -501,12 +638,14 @@ export async function fetchWalletData(
 
   const addr = address.toLowerCase();
 
-  // Parallel: tx list (heavy), code check (light), inbound-bridge internal pass
-  // (never-fail). One extra round-trip; respects the ~1s cold-scan budget.
-  const [txs, isContract, inboundBridge] = await Promise.all([
+  // Parallel: tx list (heavy), code check (light), internal-tx pass (bridge +
+  // outgoing targets) and token-transfer pass (USDC receipt, NFT mint), both
+  // never-fail. Extra round-trips run concurrently; respects the cold-scan budget.
+  const [txs, isContract, internalSignals, tokenSignals] = await Promise.all([
     fetchTxs(addr, signal, opts),
     fetchIsContract(addr, signal, opts),
-    fetchInboundBridge(addr, signal, opts),
+    fetchInternalSignals(addr, signal, opts),
+    fetchTokenSignals(addr, signal, opts),
   ]);
 
   let usedSmartWallet = false;
@@ -526,7 +665,10 @@ export async function fetchWalletData(
     txCount: txs.length,
     isContract,
     usedSmartWallet: usedSmartWallet || isContract,
-    inboundBridge,
+    inboundBridge: internalSignals.inboundBridge,
+    internalOutTo: internalSignals.internalOutTo,
+    receivedUsdc: tokenSignals.receivedUsdc,
+    mintedNft: tokenSignals.mintedNft,
     // Basename ownership is resolved at the route level (quest-derived in v1).
     hasBasename: false,
   };
@@ -547,5 +689,7 @@ export function fetchWalletDataViaBlockscoutCompat(
     requireApiKey: false,
     // Blockscout-compat rejects module=proxy&action=eth_getCode; use Base RPC.
     getCodeViaRpc: true,
+    // Blockscout-compat rejects tokentx/tokennfttx; use the v2 token-transfers endpoint.
+    tokenSignalsViaV2: true,
   });
 }

@@ -17,6 +17,17 @@ import {
   SEAPORT_1_6,
   TALENT_PASSPORT_REGISTRY,
   SOCKET_GATEWAY,
+  UNISWAP_UNIVERSAL_ROUTER_V3,
+  UNISWAP_SWAP_ROUTER_02,
+  MOONWELL_MCBETH,
+  MOONWELL_MDAI,
+  MOONWELL_MEURC,
+  AAVE_V3_WETH_GATEWAY,
+  COMPOUND_V3_WETH,
+  COMPOUND_V3_AERO,
+  COMPOUND_V3_USDBC,
+  PANCAKESWAP_V3_SWAP_ROUTER,
+  EXTRA_FINANCE_POSITION_MANAGER,
 } from "./contracts-registry";
 import type { Tx } from "./types";
 
@@ -181,6 +192,118 @@ describe("computeQuests", () => {
   it("detects a Talent Builder Score (PassportRegistry interaction)", () => {
     const r = computeQuests([tx({ to: TALENT_PASSPORT_REGISTRY })], ADDR);
     expect(r.quests.find((q) => q.id === "talent-builder-score")!.done).toBe(true);
+  });
+
+  describe("FIX B — extended contract registry (new verified addresses)", () => {
+    const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+      r.quests.find((q) => q.id === id)!.done;
+
+    it("detects a Uniswap swap via the V3 UniversalRouter and SwapRouter02", () => {
+      expect(done(computeQuests([tx({ to: UNISWAP_UNIVERSAL_ROUTER_V3 })], ADDR), "swap-uniswap")).toBe(true);
+      expect(done(computeQuests([tx({ to: UNISWAP_SWAP_ROUTER_02 })], ADDR), "swap-uniswap")).toBe(true);
+    });
+
+    it("detects Moonwell lend via mcbETH / mDAI / mEURC mTokens", () => {
+      for (const mtoken of [MOONWELL_MCBETH, MOONWELL_MDAI, MOONWELL_MEURC]) {
+        expect(done(computeQuests([tx({ to: mtoken })], ADDR), "lend-moonwell")).toBe(true);
+      }
+    });
+
+    it("detects an Aave native-ETH supply via the WrappedTokenGateway", () => {
+      expect(done(computeQuests([tx({ to: AAVE_V3_WETH_GATEWAY })], ADDR), "supply-aave")).toBe(true);
+    });
+
+    it("detects Compound supply on the WETH / AERO / USDbC markets", () => {
+      for (const comet of [COMPOUND_V3_WETH, COMPOUND_V3_AERO, COMPOUND_V3_USDBC]) {
+        expect(done(computeQuests([tx({ to: comet })], ADDR), "lend-compound")).toBe(true);
+      }
+    });
+
+    it("detects a PancakeSwap swap via the V3 SwapRouter", () => {
+      expect(done(computeQuests([tx({ to: PANCAKESWAP_V3_SWAP_ROUTER })], ADDR), "swap-pancakeswap")).toBe(true);
+    });
+
+    it("detects Extra Finance via the VeloPositionManager", () => {
+      expect(done(computeQuests([tx({ to: EXTRA_FINANCE_POSITION_MANAGER })], ADDR), "leverage-extra")).toBe(true);
+    });
+  });
+
+  describe("FIX A — outgoing internal txs count for protocol quests (smart wallets)", () => {
+    const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+      r.quests.find((q) => q.id === id)!.done;
+
+    it("counts an Aerodrome swap dispatched as an outgoing internal call", () => {
+      // Smart wallet: no normal tx to Aerodrome, but the swap is an internal call out.
+      const r = computeQuests([tx({ to: "0x9999999999999999999999999999999999999999" })], ADDR, {
+        internalOutTo: [AERODROME_ROUTER],
+      });
+      expect(done(r, "swap-aerodrome")).toBe(true);
+    });
+
+    it("counts a Uniswap (Set) interaction via an outgoing internal call", () => {
+      const r = computeQuests([tx({})], ADDR, { internalOutTo: [UNISWAP_UNIVERSAL_ROUTER_V3] });
+      expect(done(r, "swap-uniswap")).toBe(true);
+    });
+
+    it("does not validate when the internal call targets an unrelated contract", () => {
+      const r = computeQuests([tx({})], ADDR, {
+        internalOutTo: ["0x1111111111111111111111111111111111111111"],
+      });
+      expect(done(r, "swap-aerodrome")).toBe(false);
+      expect(done(r, "swap-uniswap")).toBe(false);
+    });
+  });
+
+  describe("FIX D — token-transfer pass (mint-nft, hold-usdc)", () => {
+    const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+      r.quests.find((q) => q.id === id)!.done;
+
+    it("detects mint-nft from an ERC-721/1155 transfer-from-0x0 (no mint method)", () => {
+      // A pure NFT mint shows no decoded "mint" method on the normal tx list.
+      const r = computeQuests([tx({ method: "0xabcdef12", toIsContract: true })], ADDR, {
+        mintedNft: true,
+      });
+      expect(done(r, "mint-nft")).toBe(true);
+    });
+
+    it("still detects mint-nft via the legacy method heuristic (non-regression)", () => {
+      const r = computeQuests(
+        [tx({ to: "0xdead000000000000000000000000000000000001", method: "mint", toIsContract: true })],
+        ADDR,
+      );
+      expect(done(r, "mint-nft")).toBe(true);
+    });
+
+    it("detects hold-usdc from a passive inbound USDC receipt (ctx.receivedUsdc)", () => {
+      const r = computeQuests([tx({})], ADDR, { receivedUsdc: true });
+      expect(done(r, "hold-usdc")).toBe(true);
+    });
+
+    it("does not flag mint/usdc without the token signals or a direct tx", () => {
+      const r = computeQuests([tx({})], ADDR);
+      expect(done(r, "mint-nft")).toBe(false);
+      expect(done(r, "hold-usdc")).toBe(false);
+    });
+  });
+
+  describe("FIX F — Talent Builder Score (off-chain signal)", () => {
+    const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+      r.quests.find((q) => q.id === id)!.done;
+
+    it("validates on a real off-chain Builder Score (ctx.talentBuilderScore > 0)", () => {
+      const r = computeQuests([tx({})], ADDR, { talentBuilderScore: 42 });
+      expect(done(r, "talent-builder-score")).toBe(true);
+    });
+
+    it("does not validate on a zero Builder Score with no onchain interaction", () => {
+      const r = computeQuests([tx({})], ADDR, { talentBuilderScore: 0 });
+      expect(done(r, "talent-builder-score")).toBe(false);
+    });
+
+    it("still validates on the onchain signal when no score is supplied (fallback)", () => {
+      const r = computeQuests([tx({ to: TALENT_PASSPORT_REGISTRY })], ADDR);
+      expect(done(r, "talent-builder-score")).toBe(true);
+    });
   });
 
   describe("bridge-canonical (third-party bridges + inbound fills)", () => {

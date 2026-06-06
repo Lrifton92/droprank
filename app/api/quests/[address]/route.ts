@@ -26,12 +26,14 @@ export async function GET(
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  // Versioned cache-key prefix: bumped to v2 on 2026-06-06 when bridge detection
-  // started consuming internal txs (Across/Socket + inbound fills). The bridge
-  // quest can now flip done=true, so payloads cached under the bare address MUST
-  // NOT be reused. Stale entries expire on their own (TTL 5min).
+  // Versioned cache-key prefix. v2 (2026-06-06): bridge detection started
+  // consuming internal txs. v3 (2026-06-06, PHASE 2): the token-transfer pass +
+  // outgoing internal targets land — mint-nft / hold-usdc / protocol quests can
+  // now flip done=true for the same wallet, so v2 payloads MUST NOT be reused.
+  // Stale entries expire on their own (TTL 5min). NB: `key` is the cache key only;
+  // the metier address passed to fetchWalletData is `addr` (never the versioned key).
   const addr = address.toLowerCase();
-  const key = `v2:${addr}`;
+  const key = `v3:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
@@ -40,6 +42,9 @@ export async function GET(
       return computeQuests(data.txs, addr, {
         isSmartWallet: data.usedSmartWallet,
         inboundBridge: data.inboundBridge,
+        internalOutTo: data.internalOutTo,
+        receivedUsdc: data.receivedUsdc,
+        mintedNft: data.mintedNft,
       });
     });
     return NextResponse.json(result, {

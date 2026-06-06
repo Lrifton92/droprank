@@ -3,6 +3,7 @@ import {
   fetchWalletData,
   fetchWalletDataViaBlockscoutCompat,
   BLOCKSCOUT_COMPAT_URL,
+  BLOCKSCOUT_V2_URL,
   BASE_RPC_URL,
   EtherscanError,
   __test,
@@ -69,6 +70,16 @@ function getCode(code: string) {
 /** True when this fetch call is the keyless eth_getCode JSON-RPC POST to Base. */
 function isRpcGetCode(url: string, init?: RequestInit): boolean {
   return url === BASE_RPC_URL && init?.method === "POST";
+}
+
+/** True when this fetch call is the v2 token-transfers endpoint (compat path). */
+function isV2TokenTransfers(url: string): boolean {
+  return url.startsWith(BLOCKSCOUT_V2_URL) && url.includes("/token-transfers");
+}
+
+/** Empty v2 token-transfers page. */
+function v2Tokens(items: unknown[] = []) {
+  return { ok: true, status: 200, json: async () => ({ items }) } as Response;
 }
 
 describe("detectInboundBridge (pure, over txlistinternal items)", () => {
@@ -223,6 +234,34 @@ describe("fetchWalletData", () => {
     expect(data.inboundBridge).toBe(false);
   });
 
+  it("collects outgoing internal `to` and sets token signals via native actions (FIX A/D)", async () => {
+    const AERO = "0xcf77a3ba9a5ca399b7c97c74d54e5b1beb874e43";
+    const USDC = USDC_NATIVE;
+    const ZERO = "0x0000000000000000000000000000000000000000";
+    fetchMock.mockImplementation((url: string) => {
+      // tokennfttx must be matched before the generic tokentx substring.
+      if (url.includes("action=tokennfttx")) {
+        return Promise.resolve(
+          internalOk([{ from: ZERO, to: ADDR, contractAddress: "0xnft" }]),
+        );
+      }
+      if (url.includes("action=tokentx")) {
+        return Promise.resolve(
+          internalOk([{ from: "0x9", to: ADDR, contractAddress: USDC }]),
+        );
+      }
+      if (url.includes("action=txlistinternal")) {
+        return Promise.resolve(internalOk([esInternal({ from: ADDR, to: AERO })]));
+      }
+      if (url.includes("action=txlist")) return Promise.resolve(txlistOk([esTx()]));
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.internalOutTo).toContain(AERO);
+    expect(data.receivedUsdc).toBe(true);
+    expect(data.mintedNft).toBe(true);
+  });
+
   it("flags a wallet whose own address has code as a contract/smart wallet", async () => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes("action=txlist")) return Promise.resolve(txlistOk([esTx()]));
@@ -293,13 +332,15 @@ describe("fetchWalletDataViaBlockscoutCompat (keyless)", () => {
         rpcPost = { url, init };
         return Promise.resolve(getCode("0x"));
       }
+      if (isV2TokenTransfers(url)) return Promise.resolve(v2Tokens());
       accountUrls.push(url);
       if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
       return Promise.resolve(txlistOk([esTx()]));
     });
     const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
     expect(data.txCount).toBe(1);
-    // Exactly two account calls: txlist + txlistinternal, both keyless.
+    // Exactly two Etherscan-compat account calls: txlist + txlistinternal, both
+    // keyless. The token-transfer pass uses the v2 endpoint, not these actions.
     expect(accountUrls.length).toBe(2);
     const txlistUrl = accountUrls.find((u) => !u.includes("txlistinternal"))!;
     const internalUrl = accountUrls.find((u) => u.includes("txlistinternal"))!;
@@ -335,6 +376,35 @@ describe("fetchWalletDataViaBlockscoutCompat (keyless)", () => {
     });
     const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
     expect(data.inboundBridge).toBe(true);
+  });
+
+  it("derives token signals via the v2 endpoint, not tokentx actions (FIX D)", async () => {
+    const USDC = USDC_NATIVE;
+    const ZERO = "0x0000000000000000000000000000000000000000";
+    let usedTokenAction = false;
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      if (isV2TokenTransfers(url)) {
+        return Promise.resolve(
+          v2Tokens([
+            // item-level `type` is the transfer kind; the standard is token.type.
+            { from: { hash: "0x9" }, to: { hash: ADDR }, type: "token_transfer", token: { address_hash: USDC, type: "ERC-20" } },
+            { from: { hash: ZERO }, to: { hash: ADDR }, type: "token_minting", token: { address_hash: "0xnft", type: "ERC-1155" } },
+          ]),
+        );
+      }
+      if (url.includes("action=tokentx") || url.includes("action=tokennfttx")) {
+        usedTokenAction = true;
+        return Promise.resolve(internalOk([]));
+      }
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.receivedUsdc).toBe(true);
+    expect(data.mintedNft).toBe(true);
+    // The compat path must NOT hit the broken tokentx/tokennfttx compat actions.
+    expect(usedTokenAction).toBe(false);
   });
 
   it("reports a contract via the Base RPC eth_getCode (bytecode present)", async () => {

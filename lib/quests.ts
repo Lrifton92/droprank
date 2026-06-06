@@ -3,16 +3,16 @@ import {
   AERODROME_ROUTER,
   UNISWAP_ROUTERS,
   MOONWELL_CONTRACTS,
-  AAVE_V3_POOL,
+  AAVE_CONTRACTS,
   BASENAMES_CONTROLLERS,
   BRIDGE_CONTRACTS,
   USDC_NATIVE,
   MORPHO_BLUE,
-  COMPOUND_V3_USDC,
+  COMPOUND_CONTRACTS,
   PENDLE_ROUTER_V4,
   AVANTIS_TRADING,
-  EXTRA_FINANCE_LENDING_POOL,
-  PANCAKESWAP_SMART_ROUTER,
+  EXTRA_FINANCE_CONTRACTS,
+  PANCAKESWAP_ROUTERS,
   SEAPORT_1_6,
   TALENT_CONTRACTS,
 } from "./contracts-registry";
@@ -50,6 +50,37 @@ export interface QuestContext {
    * or an Across SpokePool fill. Derived by the data layer from txlistinternal.
    */
   inboundBridge?: boolean;
+  /**
+   * Lowercased `to` addresses of the wallet's OUTGOING internal txs (from = the
+   * wallet). For 4337 smart wallets the user's protocol calls are dispatched by
+   * an entrypoint/account contract, so the protocol target shows up as an internal
+   * call out of the wallet rather than a normal tx `to`. Folded into every
+   * protocol-Set check so a smart-wallet swap/lend counts. Derived from
+   * txlistinternal; absent when that pass was skipped/failed (never breaks a scan).
+   */
+  internalOutTo?: string[];
+  /**
+   * The wallet received native USDC as an inbound ERC-20 transfer (token = USDC).
+   * Lets hold-usdc validate on a passive receipt, not only a direct USDC tx.
+   * Derived from the token-transfer pass; absent when it was skipped/failed.
+   */
+  receivedUsdc?: boolean;
+  /**
+   * The wallet was the recipient of an ERC-721/1155 transfer FROM the zero address
+   * (a mint), independent of the method name. Makes mint-nft robust and identical
+   * across the quests and score data paths. Derived from the token-transfer pass.
+   */
+  mintedNft?: boolean;
+  /**
+   * Talent Protocol Builder Score for the wallet, when the data layer can supply
+   * it (> 0 means a score exists). The Builder Score is created OFF-CHAIN via the
+   * Talent API — the onchain PassportRegistry/Score interaction is only a partial
+   * signal — so this is the authoritative source when available. FIX F: there is
+   * no KEYLESS Talent wallet→score endpoint (the public API requires an X-API-KEY
+   * we don't carry), so this stays an optional injection point; absent it, the
+   * quest falls back to the onchain TALENT_CONTRACTS signal (documented limit).
+   */
+  talentBuilderScore?: number;
 }
 
 interface QuestDef {
@@ -69,6 +100,32 @@ interface QuestDef {
 
 const to = (t: Tx) => (t.to ? t.to.toLowerCase() : null);
 
+/**
+ * True when the wallet touched any contract in `set` — as a NORMAL tx `to`, or as
+ * an OUTGOING internal-tx `to` (ctx.internalOutTo). The internal leg is what makes
+ * a 4337 smart-wallet interaction count, where the protocol call is dispatched
+ * internally rather than as a top-level tx the user signed (FIX A). Pure.
+ */
+function touched(set: ReadonlySet<string>, txs: Tx[], ctx: QuestContext): boolean {
+  for (const t of txs) {
+    const a = to(t);
+    if (a !== null && set.has(a)) return true;
+  }
+  const internal = ctx.internalOutTo;
+  if (internal) {
+    for (const a of internal) {
+      if (set.has(a)) return true;
+    }
+  }
+  return false;
+}
+
+/** Single-address variant of {@link touched} (one known contract, not a Set). */
+function touchedOne(addr: string, txs: Tx[], ctx: QuestContext): boolean {
+  if (txs.some((t) => to(t) === addr)) return true;
+  return ctx.internalOutTo?.includes(addr) === true;
+}
+
 export const QUESTS: ReadonlyArray<QuestDef> = [
   {
     id: "swap-aerodrome",
@@ -76,7 +133,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://aerodrome.finance",
     category: "DEX",
-    check: (txs) => txs.some((t) => to(t) === AERODROME_ROUTER),
+    check: (txs, _a, ctx) => touchedOne(AERODROME_ROUTER, txs, ctx),
   },
   {
     id: "swap-uniswap",
@@ -84,7 +141,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.uniswap.org",
     category: "DEX",
-    check: (txs) => txs.some((t) => { const a = to(t); return a !== null && UNISWAP_ROUTERS.has(a); }),
+    check: (txs, _a, ctx) => touched(UNISWAP_ROUTERS, txs, ctx),
   },
   {
     id: "lend-moonwell",
@@ -92,7 +149,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://moonwell.fi",
     category: "Lending",
-    check: (txs) => txs.some((t) => { const a = to(t); return a !== null && MOONWELL_CONTRACTS.has(a); }),
+    check: (txs, _a, ctx) => touched(MOONWELL_CONTRACTS, txs, ctx),
   },
   {
     id: "supply-aave",
@@ -100,14 +157,19 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.aave.com",
     category: "Lending",
-    check: (txs) => txs.some((t) => to(t) === AAVE_V3_POOL),
+    check: (txs, _a, ctx) => touched(AAVE_CONTRACTS, txs, ctx),
   },
   {
     id: "mint-nft",
     label: "Mint any NFT",
     points: 1,
     category: "NFT",
-    check: (txs) =>
+    // Robust detection (FIX D/E): an ERC-721/1155 transfer FROM the zero address
+    // to the wallet (ctx.mintedNft) is a mint regardless of the method name, so
+    // the quests and score data paths agree. Kept as OR with the legacy method
+    // heuristic for sources without the token-transfer pass.
+    check: (txs, _a, ctx) =>
+      ctx.mintedNft === true ||
       txs.some(
         (t) =>
           t.toIsContract === true &&
@@ -121,7 +183,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://base.org/names",
     category: "Identity",
-    check: (txs) => txs.some((t) => { const a = to(t); return a !== null && BASENAMES_CONTROLLERS.has(a); }),
+    check: (txs, _a, ctx) => touched(BASENAMES_CONTROLLERS, txs, ctx),
   },
   {
     id: "smart-wallet",
@@ -161,7 +223,9 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     label: "Interact with native USDC",
     points: 1,
     link: "https://www.base.org",
-    check: (txs) => txs.some((t) => to(t) === USDC_NATIVE),
+    // A direct USDC tx, OR a passive inbound USDC receipt (FIX D, ctx.receivedUsdc).
+    check: (txs, _a, ctx) =>
+      ctx.receivedUsdc === true || touchedOne(USDC_NATIVE, txs, ctx),
   },
   // --- Radar v2: additional Base protocols (more paths to the 20-pt cap) ---
   {
@@ -170,7 +234,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.morpho.org",
     category: "Lending",
-    check: (txs) => txs.some((t) => to(t) === MORPHO_BLUE),
+    check: (txs, _a, ctx) => touchedOne(MORPHO_BLUE, txs, ctx),
   },
   {
     id: "lend-compound",
@@ -178,7 +242,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.compound.finance",
     category: "Lending",
-    check: (txs) => txs.some((t) => to(t) === COMPOUND_V3_USDC),
+    check: (txs, _a, ctx) => touched(COMPOUND_CONTRACTS, txs, ctx),
   },
   {
     id: "yield-pendle",
@@ -186,7 +250,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.pendle.finance",
     category: "Lending",
-    check: (txs) => txs.some((t) => to(t) === PENDLE_ROUTER_V4),
+    check: (txs, _a, ctx) => touchedOne(PENDLE_ROUTER_V4, txs, ctx),
   },
   {
     id: "perps-avantis",
@@ -194,7 +258,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://www.avantisfi.com",
     category: "Perps",
-    check: (txs) => txs.some((t) => to(t) === AVANTIS_TRADING),
+    check: (txs, _a, ctx) => touchedOne(AVANTIS_TRADING, txs, ctx),
   },
   {
     id: "leverage-extra",
@@ -202,7 +266,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 1,
     link: "https://app.extrafi.io",
     category: "Lending",
-    check: (txs) => txs.some((t) => to(t) === EXTRA_FINANCE_LENDING_POOL),
+    check: (txs, _a, ctx) => touched(EXTRA_FINANCE_CONTRACTS, txs, ctx),
   },
   {
     id: "swap-pancakeswap",
@@ -210,7 +274,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 1,
     link: "https://pancakeswap.finance",
     category: "DEX",
-    check: (txs) => txs.some((t) => to(t) === PANCAKESWAP_SMART_ROUTER),
+    check: (txs, _a, ctx) => touched(PANCAKESWAP_ROUTERS, txs, ctx),
   },
   {
     id: "trade-opensea",
@@ -218,7 +282,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 1,
     link: "https://opensea.io",
     category: "NFT",
-    check: (txs) => txs.some((t) => to(t) === SEAPORT_1_6),
+    check: (txs, _a, ctx) => touchedOne(SEAPORT_1_6, txs, ctx),
   },
   {
     id: "talent-builder-score",
@@ -226,7 +290,12 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://talent.app",
     category: "Social",
-    check: (txs) => txs.some((t) => { const a = to(t); return a !== null && TALENT_CONTRACTS.has(a); }),
+    // FIX F: a real off-chain Builder Score (ctx.talentBuilderScore > 0) when the
+    // data layer can supply it, OR the partial onchain PassportRegistry/Score
+    // interaction (also reached via internal calls for smart wallets).
+    check: (txs, _a, ctx) =>
+      (typeof ctx.talentBuilderScore === "number" && ctx.talentBuilderScore > 0) ||
+      touched(TALENT_CONTRACTS, txs, ctx),
   },
 ];
 
