@@ -33,6 +33,13 @@ export interface WalletData {
   /** True if the wallet used a Coinbase Smart Wallet (factory detection). */
   usedSmartWallet: boolean;
   /**
+   * True if the wallet received an inbound bridge fill via an internal tx (from a
+   * known bridge contract, value > 0): a canonical deposit finalization or an
+   * Across SpokePool fill. Feeds the bridge quest (ctx.inboundBridge). Optional:
+   * absent when the internal-tx pass was skipped/failed (never breaks the scan).
+   */
+  inboundBridge?: boolean;
+  /**
    * Live ETH balance in wei (decimal string), read via eth_getBalance.
    * Optional/never-fail: absent when the RPC read failed — the dust malus is
    * then NOT applied (we don't invent a balance). See scoring.ts §4.3.

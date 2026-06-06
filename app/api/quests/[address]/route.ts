@@ -26,7 +26,11 @@ export async function GET(
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  const key = address.toLowerCase();
+  // Versioned cache-key prefix: bumped to v2 on 2026-06-06 when bridge detection
+  // started consuming internal txs (Across/Socket + inbound fills). The bridge
+  // quest can now flip done=true, so payloads cached under the bare address MUST
+  // NOT be reused. Stale entries expire on their own (TTL 5min).
+  const key = `v2:${address.toLowerCase()}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
@@ -34,6 +38,7 @@ export async function GET(
       const data = await fetchWalletData(key, req.signal);
       return computeQuests(data.txs, key, {
         isSmartWallet: data.usedSmartWallet,
+        inboundBridge: data.inboundBridge,
       });
     });
     return NextResponse.json(result, {

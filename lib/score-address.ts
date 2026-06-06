@@ -117,6 +117,7 @@ export async function scoreAddress(
   const data = await fetchWalletData(addr, signal);
   const quests = computeQuests(data.txs, addr, {
     isSmartWallet: data.usedSmartWallet,
+    inboundBridge: data.inboundBridge,
   });
   // v1: Basename ownership is approximated from the registration quest.
   // TODO: replace with a true Basenames reverse resolution read.

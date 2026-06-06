@@ -16,6 +16,7 @@ import {
   PANCAKESWAP_SMART_ROUTER,
   SEAPORT_1_6,
   TALENT_PASSPORT_REGISTRY,
+  SOCKET_GATEWAY,
 } from "./contracts-registry";
 import type { Tx } from "./types";
 
@@ -180,6 +181,32 @@ describe("computeQuests", () => {
   it("detects a Talent Builder Score (PassportRegistry interaction)", () => {
     const r = computeQuests([tx({ to: TALENT_PASSPORT_REGISTRY })], ADDR);
     expect(r.quests.find((q) => q.id === "talent-builder-score")!.done).toBe(true);
+  });
+
+  describe("bridge-canonical (third-party bridges + inbound fills)", () => {
+    const bridgeDone = (r: ReturnType<typeof computeQuests>) =>
+      r.quests.find((q) => q.id === "bridge-canonical")!.done;
+
+    it("validates on an inbound internal fill (ctx.inboundBridge) with no normal bridge tx", () => {
+      // Across fill onto Base: from = SpokePool, value > 0, internal tx only.
+      const r = computeQuests([tx({})], ADDR, { inboundBridge: true });
+      expect(bridgeDone(r)).toBe(true);
+    });
+
+    it("validates on a normal tx to a third-party bridge (Socket gateway)", () => {
+      const r = computeQuests([tx({ to: SOCKET_GATEWAY })], ADDR);
+      expect(bridgeDone(r)).toBe(true);
+    });
+
+    it("still validates on a normal tx to the canonical L2 bridge (non-regression)", () => {
+      const r = computeQuests([tx({ to: L2_STANDARD_BRIDGE })], ADDR);
+      expect(bridgeDone(r)).toBe(true);
+    });
+
+    it("does not validate with no bridge interaction at all", () => {
+      const r = computeQuests([tx({ to: AERODROME_ROUTER })], ADDR);
+      expect(bridgeDone(r)).toBe(false);
+    });
   });
 
   it("clamps earned at total when more than 20 pts of quests are completed", () => {

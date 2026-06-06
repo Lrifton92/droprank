@@ -58,14 +58,44 @@ export const BASENAMES_UPGRADEABLE_CONTROLLER = lc(
 /**
  * Canonical OP-stack L2 Standard Bridge on Base.
  * Blockscout: proxy impl "L2StandardBridge", verified.
- * NOTE on detection: a canonical DEPOSIT (bridging FROM Ethereum TO Base) is
- * initiated on L1 and arrives on Base as a system tx — it is NOT a normal tx the
- * user signed on Base, so it does not appear in the user's L2 tx list. What we
- * can reliably detect from the L2 tx list is interaction WITH this bridge
- * (e.g. initiating a withdrawal). The bridge quest therefore matches L2 bridge
- * interactions; pure deposit-only users are a known false-negative (documented).
+ * Detection: an L2 interaction with this contract appears in the normal tx list
+ * (e.g. initiating a withdrawal). A canonical DEPOSIT (bridging FROM Ethereum TO
+ * Base) is finalized on L2 by this same bridge crediting the user via an INTERNAL
+ * tx (from = L2StandardBridge, value > 0) — invisible in the normal list but
+ * caught by the internal-tx pass (see BRIDGE_CONTRACTS / bridge-canonical quest).
  */
 export const L2_STANDARD_BRIDGE = lc("0x4200000000000000000000000000000000000010");
+
+/**
+ * Across Protocol SpokePool on Base (third-party bridge). An inbound fill
+ * (bridging onto Base via Across) is delivered to the user as an INTERNAL tx
+ * (from = SpokePool, value > 0) — never a normal tx the user signed on Base.
+ * Verified on base.blockscout.com 2026-06-06: proxy impl "OP_SpokePool", verified.
+ * Source: across.to docs / across-protocol/contracts (Base SpokePool).
+ */
+export const ACROSS_SPOKE_POOL = lc("0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64");
+
+/**
+ * Socket / Bungee SocketGateway (third-party bridge aggregator). Same canonical
+ * address across chains. Bridging through it is a normal tx with `to` = this
+ * gateway (and it never touches the canonical L2 bridge).
+ * Verified on base.blockscout.com 2026-06-06: name "SocketGateway", verified.
+ * Source: socket.tech / SocketDotTech (SocketGateway).
+ */
+export const SOCKET_GATEWAY = lc("0x3a23F943181408EAC424116Af7b7790c94Cb97a5");
+
+/**
+ * Bridges we recognize for the bridge quest / score criterion. Matched two ways:
+ *  - a NORMAL tx whose `to` is one of these (e.g. L2 bridge withdrawal, Socket
+ *    aggregator bridge);
+ *  - an INBOUND INTERNAL tx whose `from` is one of these with value > 0 (canonical
+ *    deposit finalization, Across fill) — the data layer surfaces this signal.
+ */
+export const BRIDGE_CONTRACTS = new Set([
+  L2_STANDARD_BRIDGE,
+  ACROSS_SPOKE_POOL,
+  SOCKET_GATEWAY,
+]);
 
 /**
  * Coinbase Smart Wallet factory. Source: coinbase/smart-wallet README.

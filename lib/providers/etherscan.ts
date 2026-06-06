@@ -4,6 +4,7 @@ import { BADGE_CHAIN_ID } from "../badge-abi";
 import {
   COINBASE_SMART_WALLET_FACTORY_V1,
   COINBASE_SMART_WALLET_FACTORY_V1_1,
+  BRIDGE_CONTRACTS,
 } from "../contracts-registry";
 
 /**
@@ -239,14 +240,66 @@ function normalizeTx(v: EsTx): Tx {
   };
 }
 
+/** Raw Etherscan v2 txlistinternal item (subset we read). */
+interface EsInternalTx {
+  /** Originating address (lowercased on read); a bridge contract for a fill. */
+  from: string;
+  /** Beneficiary; the scanned wallet for an inbound fill. */
+  to: string;
+  /** Value in wei, decimal string. */
+  value: string;
+}
+
+/**
+ * Detect an inbound bridge fill from the internal-tx list: an internal tx whose
+ * `from` is a known bridge contract and that delivers value (> 0) to the wallet.
+ * Covers canonical deposit finalizations (from = L2StandardBridge) and Across
+ * SpokePool fills (from = SpokePool) — neither appears in the normal tx list.
+ * Pure; `value` parse failures are treated as 0 (no fill).
+ */
+function detectInboundBridge(items: EsInternalTx[], address: string): boolean {
+  const addr = address.toLowerCase();
+  for (const it of items) {
+    const from = (it.from ?? "").toLowerCase();
+    if (!BRIDGE_CONTRACTS.has(from)) continue;
+    if ((it.to ?? "").toLowerCase() !== addr) continue;
+    try {
+      if (BigInt(it.value || "0") > BigInt(0)) return true;
+    } catch {
+      // Malformed value -> treat as 0 (no fill).
+    }
+  }
+  return false;
+}
+
 /** Internal export for tests only. */
-export const __test = { normalizeTx, deriveMethod, hasCallData };
+export const __test = { normalizeTx, deriveMethod, hasCallData, detectInboundBridge };
 
 function buildTxlistUrl(address: string, opts: ClientOptions): string {
   const u = new URL(opts.baseUrl ?? BASE_URL);
   u.searchParams.set("chainid", String(chainId()));
   u.searchParams.set("module", "account");
   u.searchParams.set("action", "txlist");
+  u.searchParams.set("address", address);
+  u.searchParams.set("startblock", "0");
+  u.searchParams.set("endblock", "99999999");
+  u.searchParams.set("page", "1");
+  u.searchParams.set("offset", String(ETHERSCAN_PAGE_CAP));
+  u.searchParams.set("sort", "desc");
+  if (opts.requireApiKey !== false) u.searchParams.set("apikey", apiKey());
+  return u.toString();
+}
+
+/**
+ * Internal-tx list URL (Etherscan-compat `module=account&action=txlistinternal`).
+ * One page, offset 10000 (same cap as txlist) — bridge fills are few, so a single
+ * page covers every realistic wallet without adding cold-scan round-trips.
+ */
+function buildTxlistInternalUrl(address: string, opts: ClientOptions): string {
+  const u = new URL(opts.baseUrl ?? BASE_URL);
+  u.searchParams.set("chainid", String(chainId()));
+  u.searchParams.set("module", "account");
+  u.searchParams.set("action", "txlistinternal");
   u.searchParams.set("address", address);
   u.searchParams.set("startblock", "0");
   u.searchParams.set("endblock", "99999999");
@@ -298,6 +351,34 @@ async function fetchTxs(
     }`,
     "api",
   );
+}
+
+/**
+ * Inbound-bridge signal from the internal-tx list. NEVER-FAIL: any API/transport
+ * error returns false (no extra cold-scan failure mode) — a missed fill is a
+ * documented false-negative, never a broken scan. "No internal txs" (status 0)
+ * is a normal empty wallet, also false.
+ */
+async function fetchInboundBridge(
+  address: string,
+  signal: AbortSignal | undefined,
+  opts: ClientOptions,
+): Promise<boolean> {
+  try {
+    const env = await getEnvelope<EsInternalTx[] | string>(
+      buildTxlistInternalUrl(address, opts),
+      signal,
+    );
+    // Accept the result whenever it's an array, regardless of status. Blockscout-
+    // compat returns status "2" ("Some internal transactions ... not yet been
+    // processed") with a fully populated array — verified 2026-06-06 on Soufian's
+    // wallet (the Across fills are present there). Keying on status "1" only would
+    // discard those rows and re-introduce the false negative this fix removes.
+    const items = Array.isArray(env.result) ? env.result : [];
+    return detectInboundBridge(items, address);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -420,10 +501,12 @@ export async function fetchWalletData(
 
   const addr = address.toLowerCase();
 
-  // Two parallel calls: the tx list (heavy) and the code check (light).
-  const [txs, isContract] = await Promise.all([
+  // Parallel: tx list (heavy), code check (light), inbound-bridge internal pass
+  // (never-fail). One extra round-trip; respects the ~1s cold-scan budget.
+  const [txs, isContract, inboundBridge] = await Promise.all([
     fetchTxs(addr, signal, opts),
     fetchIsContract(addr, signal, opts),
+    fetchInboundBridge(addr, signal, opts),
   ]);
 
   let usedSmartWallet = false;
@@ -443,6 +526,7 @@ export async function fetchWalletData(
     txCount: txs.length,
     isContract,
     usedSmartWallet: usedSmartWallet || isContract,
+    inboundBridge,
     // Basename ownership is resolved at the route level (quest-derived in v1).
     hasBasename: false,
   };

@@ -29,10 +29,12 @@ export async function GET(
 
   const addr = address.toLowerCase();
   // v2 barème: the breakdown shape changed (new keys, identity regrouped, malus
-  // line). A "v2:" cache key prefix starts a clean L1/L2 namespace so a v1 payload
-  // cached under the bare address (TTL 5min) can't be served post-deploy. v1
-  // payloads expire on their own; the UI tolerates either shape regardless.
-  const key = `v2:${addr}`;
+  // line). A versioned cache-key prefix starts a clean L1/L2 namespace so a stale
+  // payload can't be served post-deploy. Bumped v2->v3 on 2026-06-06 when bridge
+  // detection started consuming internal txs (Across/Socket + inbound fills): a
+  // wallet's bridge criterion can flip true, so old "v2:" payloads MUST NOT be
+  // reused. Stale payloads expire on their own; the UI tolerates either shape.
+  const key = `v3:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

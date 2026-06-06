@@ -7,9 +7,29 @@ import {
   EtherscanError,
   __test,
 } from "./etherscan";
+import {
+  ACROSS_SPOKE_POOL,
+  L2_STANDARD_BRIDGE,
+  USDC_NATIVE,
+} from "../contracts-registry";
 
 const ADDR = "0xabc0000000000000000000000000000000000abc";
 const KEY = "TEST_KEY";
+
+/** Build a raw Etherscan v2 txlistinternal item (subset we read). */
+function esInternal(over: Record<string, unknown> = {}) {
+  return {
+    from: "0x2222222222222222222222222222222222222222",
+    to: ADDR,
+    value: "1000000000000000000", // 1 ETH
+    ...over,
+  };
+}
+
+/** txlistinternal success envelope. */
+function internalOk(items: unknown[]) {
+  return { ok: true, status: 200, json: async () => ({ status: "1", message: "OK", result: items }) } as Response;
+}
 
 /** Build a raw Etherscan v2 txlist item. */
 function esTx(over: Record<string, unknown> = {}) {
@@ -50,6 +70,31 @@ function getCode(code: string) {
 function isRpcGetCode(url: string, init?: RequestInit): boolean {
   return url === BASE_RPC_URL && init?.method === "POST";
 }
+
+describe("detectInboundBridge (pure, over txlistinternal items)", () => {
+  const det = (items: unknown[]) =>
+    __test.detectInboundBridge(items as Parameters<typeof __test.detectInboundBridge>[0], ADDR);
+
+  it("flags an Across SpokePool fill (from = SpokePool, value > 0, to = wallet)", () => {
+    expect(det([esInternal({ from: ACROSS_SPOKE_POOL })])).toBe(true);
+  });
+
+  it("flags a canonical deposit finalization (from = L2 bridge, value > 0)", () => {
+    expect(det([esInternal({ from: L2_STANDARD_BRIDGE })])).toBe(true);
+  });
+
+  it("ignores a zero-value internal from a bridge (no real fill)", () => {
+    expect(det([esInternal({ from: ACROSS_SPOKE_POOL, value: "0" })])).toBe(false);
+  });
+
+  it("ignores internals from non-bridge contracts even with value", () => {
+    expect(det([esInternal({ from: USDC_NATIVE })])).toBe(false);
+  });
+
+  it("returns false for no internals", () => {
+    expect(det([])).toBe(false);
+  });
+});
 
 describe("deriveMethod", () => {
   it("strips the param list from functionName and lowercases", () => {
@@ -139,8 +184,9 @@ describe("fetchWalletData", () => {
   });
 
   it("aggregates txs in one call and reports isContract via eth_getCode", async () => {
-    // Both calls fire in parallel via Promise.all; resolve by URL, not order.
+    // Three calls fire via Promise.all; resolve by URL, not order.
     fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
       if (url.includes("action=txlist")) {
         return Promise.resolve(txlistOk([esTx(), esTx(), esTx()]));
       }
@@ -151,6 +197,30 @@ describe("fetchWalletData", () => {
     expect(data.txCount).toBe(3);
     expect(data.isContract).toBe(false);
     expect(data.address).toBe(ADDR);
+    expect(data.inboundBridge).toBe(false);
+  });
+
+  it("sets inboundBridge when an internal Across fill is present", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) {
+        return Promise.resolve(internalOk([esInternal({ from: ACROSS_SPOKE_POOL })]));
+      }
+      if (url.includes("action=txlist")) return Promise.resolve(txlistOk([esTx()]));
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.inboundBridge).toBe(true);
+  });
+
+  it("never fails the scan when the internal-tx call errors (inboundBridge falsy)", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(envelope({}, 500));
+      if (url.includes("action=txlist")) return Promise.resolve(txlistOk([esTx()]));
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.txCount).toBe(1);
+    expect(data.inboundBridge).toBe(false);
   });
 
   it("flags a wallet whose own address has code as a contract/smart wallet", async () => {
@@ -216,28 +286,55 @@ describe("fetchWalletDataViaBlockscoutCompat (keyless)", () => {
   });
 
   it("fetches txs from the Blockscout host (no apikey) and code from Base RPC", async () => {
-    const txlistUrls: string[] = [];
+    const accountUrls: string[] = [];
     let rpcPost: { url: string; init?: RequestInit } | null = null;
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
       if (isRpcGetCode(url, init)) {
         rpcPost = { url, init };
         return Promise.resolve(getCode("0x"));
       }
-      txlistUrls.push(url);
+      accountUrls.push(url);
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
       return Promise.resolve(txlistOk([esTx()]));
     });
     const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
     expect(data.txCount).toBe(1);
-    // txlist goes to the keyless Blockscout-compat host, never carrying an apikey.
-    expect(txlistUrls.length).toBe(1);
-    expect(txlistUrls[0].startsWith(BLOCKSCOUT_COMPAT_URL)).toBe(true);
-    expect(txlistUrls[0]).not.toContain("apikey=");
+    // Exactly two account calls: txlist + txlistinternal, both keyless.
+    expect(accountUrls.length).toBe(2);
+    const txlistUrl = accountUrls.find((u) => !u.includes("txlistinternal"))!;
+    const internalUrl = accountUrls.find((u) => u.includes("txlistinternal"))!;
+    expect(txlistUrl.startsWith(BLOCKSCOUT_COMPAT_URL)).toBe(true);
+    expect(txlistUrl).not.toContain("apikey=");
+    expect(internalUrl.startsWith(BLOCKSCOUT_COMPAT_URL)).toBe(true);
+    expect(internalUrl).not.toContain("apikey=");
     // eth_getCode is a JSON-RPC POST to Base, NOT the Blockscout proxy module.
     expect(rpcPost).not.toBeNull();
     expect(rpcPost!.url).toBe(BASE_RPC_URL);
     const sentBody = JSON.parse(String(rpcPost!.init!.body));
     expect(sentBody.method).toBe("eth_getCode");
     expect(sentBody.params).toEqual([ADDR.toLowerCase(), "latest"]);
+  });
+
+  it("reads internal fills even when the compat status is '2' (partially processed)", async () => {
+    // Blockscout-compat returns status "2" with a populated array; the array must
+    // still be read (verified live on Soufian's wallet 2026-06-06).
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (isRpcGetCode(url, init)) return Promise.resolve(getCode("0x"));
+      if (url.includes("action=txlistinternal")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            status: "2",
+            message: "Some internal transactions ... not yet been processed",
+            result: [esInternal({ from: ACROSS_SPOKE_POOL })],
+          }),
+        } as Response);
+      }
+      return Promise.resolve(txlistOk([esTx()]));
+    });
+    const data = await fetchWalletDataViaBlockscoutCompat(ADDR);
+    expect(data.inboundBridge).toBe(true);
   });
 
   it("reports a contract via the Base RPC eth_getCode (bytecode present)", async () => {

@@ -269,7 +269,7 @@
     "mint-nft": "Mint un NFT",
     "basename": "Enregistrer un Basename",
     "smart-wallet": "Utiliser un Smart Wallet",
-    "bridge-canonical": "Utiliser le bridge canonique Base",
+    "bridge-canonical": "Bridge vers ou depuis Base",
     "deploy-contract": "Déployer un contrat",
     "active-30-days": "Actif sur 30+ jours distincts",
     "hold-usdc": "Interagir avec l'USDC natif",

@@ -3,6 +3,7 @@ import type { Tx, WalletData } from "../types";
 import {
   COINBASE_SMART_WALLET_FACTORY_V1,
   COINBASE_SMART_WALLET_FACTORY_V1_1,
+  BRIDGE_CONTRACTS,
 } from "../contracts-registry";
 
 /**
@@ -126,6 +127,59 @@ async function getJson<T>(
   );
 }
 
+/** Blockscout v2 internal-transaction item (subset we read). */
+interface V2InternalTx {
+  from: V2AddressRef | null;
+  to: V2AddressRef | null;
+  value: string;
+}
+
+interface V2InternalPage {
+  items: V2InternalTx[];
+}
+
+/**
+ * Detect an inbound bridge fill from v2 internal txs: an internal tx whose `from`
+ * is a known bridge contract delivering value (> 0) to the wallet. Covers
+ * canonical deposit finalizations and Across SpokePool fills (neither appears in
+ * the normal tx list). Pure; value parse failures count as 0 (no fill).
+ */
+function detectInboundBridge(items: V2InternalTx[], address: string): boolean {
+  const addr = address.toLowerCase();
+  for (const it of items) {
+    const from = (it.from?.hash ?? "").toLowerCase();
+    if (!BRIDGE_CONTRACTS.has(from)) continue;
+    if ((it.to?.hash ?? "").toLowerCase() !== addr) continue;
+    try {
+      if (BigInt(it.value || "0") > BigInt(0)) return true;
+    } catch {
+      // Malformed value -> treat as 0.
+    }
+  }
+  return false;
+}
+
+/**
+ * Inbound-bridge signal from the v2 internal-transactions endpoint. NEVER-FAIL:
+ * one page is enough (bridge fills are few) and any error returns false so a
+ * flaky call never breaks the scan. 404 (unused address) -> false.
+ */
+async function fetchInboundBridge(
+  address: string,
+  signal: AbortSignal | undefined,
+): Promise<boolean> {
+  try {
+    const res = await getJson<V2InternalPage>(
+      `${BASE_URL}/addresses/${address}/internal-transactions`,
+      signal,
+      true,
+    );
+    return detectInboundBridge(res.body?.items ?? [], address);
+  } catch {
+    return false;
+  }
+}
+
 /** Map a Blockscout v2 tx to our internal Tx. */
 function normalizeTx(v: V2Tx): Tx {
   const created = v.created_contract != null;
@@ -167,12 +221,12 @@ export async function fetchWalletData(
   }
   const addr = address.toLowerCase();
 
-  // 1. Address info (contract detection). 404 => unused address, treat as EOA.
-  const info = await getJson<{ is_contract?: boolean }>(
-    `${BASE_URL}/addresses/${addr}`,
-    signal,
-    true,
-  );
+  // 1. Address info (contract detection) + inbound-bridge internal pass, parallel.
+  //    404 on info => unused address, treat as EOA. The internal pass never fails.
+  const [info, inboundBridge] = await Promise.all([
+    getJson<{ is_contract?: boolean }>(`${BASE_URL}/addresses/${addr}`, signal, true),
+    fetchInboundBridge(addr, signal),
+  ]);
   const isContract = info.body?.is_contract === true;
 
   // 2. Paginated tx list, capped.
@@ -210,6 +264,7 @@ export async function fetchWalletData(
     isContract,
     // A checked address that is itself a smart-wallet contract also counts.
     usedSmartWallet: usedSmartWallet || isContract,
+    inboundBridge,
     // Basename ownership is a reverse-resolution read handled by the API route;
     // default false here (the pure data layer stays keyless/tx-only).
     hasBasename: false,

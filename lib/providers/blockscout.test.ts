@@ -4,8 +4,24 @@ import {
   BlockscoutError,
   __test,
 } from "./blockscout";
+import { ACROSS_SPOKE_POOL } from "../contracts-registry";
 
 const ADDR = "0xabc0000000000000000000000000000000000abc";
+
+/** Build a Blockscout v2 internal-transaction item (subset we read). */
+function internalItem(over: Record<string, unknown> = {}) {
+  return {
+    from: { hash: "0x2222222222222222222222222222222222222222" },
+    to: { hash: ADDR },
+    value: "1000000000000000000",
+    ...over,
+  };
+}
+
+/** Empty internal-transactions page (default for tests that don't assert bridge). */
+function emptyInternal() {
+  return jsonResponse({ items: [], next_page_params: null });
+}
 
 /** Build a Blockscout v2 tx item. */
 function item(over: Record<string, unknown> = {}) {
@@ -76,27 +92,62 @@ describe("fetchWalletData", () => {
   });
 
   it("aggregates txs across pages up to the cap and reports isContract", async () => {
-    // address info call -> is_contract false
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({ is_contract: false, hash: ADDR }),
-    );
-    // page 1: 2 txs + next_page_params
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({
-        items: [item(), item()],
-        next_page_params: { block_number: 1, index: 1 },
-      }),
-    );
-    // page 2: 1 tx, no next page
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({ items: [item()], next_page_params: null }),
-    );
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      // tx pages: first call returns a next page, second ends.
+      return Promise.resolve(
+        firstPageDone
+          ? jsonResponse({ items: [item()], next_page_params: null })
+          : ((firstPageDone = true),
+            jsonResponse({
+              items: [item(), item()],
+              next_page_params: { block_number: 1, index: 1 },
+            })),
+      );
+    });
+    let firstPageDone = false;
 
     const data = await fetchWalletData(ADDR);
     expect(data.txs.length).toBe(3);
     expect(data.txCount).toBe(3);
     expect(data.isContract).toBe(false);
     expect(data.address).toBe(ADDR);
+    expect(data.inboundBridge).toBe(false);
+  });
+
+  it("sets inboundBridge from a v2 internal Across fill (from = SpokePool, value > 0)", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/internal-transactions")) {
+        return Promise.resolve(
+          jsonResponse({
+            items: [internalItem({ from: { hash: ACROSS_SPOKE_POOL } })],
+            next_page_params: null,
+          }),
+        );
+      }
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      return Promise.resolve(jsonResponse({ items: [item()], next_page_params: null }));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.inboundBridge).toBe(true);
+  });
+
+  it("never fails the scan when the internal-tx call errors (inboundBridge falsy)", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/internal-transactions")) return Promise.resolve(jsonResponse({}, 500));
+      if (url.endsWith(`/addresses/${ADDR}`)) {
+        return Promise.resolve(jsonResponse({ is_contract: false, hash: ADDR }));
+      }
+      return Promise.resolve(jsonResponse({ items: [item()], next_page_params: null }));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.txCount).toBe(1);
+    expect(data.inboundBridge).toBe(false);
   });
 
   it("throws a typed BlockscoutError on a non-ok response", async () => {
@@ -105,11 +156,11 @@ describe("fetchWalletData", () => {
   });
 
   it("treats a 404 address as an empty (unused) wallet, not an error", async () => {
-    // address info 404 -> not a contract, no txs
-    fetchMock.mockResolvedValueOnce(jsonResponse({}, 404));
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({ items: [], next_page_params: null }),
-    );
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/internal-transactions")) return Promise.resolve(emptyInternal());
+      if (url.endsWith(`/addresses/${ADDR}`)) return Promise.resolve(jsonResponse({}, 404));
+      return Promise.resolve(jsonResponse({ items: [], next_page_params: null }));
+    });
     const data = await fetchWalletData(ADDR);
     expect(data.txCount).toBe(0);
     expect(data.isContract).toBe(false);

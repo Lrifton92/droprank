@@ -5,7 +5,7 @@ import {
   MOONWELL_CONTRACTS,
   AAVE_V3_POOL,
   BASENAMES_CONTROLLERS,
-  L2_STANDARD_BRIDGE,
+  BRIDGE_CONTRACTS,
   USDC_NATIVE,
   MORPHO_BLUE,
   COMPOUND_V3_USDC,
@@ -29,8 +29,11 @@ import {
  *
  * Detection note: we match on `tx.to` against verified Base contract addresses
  * (see contracts-registry.ts). This is the keyless Blockscout-only signal.
- * Known limitation: canonical bridge DEPOSITS (L1->Base) don't appear as L2 txs,
- * so the bridge quest only catches L2 bridge interactions (documented in registry).
+ * Bridge detection (limitation lifted 2026-06-06): the bridge quest now matches
+ * (a) a NORMAL tx to any known bridge (canonical L2 bridge withdrawal, Socket/
+ * Bungee aggregator), AND (b) an INBOUND fill delivered as an internal tx — a
+ * canonical deposit finalization or an Across SpokePool fill (from = bridge,
+ * value > 0). The data layer surfaces (b) via ctx.inboundBridge.
  */
 
 export const QUESTS_MAX_POINTS = 20;
@@ -41,6 +44,12 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
 export interface QuestContext {
   /** The checked address is itself a Coinbase Smart Wallet (factory-deployed). */
   isSmartWallet?: boolean;
+  /**
+   * The wallet received an inbound bridge fill delivered as an internal tx
+   * (from a known bridge contract, value > 0): a canonical deposit finalization
+   * or an Across SpokePool fill. Derived by the data layer from txlistinternal.
+   */
+  inboundBridge?: boolean;
 }
 
 interface QuestDef {
@@ -124,11 +133,13 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
   },
   {
     id: "bridge-canonical",
-    label: "Use the canonical Base bridge",
+    label: "Bridge to or from Base",
     points: 2,
     link: "https://bridge.base.org",
     category: "Bridge",
-    check: (txs) => txs.some((t) => to(t) === L2_STANDARD_BRIDGE),
+    check: (txs, _address, ctx) =>
+      ctx.inboundBridge === true ||
+      txs.some((t) => { const a = to(t); return a !== null && BRIDGE_CONTRACTS.has(a); }),
   },
   {
     id: "deploy-contract",
