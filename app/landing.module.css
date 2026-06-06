@@ -201,3 +201,38 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
 }
+
+/* CTA arrows — same single-SVG model as the menu cards: chevron alone at
+   rest, shaft draws in from the head on hover while the arrow slides right. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btnArrow {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.26s var(--ease-out);
+}
+.btnArrow svg {
+  display: block;
+}
+.btnArrowShaft {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: right center;
+  transition: transform 0.26s var(--ease-out);
+}
+.cta:not(:disabled):hover .btnArrow,
+.cta:not(:disabled):focus-visible .btnArrow {
+  transform: translateX(4px);
+}
+.cta:not(:disabled):hover .btnArrowShaft,
+.cta:not(:disabled):focus-visible .btnArrowShaft {
+  transform: scaleX(1);
+}
+.cta:not(:disabled):active .btnArrow {
+  transform: translateX(3px);
+  transition-duration: 0.06s;
+}

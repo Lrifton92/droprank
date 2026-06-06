@@ -28,8 +28,8 @@
     "walletAddress": "adresse du wallet",
     "addressPlaceholder": "0x…",
     "invalidAddress": "! adresse invalide",
-    "scanThisWallet": "Scanner ce wallet →",
-    "enter": "Entrer →",
+    "scanThisWallet": "Scanner ce wallet",
+    "enter": "Entrer",
     "footerCredit": "// built on base by @lrifton6240"
   },
   "enter": {

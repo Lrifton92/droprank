@@ -10,6 +10,32 @@ import BaseCube from "./_components/BaseCube";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
 import styles from "./landing.module.css";
 
+/* CTA arrow: same single-SVG model as the menu CardArrow — chevron head at
+   rest, the shaft draws in from the head on button hover while the arrow
+   slides right. One element, nothing can overlap the glyph. */
+function BtnArrow() {
+  return (
+    <span className={styles.btnArrow} aria-hidden>
+      <svg viewBox="0 0 20 12" width="18" height="11" fill="none">
+        <path
+          className={styles.btnArrowShaft}
+          d="M2 6h14"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M12.5 1.5 17 6l-4.5 4.5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 /**
  * Landing. Premium UI over the existing logic:
  *  - Connect Wallet (OnchainKit) -> on connect, go to /enter.
@@ -80,10 +106,11 @@ export default function Home() {
 
           {isConnected && address && (
             <button
-              className="dr-btn"
+              className={`dr-btn ${styles.cta}`}
               onClick={() => router.push(`/enter?address=${address}`)}
             >
               {t("enter")}
+              <BtnArrow />
             </button>
           )}
 
@@ -109,11 +136,12 @@ export default function Home() {
               <p className={styles.inputErr}>{t("invalidAddress")}</p>
             )}
             <button
-              className="dr-btn dr-btn--ghost"
+              className={`dr-btn dr-btn--ghost ${styles.cta}`}
               disabled={!pastedValid}
               onClick={() => router.push(`/enter?address=${trimmed}`)}
             >
               {t("scanThisWallet")}
+              <BtnArrow />
             </button>
           </div>
         </section>
