@@ -265,6 +265,16 @@
     animation: dr-blink 1.05s steps(1) infinite;
   }
 
+  /* Back-arrow host: lays out the shared <BackArrow /> next to its label and is
+     the hover/focus trigger that draws the arrow's shaft (see BackArrow.module.css).
+     The page-scoped `.back` links bring their own (identical) inline-flex + gap, so
+     this only meaningfully styles the ghost "new scan" buttons. */
+  .dr-back-host {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
   /* Buttons */
   .dr-btn {
     --btn-bg: var(--base);

@@ -77,6 +77,7 @@ function DiagArrow() {
 }
 
 import Counter from "../_components/Counter";
+import BackArrow from "../_components/BackArrow";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./radar.module.css";
@@ -140,8 +141,9 @@ function RadarInner() {
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
-            ← <span className={styles.backLabel}>MENU</span>
+          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
+            <BackArrow />
+            <span className={styles.backLabel}>MENU</span>
           </Link>
           <span className="dr-eyebrow">{t("questRadar")}</span>
           <LocaleSwitcher />
@@ -150,7 +152,8 @@ function RadarInner() {
         {!valid && (
           <div className={styles.state}>
             <p className={styles.stateTitle}>{t("invalidTarget")}</p>
-            <button className="dr-btn dr-btn--ghost" onClick={() => router.replace("/")}>
+            <button className="dr-back-host dr-btn dr-btn--ghost" onClick={() => router.replace("/")}>
+              <BackArrow />
               {tc("newScan")}
             </button>
           </div>

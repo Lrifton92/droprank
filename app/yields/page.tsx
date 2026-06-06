@@ -7,6 +7,7 @@ import { formatUsd } from "../_components/presentation";
 import { YIELD_CHAINS, ALL_SLUG, type ChainSlug, type YieldPool, type YieldsResult } from "@/lib/yields";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import BackArrow from "../_components/BackArrow";
 import styles from "./yields.module.css";
 
 type ProfileKey = "stable" | "majors" | "degen";
@@ -153,8 +154,9 @@ function YieldsInner() {
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
-            ← <span className={styles.backLabel}>MENU</span>
+          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
+            <BackArrow />
+            <span className={styles.backLabel}>MENU</span>
           </Link>
           <span className="dr-eyebrow">{t("eyebrow")}</span>
           <LocaleSwitcher />

@@ -1,0 +1,29 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transition: transform 0.22s var(--ease-out);
+}
+.wrap svg {
+  display: block;
+}
+/* Shaft hidden at rest (chevron alone), drawn from the head rightward toward the
+   label on hover/focus of the host — mirror of the menu card arrows. */
+.shaft {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 0.22s var(--ease-out);
+}
+:global(.dr-back-host):hover .shaft,
+:global(.dr-back-host):focus-visible .shaft {
+  transform: scaleX(1);
+}
+:global(.dr-back-host):hover .wrap {
+  transform: translateX(-3px);
+}
+:global(.dr-back-host):active .wrap {
+  transform: translateX(-1px);
+  transition-duration: 0.06s;
+}

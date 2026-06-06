@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { timeAgo } from "../_components/presentation";
 import type { NewsItem } from "@/lib/news";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import BackArrow from "../_components/BackArrow";
 import styles from "./news.module.css";
 
 /**
@@ -77,8 +78,9 @@ function NewsInner() {
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
-            ← <span className={styles.backLabel}>MENU</span>
+          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
+            <BackArrow />
+            <span className={styles.backLabel}>MENU</span>
           </Link>
           <span className="dr-eyebrow">{t("baseFeed")}</span>
           <LocaleSwitcher />

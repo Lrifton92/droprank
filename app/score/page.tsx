@@ -7,6 +7,7 @@ import { isAddress } from "viem";
 import type { ScoreResult } from "@/lib/types";
 import { parseDetail } from "@/i18n/config";
 import Counter from "../_components/Counter";
+import BackArrow from "../_components/BackArrow";
 import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
@@ -71,8 +72,9 @@ function ScoreInner() {
       <div className="dr-grid-bg" />
       <main className="dr-shell dr-wide">
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={styles.back} aria-label={tc("back")}>
-            ← <span className={styles.backLabel}>MENU</span>
+          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
+            <BackArrow />
+            <span className={styles.backLabel}>MENU</span>
           </Link>
           <span className="dr-eyebrow">{t("report")}</span>
           <LocaleSwitcher />
@@ -82,7 +84,8 @@ function ScoreInner() {
           <div className={styles.state}>
             <p className={styles.stateTitle}>{t("invalidTarget")}</p>
             <p className={styles.stateSub}>{t("invalidTargetSub")}</p>
-            <button className="dr-btn dr-btn--ghost" onClick={() => router.replace("/")}>
+            <button className="dr-back-host dr-btn dr-btn--ghost" onClick={() => router.replace("/")}>
+              <BackArrow />
               {tc("newScan")}
             </button>
           </div>
