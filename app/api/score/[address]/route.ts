@@ -31,9 +31,10 @@ export async function GET(
   // Versioned cache-key prefix. v2 barème changed the breakdown shape; v3
   // (2026-06-06) on internal-tx bridge detection; v4 (2026-06-06, PHASE 2) on the
   // token-transfer pass + outgoing internal targets; v5 (2026-06-07) on the
-  // off-chain Talent Builder Score — talent-builder-score can flip, raising the
-  // quests criterion and the score, so v4 payloads MUST NOT be reused. Stale
-  // payloads expire on their own; the UI tolerates either shape. NB: `key` is the
+  // keyless onchain Talent Builder Score — talent-builder-score can flip, raising
+  // the quests criterion and the score, so v4 payloads MUST NOT be reused. (The
+  // off-chain-API→onchain pivot keeps the same shape, so v5 is NOT re-bumped.)
+  // Stale payloads expire on their own; the UI tolerates either shape. NB: `key` is the
   // cache key only; `addr` is what reaches the data layer.
   const key = `v5:${addr}`;
 

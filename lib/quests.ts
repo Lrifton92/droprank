@@ -72,13 +72,11 @@ export interface QuestContext {
    */
   mintedNft?: boolean;
   /**
-   * Talent Protocol Builder Score for the wallet, when the data layer can supply
-   * it (> 0 means a score exists). The Builder Score is created OFF-CHAIN via the
-   * Talent API — the onchain PassportRegistry/Score interaction is only a partial
-   * signal — so this is the authoritative source when available. The data layer
-   * fetches it via lib/providers/talent.ts using the server-only TALENT_API_KEY;
-   * when that key is absent (or the call fails) this is 0 and the quest falls back
-   * to the onchain TALENT_CONTRACTS signal (documented limit).
+   * Talent Protocol Builder Score signal for the wallet (> 0 means the wallet
+   * created a Builder Score, even if currently expired). Read KEYLESS onchain on
+   * Base via lib/providers/talent.ts (PassportBuilderScore.getLastUpdateByAddress);
+   * on any RPC error this is 0 and the quest falls back to the onchain
+   * TALENT_CONTRACTS tx signal.
    */
   talentBuilderScore?: number;
 }
@@ -290,8 +288,8 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://talent.app",
     category: "Social",
-    // FIX F: a real off-chain Builder Score (ctx.talentBuilderScore > 0) when the
-    // data layer can supply it, OR the partial onchain PassportRegistry/Score
+    // The keyless onchain Builder Score signal (ctx.talentBuilderScore > 0 = the
+    // wallet created a Builder Score), OR the PassportRegistry/Score tx
     // interaction (also reached via internal calls for smart wallets).
     check: (txs, _a, ctx) =>
       (typeof ctx.talentBuilderScore === "number" && ctx.talentBuilderScore > 0) ||

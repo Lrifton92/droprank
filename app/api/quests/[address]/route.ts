@@ -29,10 +29,12 @@ export async function GET(
 
   // Versioned cache-key prefix. v2 (2026-06-06): bridge detection started
   // consuming internal txs. v3 (2026-06-06, PHASE 2): the token-transfer pass +
-  // outgoing internal targets land. v4 (2026-06-07): the off-chain Talent Builder
-  // Score (ctx.talentBuilderScore) lands — talent-builder-score can now flip
-  // done=true for a wallet with no onchain Talent tx, so v3 payloads MUST NOT be
-  // reused. Stale entries expire on their own (TTL 5min). NB: `key` is the cache
+  // outgoing internal targets land. v4 (2026-06-07): the keyless onchain Talent
+  // Builder Score (ctx.talentBuilderScore) lands — talent-builder-score can now
+  // flip done=true for a wallet with no Talent tx, so v3 payloads MUST NOT be
+  // reused. (The off-chain-API→onchain pivot keeps the same shape — a number per
+  // address that flips the same quest — so v4 is NOT re-bumped.) Stale entries
+  // expire on their own (TTL 5min). NB: `key` is the cache
   // key only; the metier address passed to fetchWalletData is `addr` (never the key).
   const addr = address.toLowerCase();
   const key = `v4:${addr}`;

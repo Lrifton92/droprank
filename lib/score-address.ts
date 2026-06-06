@@ -115,8 +115,8 @@ export async function scoreAddress(
   signal?: AbortSignal,
 ): Promise<ScoreResult> {
   const addr = address.toLowerCase();
-  // The off-chain Talent Builder Score runs in parallel with the on-chain scan so
-  // it never lengthens the cold scan. Never-fail: 0 on any error / missing key.
+  // The keyless onchain Talent Builder Score read runs in parallel with the scan
+  // so it never lengthens the cold scan. Never-fail: 0 on any RPC error.
   const [data, talentBuilderScore] = await Promise.all([
     fetchWalletData(addr, signal),
     fetchTalentBuilderScore(addr, signal),
