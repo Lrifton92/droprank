@@ -37,7 +37,11 @@ export async function GET(
   // expire on their own (TTL 5min). NB: `key` is the cache
   // key only; the metier address passed to fetchWalletData is `addr` (never the key).
   const addr = address.toLowerCase();
-  const key = `v4:${addr}`;
+  // v5 (2026-06-07): the v4 namespace was polluted by the short-lived paid-API
+  // Talent build (commit 6c4283e ran in prod with no key → talentBuilderScore=0
+  // → talent-builder-score cached done=false). The onchain pivot keeps shape but
+  // FLIPS that result, so v4 payloads MUST NOT be reused — bump to v5.
+  const key = `v5:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
