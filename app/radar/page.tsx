@@ -47,6 +47,35 @@ const CATEGORY_ORDER: ProtocolCategory[] = [
 ];
 
 const BRIDGE_QUEST_ID = "bridge-canonical";
+
+/**
+ * Diagonal "go" arrow (↗) for the quest link — a single inline SVG (one diagonal
+ * shaft + a chevron head), mirroring CardArrow/BtnArrow on the menu/home screens.
+ * Replaces the unicode ↗ glyph, which doesn't render in the mono font (it showed
+ * up as a pencil/stroke). 12×12 square viewBox, currentColor stroke.
+ */
+function DiagArrow() {
+  return (
+    <span className={styles.diag} aria-hidden>
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
+        <path
+          d="M3.5 8.5 8.5 3.5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M4.5 3.5h4v4"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 import Counter from "../_components/Counter";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
@@ -219,7 +248,7 @@ function RadarInner() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {tc("doIt")}
+                        {tc("doIt")} <DiagArrow />
                       </a>
                     ) : (
                       <span className={styles.qStatus}>

@@ -279,10 +279,25 @@
   border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
   transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .qLink:hover {
   background: var(--base-soft);
   color: var(--text);
+}
+/* Diagonal "go" arrow — nudges up-right on hover, matching the qLink accent. */
+.diag {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.16s var(--ease-out);
+}
+.diag svg {
+  display: block;
+}
+.qLink:hover .diag {
+  transform: translate(1px, -1px);
 }
 .qStatus {
   font-family: var(--font-mono);
