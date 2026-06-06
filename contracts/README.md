@@ -79,6 +79,12 @@ Update `lib/badge-abi.ts` at the repo root with the deployed addresses
 (`DROPRANK_BADGE_ADDRESS`). The ABI there is auto-generated from the build
 artifact; regenerate it if the contract changes.
 
+## Deployed
+
+| Network | Address |
+|---|---|
+| Base mainnet | [`0x5d3febf136e461be015713e2947bbd0940c8e92b`](https://basescan.org/address/0x5d3febf136e461be015713e2947bbd0940c8e92b) — verified on Basescan, Blockscout and Sourcify (2026-06-04) |
+
 ## EIP-712 attestation
 
 The backend signs this typed data; the contract verifies it on `mint`/`refresh`:
