@@ -6,7 +6,7 @@ DropRank is a Base mini-app that scores any wallet's airdrop readiness, shows
 exactly what to improve, and lets you mint your score as a soulbound badge —
 fully on-chain, non-transferable, refreshable.
 
-**Live:** [droprank.vercel.app](https://droprank.vercel.app)
+**Live:** [droprank.xyz](https://droprank.xyz)
 
 ## What it does
 
