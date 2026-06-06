@@ -30,13 +30,14 @@ export async function GET(
   // started consuming internal txs (Across/Socket + inbound fills). The bridge
   // quest can now flip done=true, so payloads cached under the bare address MUST
   // NOT be reused. Stale entries expire on their own (TTL 5min).
-  const key = `v2:${address.toLowerCase()}`;
+  const addr = address.toLowerCase();
+  const key = `v2:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
     const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
-      const data = await fetchWalletData(key, req.signal);
-      return computeQuests(data.txs, key, {
+      const data = await fetchWalletData(addr, req.signal);
+      return computeQuests(data.txs, addr, {
         isSmartWallet: data.usedSmartWallet,
         inboundBridge: data.inboundBridge,
       });
