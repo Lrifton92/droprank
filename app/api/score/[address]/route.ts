@@ -37,9 +37,12 @@ export async function GET(
   // polluted by the short-lived paid-API build (commit 6c4283e ran in prod with no
   // key → talent criterion cached stale); the onchain pivot flips the result for
   // the same wallet, so v5 payloads MUST NOT be reused — bump to v6.
+  // v7 (2026-06-09): the extended Aerodrome/PancakeSwap/Morpho quest detection
+  // (Universal Routers + Morpho Bundler3) can flip those quests done=true, raising
+  // the quests criterion and the score, so v6 payloads MUST NOT be reused — bump to v7.
   // Stale payloads expire on their own; the UI tolerates either shape. NB: `key` is the
   // cache key only; `addr` is what reaches the data layer.
-  const key = `v6:${addr}`;
+  const key = `v7:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

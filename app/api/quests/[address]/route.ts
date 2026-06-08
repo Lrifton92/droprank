@@ -41,7 +41,12 @@ export async function GET(
   // Talent build (commit 6c4283e ran in prod with no key → talentBuilderScore=0
   // → talent-builder-score cached done=false). The onchain pivot keeps shape but
   // FLIPS that result, so v4 payloads MUST NOT be reused — bump to v5.
-  const key = `v5:${addr}`;
+  // v6 (2026-06-09): extended the swap-aerodrome / swap-pancakeswap / lend-morpho
+  // detection to the aggregated routers real UIs dispatch through (Aerodrome +
+  // PancakeSwap Universal Routers, Morpho Bundler3). Wallets that swapped/deposited
+  // via those were cached done=false, and the fix FLIPS them — so v5 payloads MUST
+  // NOT be reused — bump to v6.
+  const key = `v6:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

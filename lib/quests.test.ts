@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { computeQuests, QUESTS, QUESTS_MAX_POINTS } from "./quests";
 import {
   AERODROME_ROUTER,
+  AERODROME_UNIVERSAL_ROUTER,
+  AERODROME_UNIVERSAL_ROUTER_LEGACY,
   UNISWAP_UNIVERSAL_ROUTER_V2,
   MOONWELL_COMPTROLLER,
   AAVE_V3_POOL,
@@ -9,6 +11,7 @@ import {
   L2_STANDARD_BRIDGE,
   USDC_NATIVE,
   MORPHO_BLUE,
+  MORPHO_BUNDLER3,
   COMPOUND_V3_USDC,
   PENDLE_ROUTER_V4,
   AVANTIS_TRADING,
@@ -27,6 +30,7 @@ import {
   COMPOUND_V3_AERO,
   COMPOUND_V3_USDBC,
   PANCAKESWAP_V3_SWAP_ROUTER,
+  PANCAKESWAP_UNIVERSAL_ROUTER,
   EXTRA_FINANCE_POSITION_MANAGER,
 } from "./contracts-registry";
 import type { Tx } from "./types";
@@ -203,6 +207,15 @@ describe("computeQuests", () => {
       expect(done(computeQuests([tx({ to: UNISWAP_SWAP_ROUTER_02 })], ADDR), "swap-uniswap")).toBe(true);
     });
 
+    it("detects an Aerodrome swap via the Universal Router (current + legacy)", () => {
+      // Real swaps on aerodrome.finance route through the Universal Router, not the
+      // classic Router — the reported gap (a swap went undetected). Case-insensitive.
+      for (const r of [AERODROME_UNIVERSAL_ROUTER, AERODROME_UNIVERSAL_ROUTER_LEGACY]) {
+        expect(done(computeQuests([tx({ to: r })], ADDR), "swap-aerodrome")).toBe(true);
+        expect(done(computeQuests([tx({ to: r.toUpperCase() })], ADDR), "swap-aerodrome")).toBe(true);
+      }
+    });
+
     it("detects Moonwell lend via mcbETH / mDAI / mEURC mTokens", () => {
       for (const mtoken of [MOONWELL_MCBETH, MOONWELL_MDAI, MOONWELL_MEURC]) {
         expect(done(computeQuests([tx({ to: mtoken })], ADDR), "lend-moonwell")).toBe(true);
@@ -223,8 +236,24 @@ describe("computeQuests", () => {
       expect(done(computeQuests([tx({ to: PANCAKESWAP_V3_SWAP_ROUTER })], ADDR), "swap-pancakeswap")).toBe(true);
     });
 
+    it("detects a PancakeSwap swap via the Universal Router (current UI)", () => {
+      // pancakeswap.finance routes swaps through the Universal Router today, not the
+      // SmartRouter/V3 router — the reported gap. Case-insensitive on `to`.
+      expect(done(computeQuests([tx({ to: PANCAKESWAP_UNIVERSAL_ROUTER })], ADDR), "swap-pancakeswap")).toBe(true);
+      expect(done(computeQuests([tx({ to: PANCAKESWAP_UNIVERSAL_ROUTER.toUpperCase() })], ADDR), "swap-pancakeswap")).toBe(true);
+    });
+
     it("detects Extra Finance via the VeloPositionManager", () => {
       expect(done(computeQuests([tx({ to: EXTRA_FINANCE_POSITION_MANAGER })], ADDR), "leverage-extra")).toBe(true);
+    });
+
+    it("detects a Morpho deposit via Bundler3 (app.morpho.org flow)", () => {
+      // app.morpho.org routes supply/deposit through the Bundler3 multicall, not the
+      // Morpho Blue singleton directly — the reported gap. Case-insensitive on `to`.
+      expect(done(computeQuests([tx({ to: MORPHO_BUNDLER3 })], ADDR), "lend-morpho")).toBe(true);
+      expect(done(computeQuests([tx({ to: MORPHO_BUNDLER3.toUpperCase() })], ADDR), "lend-morpho")).toBe(true);
+      // Non-regression: the direct Morpho Blue singleton path still validates.
+      expect(done(computeQuests([tx({ to: MORPHO_BLUE })], ADDR), "lend-morpho")).toBe(true);
     });
   });
 

@@ -11,8 +11,25 @@
 
 const lc = (a: string) => a.toLowerCase();
 
-/** Aerodrome Router. Blockscout: name "Router", verified. */
+/** Aerodrome Router (classic Solidly v2 router). Blockscout: name "Router", verified. */
 export const AERODROME_ROUTER = lc("0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43");
+
+/**
+ * Aerodrome Universal Router(s) — the aggregated swap entrypoint the
+ * aerodrome.finance UI dispatches to (routes both v2 and Slipstream/CL pools).
+ * A swap done on Aerodrome today has `to` = one of these, NOT the classic Router
+ * above — so the swap-aerodrome quest missed real swaps (reported gap, fixed
+ * 2026-06-09 from a live reproduction).
+ *  - 0xcAF2…7c67 (current): Blockscout name "UniversalRouter", verified; its
+ *    constructor carries veloV2Factory / veloCLFactory params (Velodrome/Aerodrome
+ *    lineage) — confirmed live as the router an aerodrome.finance swap routes through.
+ *  - 0x6cb4…Be3e (prior): Blockscout name "UniversalRouter", verified; BaseScan
+ *    public label "Aerodrome: Universal Router".
+ */
+export const AERODROME_UNIVERSAL_ROUTER = lc("0xcAF22ce31298CF2BF1D152862F80216478ad7c67");
+export const AERODROME_UNIVERSAL_ROUTER_LEGACY = lc(
+  "0x6cb442acF35158D5eDa88fe602221b67B400Be3E",
+);
 
 /**
  * Uniswap Universal Router on Base. Several deployments are in active use; we
@@ -154,6 +171,17 @@ export const USDC_NATIVE = lc("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
 export const MORPHO_BLUE = lc("0xBBBBBbbBBb9cC5e90e3b3Af64bDAF62C37EEFFCb");
 
 /**
+ * Morpho Bundler3 — the multicall entrypoint the app.morpho.org UI routes
+ * supply/deposit/borrow through. A deposit done on Morpho today has `to` = this
+ * bundler (which calls Morpho Blue / a MetaMorpho vault internally), NOT the
+ * Morpho Blue singleton above — so the lend-morpho quest missed real deposits
+ * (the reported gap, fixed 2026-06-09 from a live reproduction).
+ * Blockscout: name "Bundler3", verified; source references Morpho.
+ * Source: morpho-org/bundler3.
+ */
+export const MORPHO_BUNDLER3 = lc("0x6BFd8137e702540E7A42B74178A4a49Ba43920C4");
+
+/**
  * Compound III (Comet) markets on Base (lending). Each collateral base asset is a
  * separate Comet contract; we match any so a supply to any market counts.
  * Source: compound.finance docs / compound-finance/comet.
@@ -196,6 +224,18 @@ export const EXTRA_FINANCE_POSITION_MANAGER = lc("0xf9cFB8a62f50e10AdDE5Aa888B44
  */
 export const PANCAKESWAP_SMART_ROUTER = lc("0x678Aa4bF4E210cf2166753e054d5b7c31cc7fa86");
 export const PANCAKESWAP_V3_SWAP_ROUTER = lc("0x1b81D678ffb9C0263b24A97847620C99d213eB14");
+/**
+ * PancakeSwap Universal Router on Base — the aggregated entrypoint the current
+ * pancakeswap.finance UI routes swaps through (so a swap done today has `to` =
+ * this, not the SmartRouter/V3 router above; the reported gap, fixed 2026-06-09).
+ * Same canonical address across chains (CREATE2). Blockscout: name
+ * "UniversalRouter", verified; source references PancakeSwap/stableSwap.
+ * BaseScan public label "PancakeSwap: Universal Router"; listed in PancakeSwap
+ * developer docs (universal-router/addresses) for Base.
+ */
+export const PANCAKESWAP_UNIVERSAL_ROUTER = lc(
+  "0xFE6508f0015C778Bdcc1fB5465bA5ebE224C9912",
+);
 
 /**
  * OpenSea Seaport 1.6 (NFT marketplace — new category). Same canonical address
@@ -206,6 +246,11 @@ export const PANCAKESWAP_V3_SWAP_ROUTER = lc("0x1b81D678ffb9C0263b24A97847620C99
 export const SEAPORT_1_6 = lc("0x0000000000000068F116a894984e2DB1123eB395");
 
 /** Convenience sets for matching `tx.to`. */
+export const AERODROME_ROUTERS = new Set([
+  AERODROME_ROUTER,
+  AERODROME_UNIVERSAL_ROUTER,
+  AERODROME_UNIVERSAL_ROUTER_LEGACY,
+]);
 export const UNISWAP_ROUTERS = new Set([
   UNISWAP_UNIVERSAL_ROUTER_V1_2,
   UNISWAP_UNIVERSAL_ROUTER_V2,
@@ -227,9 +272,11 @@ export const COMPOUND_CONTRACTS = new Set([
   COMPOUND_V3_AERO,
   COMPOUND_V3_USDBC,
 ]);
+export const MORPHO_CONTRACTS = new Set([MORPHO_BLUE, MORPHO_BUNDLER3]);
 export const PANCAKESWAP_ROUTERS = new Set([
   PANCAKESWAP_SMART_ROUTER,
   PANCAKESWAP_V3_SWAP_ROUTER,
+  PANCAKESWAP_UNIVERSAL_ROUTER,
 ]);
 export const EXTRA_FINANCE_CONTRACTS = new Set([
   EXTRA_FINANCE_LENDING_POOL,

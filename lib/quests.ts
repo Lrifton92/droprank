@@ -1,13 +1,13 @@
 import type { Tx, QuestsResult, QuestResult, ProtocolCategory } from "./types";
 import {
-  AERODROME_ROUTER,
+  AERODROME_ROUTERS,
   UNISWAP_ROUTERS,
   MOONWELL_CONTRACTS,
   AAVE_CONTRACTS,
   BASENAMES_CONTROLLERS,
   BRIDGE_CONTRACTS,
   USDC_NATIVE,
-  MORPHO_BLUE,
+  MORPHO_CONTRACTS,
   COMPOUND_CONTRACTS,
   PENDLE_ROUTER_V4,
   AVANTIS_TRADING,
@@ -131,7 +131,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://aerodrome.finance",
     category: "DEX",
-    check: (txs, _a, ctx) => touchedOne(AERODROME_ROUTER, txs, ctx),
+    check: (txs, _a, ctx) => touched(AERODROME_ROUTERS, txs, ctx),
   },
   {
     id: "swap-uniswap",
@@ -232,7 +232,7 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.morpho.org",
     category: "Lending",
-    check: (txs, _a, ctx) => touchedOne(MORPHO_BLUE, txs, ctx),
+    check: (txs, _a, ctx) => touched(MORPHO_CONTRACTS, txs, ctx),
   },
   {
     id: "lend-compound",
