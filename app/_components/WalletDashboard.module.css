@@ -10,11 +10,15 @@
   letter-spacing: 0.28em;
 }
 
-/* Three stat tiles. Single column under 520px (mobile webview), 3-up above. */
+/* Three stat tiles. Single column under 520px (mobile webview), 3-up above.
+   `perspective` here is what gives the child tiles their 3D depth on tilt; it
+   lives on the container so the three tilts share one vanishing point. */
 .tiles {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
 }
 @media (min-width: 520px) {
   .tiles {
@@ -22,16 +26,107 @@
   }
 }
 
+/* The tile is the tilting surface. --rx/--ry are written by the pointer handler
+   (0 at rest) and the transform springs back via the transition when the
+   cursor leaves. transform-style: preserve-3d lets the inner content lift on Z.
+   On entry each tile rises with a tiny per-tile stagger (--t), reusing the
+   page's rise vocabulary. */
 .tile {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: var(--base-soft);
   min-height: 86px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.5s var(--ease-out), box-shadow 0.3s var(--ease-out);
+  will-change: transform;
+  /* `backwards` (not `both`): the entry anim must NOT keep `forwards`-filling the
+     transform, or it would override the tilt transition afterwards (pointer
+     moves would snap instead of spring). On finish, the declared `transform`
+     above takes back control and the tilt transition works. */
+  animation: tile-in 0.6s var(--ease-out) calc(var(--t, 0) * 0.08s) backwards;
+}
+.tile:nth-child(1) { --t: 0; }
+.tile:nth-child(2) { --t: 1; }
+.tile:nth-child(3) { --t: 2; }
+/* While tilted (pointer present) the tile lifts with a measured accent glow. */
+.tile:hover {
+  box-shadow:
+    0 18px 40px -24px var(--base-glow),
+    inset 0 0 0 1px color-mix(in srgb, var(--base-300) 18%, transparent);
+}
+@keyframes tile-in {
+  from { opacity: 0; transform: translateY(10px) rotateX(8deg); }
+  to { opacity: 1; transform: rotateX(var(--rx)) rotateY(var(--ry)); }
+}
+
+/* Holographic graticule + roaming spotlight on the tile FACE (z:0). The fine
+   HUD grid stays faint; the spotlight (radial, follows --mx/--my) brightens the
+   patch under the cursor so the surface feels lit, not painted. */
+.tileFace {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120px 120px at var(--mx) var(--my),
+      color-mix(in srgb, var(--base-300) 16%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(0deg, rgba(120, 160, 255, 0.04) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, rgba(120, 160, 255, 0.04) 0 1px, transparent 1px 9px);
+  opacity: 0.6;
+  transition: opacity 0.3s var(--ease-out);
+}
+.tile:hover .tileFace { opacity: 1; }
+
+/* Diagonal sheen sweeping across once on load (depth/holographic cue), then a
+   second slow pass on hover. transform-only, clipped by the tile's radius. */
+.tileSheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tileSheen::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 50%;
+  height: 180%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(138, 176, 255, 0.12) 50%,
+    transparent 60%
+  );
+  transform: translateX(0) rotate(8deg);
+  animation: tile-sheen 1.3s var(--ease-out) calc(0.5s + var(--t, 0) * 0.08s) 1 both;
+}
+@keyframes tile-sheen {
+  from { transform: translateX(0) rotate(8deg); }
+  to { transform: translateX(360%) rotate(8deg); }
+}
+
+/* Content rides 22px up on Z so it floats above the lit face during tilt. */
+.tileInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transform: translateZ(22px);
 }
 
 .tileLabel {
@@ -58,8 +153,11 @@
   margin-left: 2px;
 }
 
-/* Tier chip, tinted with the tier color passed via --tier. */
+/* Tier chip, tinted with the tier color passed via --tier. A measured halo
+   behind it breathes (opacity-only) so the tier reads as "live" without the
+   chip text ever flickering — legibility stays intact. */
 .tier {
+  position: relative;
   align-self: flex-start;
   font-family: var(--font-mono);
   font-size: 9px;
@@ -70,6 +168,20 @@
   color: var(--tier, var(--base-300));
   border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 42%, transparent);
   background: color-mix(in srgb, var(--tier, var(--base-300)) 12%, transparent);
+}
+.tier::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: radial-gradient(
+    60% 120% at 50% 50%,
+    color-mix(in srgb, var(--tier, var(--base-300)) 38%, transparent),
+    transparent 70%
+  );
+  z-index: -1;
+  filter: blur(4px);
+  animation: dr-breathe 3.4s var(--ease-in-out) infinite;
 }
 
 /* Tasks progress bar. */
@@ -88,7 +200,24 @@
   border-radius: 999px;
   background: linear-gradient(90deg, var(--base-300), var(--base-200));
   box-shadow: 0 0 10px -2px var(--base-glow);
-  transition: width 0.6s var(--ease-out);
+  /* width transitions when data arrives (0% → real %); a snappier-than-track
+     ease so the fill feels like it locks into place. */
+  transition: width 0.7s var(--ease-out);
+}
+/* A highlight sweeping once across the filled track right after it settles. */
+.bar i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  transform: translateX(-120%);
+  animation: dr-sweep 1.4s var(--ease-out) 0.7s 1 both;
 }
 
 /* "Biggest levers" list. */
@@ -117,6 +246,22 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
+  /* Staggered slide-in from the left, ordered by --g (0,1,2). `backwards` so the
+     entry doesn't forwards-fill the transform and block the :hover nudge. */
+  animation: gain-in 0.45s var(--ease-out) calc(var(--g, 0) * 0.09s) backwards;
+  transition: transform 0.2s var(--ease-out);
+}
+/* Micro-interaction: the row nudges right and its +gain chip lifts on hover. */
+.gain:hover {
+  transform: translateX(3px);
+}
+.gain:hover .gainPlus {
+  border-color: color-mix(in srgb, var(--ok) 55%, transparent);
+  box-shadow: 0 0 12px -3px color-mix(in srgb, var(--ok) 60%, transparent);
+}
+@keyframes gain-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 .gainPlus {
   flex: none;
@@ -130,6 +275,7 @@
   border: 1px solid color-mix(in srgb, var(--ok) 34%, transparent);
   background: color-mix(in srgb, var(--ok) 9%, transparent);
   font-variant-numeric: tabular-nums;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 .gainLink {
   color: var(--base-200);
@@ -151,4 +297,22 @@
   font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--ok);
+}
+
+/* Reduced motion: the global rule zeroes durations (entry anims snap to their
+   readable final frame; the count-up snaps via the JS guard; the JS tilt never
+   engages). Belt-and-braces here — kill the roaming sheen/spotlight/breathe and
+   guarantee every tile is flat & opaque. */
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transform: none;
+  }
+  .tileSheen::before,
+  .bar i::after,
+  .tier::before {
+    display: none;
+  }
+  .tileFace {
+    opacity: 0.6;
+  }
 }

@@ -103,8 +103,16 @@ function MenuInner() {
           </button>
         </div>
 
+        <div className="dr-enter" style={{ "--i": 2 } as CSSProperties}>
+          <BasenameCard address={address} />
+        </div>
+
+        <div className="dr-enter" style={{ "--i": 3 } as CSSProperties}>
+          <WalletDashboard address={address} />
+        </div>
+
         <nav className={styles.grid}>
-          <Link href={`/score${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 2 } as CSSProperties}>
+          <Link href={`/score${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 4 } as CSSProperties}>
             <span className={styles.idx}>01</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -116,7 +124,7 @@ function MenuInner() {
             <CardArrow />
           </Link>
 
-          <Link href={`/radar${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 3 } as CSSProperties}>
+          <Link href={`/radar${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 5 } as CSSProperties}>
             <span className={styles.idx}>02</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -130,7 +138,7 @@ function MenuInner() {
             <CardArrow />
           </Link>
 
-          <Link href={`/news${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 4 } as CSSProperties}>
+          <Link href={`/news${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 6 } as CSSProperties}>
             <span className={styles.idx}>03</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -144,7 +152,7 @@ function MenuInner() {
             <CardArrow />
           </Link>
 
-          <Link href={`/discover${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 5 } as CSSProperties}>
+          <Link href={`/discover${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 7 } as CSSProperties}>
             <span className={styles.idx}>04</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -160,7 +168,7 @@ function MenuInner() {
           {/* 5th card. With 2 cols (md) and 4 cols (xl) it would dangle alone on a
               new row; `cardWide` spans the full row instead so it reads as an
               intentional feature strip, never an orphan. <768px = full-width too. */}
-          <Link href={`/yields${qs}`} className={`dr-panel dr-enter ${styles.card} ${styles.cardWide}`} style={{ "--i": 6 } as CSSProperties}>
+          <Link href={`/yields${qs}`} className={`dr-panel dr-enter ${styles.card} ${styles.cardWide}`} style={{ "--i": 8 } as CSSProperties}>
             <span className={styles.idx}>05</span>
             <span className={styles.glyph} aria-hidden>
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
@@ -173,14 +181,6 @@ function MenuInner() {
             <CardArrow />
           </Link>
         </nav>
-
-        <div className="dr-enter" style={{ "--i": 7 } as CSSProperties}>
-          <BasenameCard address={address} />
-        </div>
-
-        <div className="dr-enter" style={{ "--i": 8 } as CSSProperties}>
-          <WalletDashboard address={address} />
-        </div>
 
         <div className="dr-enter" style={{ "--i": 9 } as CSSProperties}>
           <BaseBanner />

@@ -342,7 +342,7 @@
    loop) so it reads as a terminal booting, never a nagging animation.
    --termBase delays the inner sequence until the panel itself has arrived. */
 .term {
-  --termBase: 0.62s; /* ~ when .dr-enter(--i:9) has the panel in place */
+  --termBase: 0.78s; /* ~ when .dr-enter(--i:10) has the panel in place */
   position: relative;
 }
 /* One-shot scanline sweeping top→bottom across the panel as it boots. */
