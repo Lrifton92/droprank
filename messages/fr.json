@@ -112,6 +112,14 @@
     "shareGenericText": "Scanne ton score airdrop Base — DropRank par @lrifton6240",
     "shareTitle": "Mon DropRank"
   },
+  "dashboard": {
+    "title": "MISE AU POINT",
+    "score": "SCORE",
+    "rank": "RANG",
+    "tasks": "TÂCHES",
+    "nextGains": "leviers principaux",
+    "allMaxed": "✓ tous les leviers au max — wallet based"
+  },
   "detail": {
     "tx": "{count} tx",
     "months": "{count} mois",

@@ -7,6 +7,7 @@ import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BaseBanner from "../_components/BaseBanner";
 import BasenameCard from "../_components/BasenameCard";
+import WalletDashboard from "../_components/WalletDashboard";
 import SessionTicker from "./SessionTicker";
 import styles from "./menu.module.css";
 
@@ -178,10 +179,14 @@ function MenuInner() {
         </div>
 
         <div className="dr-enter" style={{ "--i": 8 } as CSSProperties}>
+          <WalletDashboard address={address} />
+        </div>
+
+        <div className="dr-enter" style={{ "--i": 9 } as CSSProperties}>
           <BaseBanner />
         </div>
 
-        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 9 } as CSSProperties}>
+        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 10 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />

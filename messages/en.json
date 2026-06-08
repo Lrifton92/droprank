@@ -112,6 +112,14 @@
     "shareGenericText": "Scan your Base airdrop score — DropRank by @lrifton6240",
     "shareTitle": "My DropRank"
   },
+  "dashboard": {
+    "title": "WALLET TUNING",
+    "score": "SCORE",
+    "rank": "RANK",
+    "tasks": "TASKS",
+    "nextGains": "biggest levers",
+    "allMaxed": "✓ all levers maxed — based wallet"
+  },
   "detail": {
     "tx": "{count} tx",
     "months": "{count} months",
