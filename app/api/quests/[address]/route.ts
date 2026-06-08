@@ -46,7 +46,11 @@ export async function GET(
   // PancakeSwap Universal Routers, Morpho Bundler3). Wallets that swapped/deposited
   // via those were cached done=false, and the fix FLIPS them — so v5 payloads MUST
   // NOT be reused — bump to v6.
-  const key = `v6:${addr}`;
+  // v7 (2026-06-09): the cross-protocol audit added more current aggregated
+  // entrypoints (Uniswap v4 UR, Aave WrappedTokenGatewayV3, Compound BaseBulker,
+  // Moonwell WETHRouter + 12 mTokens, Basenames legacy controller) — these also
+  // flip quests done=true, so v6 payloads MUST NOT be reused — bump to v7.
+  const key = `v7:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

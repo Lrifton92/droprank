@@ -32,6 +32,12 @@ import {
   PANCAKESWAP_V3_SWAP_ROUTER,
   PANCAKESWAP_UNIVERSAL_ROUTER,
   EXTRA_FINANCE_POSITION_MANAGER,
+  UNISWAP_UNIVERSAL_ROUTER_V4,
+  AAVE_V3_WETH_GATEWAY_V3,
+  COMPOUND_V3_BULKER,
+  MOONWELL_WETH_ROUTER,
+  MOONWELL_MCBBTC,
+  BASENAMES_LEGACY_CONTROLLER,
 } from "./contracts-registry";
 import type { Tx } from "./types";
 
@@ -254,6 +260,32 @@ describe("computeQuests", () => {
       expect(done(computeQuests([tx({ to: MORPHO_BUNDLER3.toUpperCase() })], ADDR), "lend-morpho")).toBe(true);
       // Non-regression: the direct Morpho Blue singleton path still validates.
       expect(done(computeQuests([tx({ to: MORPHO_BLUE })], ADDR), "lend-morpho")).toBe(true);
+    });
+  });
+
+  describe("FIX C — audit 2026-06-09 (current aggregated entrypoints across protocols)", () => {
+    const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+      r.quests.find((q) => q.id === id)!.done;
+
+    it("detects a Uniswap swap via the v4 Universal Router (current app UI)", () => {
+      expect(done(computeQuests([tx({ to: UNISWAP_UNIVERSAL_ROUTER_V4 })], ADDR), "swap-uniswap")).toBe(true);
+    });
+
+    it("detects an Aave native-ETH supply via the current WrappedTokenGatewayV3", () => {
+      expect(done(computeQuests([tx({ to: AAVE_V3_WETH_GATEWAY_V3 })], ADDR), "supply-aave")).toBe(true);
+    });
+
+    it("detects a Compound supply routed through the BaseBulker", () => {
+      expect(done(computeQuests([tx({ to: COMPOUND_V3_BULKER })], ADDR), "lend-compound")).toBe(true);
+    });
+
+    it("detects a Moonwell ETH lend via the WETHRouter and a non-base mToken (mcbBTC)", () => {
+      expect(done(computeQuests([tx({ to: MOONWELL_WETH_ROUTER })], ADDR), "lend-moonwell")).toBe(true);
+      expect(done(computeQuests([tx({ to: MOONWELL_MCBBTC })], ADDR), "lend-moonwell")).toBe(true);
+    });
+
+    it("detects a Basename registration via the legacy RegistrarController", () => {
+      expect(done(computeQuests([tx({ to: BASENAMES_LEGACY_CONTROLLER })], ADDR), "basename")).toBe(true);
     });
   });
 

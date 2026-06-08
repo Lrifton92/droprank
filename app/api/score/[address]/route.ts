@@ -40,9 +40,13 @@ export async function GET(
   // v7 (2026-06-09): the extended Aerodrome/PancakeSwap/Morpho quest detection
   // (Universal Routers + Morpho Bundler3) can flip those quests done=true, raising
   // the quests criterion and the score, so v6 payloads MUST NOT be reused — bump to v7.
+  // v8 (2026-06-09): the cross-protocol audit additions (Uniswap v4 UR, Aave
+  // WrappedTokenGatewayV3, Compound BaseBulker, Moonwell WETHRouter + mTokens,
+  // Basenames legacy) raise the quests criterion further, so v7 payloads MUST NOT
+  // be reused — bump to v8.
   // Stale payloads expire on their own; the UI tolerates either shape. NB: `key` is the
   // cache key only; `addr` is what reaches the data layer.
-  const key = `v7:${addr}`;
+  const key = `v8:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

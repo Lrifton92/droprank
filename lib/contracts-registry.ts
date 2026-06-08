@@ -54,6 +54,16 @@ export const UNISWAP_UNIVERSAL_ROUTER_V3 = lc(
 export const UNISWAP_SWAP_ROUTER_02 = lc(
   "0x2626664c2603336E57B271c5C0b26F421741e481",
 );
+/**
+ * Uniswap Universal Router 2.1.1 — the v4-supporting Universal Router that
+ * app.uniswap.org routes Base swaps through today (post-v4). A swap done on the
+ * official UI now has `to` = this, not the older v1.2/v2/v3 routers above (audit
+ * gap, 2026-06-09). Blockscout: name "UniversalRouter", verified. Source: official
+ * Uniswap v4 deployments page (developers.uniswap.org, Base 8453).
+ */
+export const UNISWAP_UNIVERSAL_ROUTER_V4 = lc(
+  "0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7",
+);
 
 /**
  * Moonwell. Lend/borrow flows interact with the Comptroller (Unitroller proxy)
@@ -71,6 +81,30 @@ export const MOONWELL_MCBETH = lc("0x3bf93770f2d4a794c3d9EBEfBAeBAE2a8f09A5E5");
 export const MOONWELL_MDAI = lc("0x73b06D8d18De422E269645eaCe15400DE7462417");
 /** Moonwell mEURC. Blockscout token: symbol "mEURC" / "Moonwell EURC". */
 export const MOONWELL_MEURC = lc("0xb682c840B5F4FC58B20769E691A6fa1305A501a2");
+/**
+ * Moonwell WETHRouter — a native-ETH lend on app.moonwell.fi routes through this
+ * router (not an mToken directly), so an ETH supply has `to` = this (audit gap,
+ * 2026-06-09). Blockscout: name "WETHRouter", verified. Source: docs.moonwell.fi.
+ */
+export const MOONWELL_WETH_ROUTER = lc("0x70778cfcFC475c7eA0f24cC625Baf6Eae475D0c9");
+/**
+ * Additional Moonwell core markets on Base (the registry previously covered only 6
+ * of ~18). Each is an MErc20Delegator (impl MErc20Delegate), verified on Blockscout
+ * 2026-06-09; symbols per docs.moonwell.fi. A lend into any of these has `to` = the
+ * mToken and was undetected.
+ */
+export const MOONWELL_MUSDBC = lc("0x703843C3379b52F9FF486c9f5892218d2a065cC8");
+export const MOONWELL_MWSTETH = lc("0x627Fe393Bc6EdDA28e99AE648fD6fF362514304b");
+export const MOONWELL_MRETH = lc("0xCB1DaCd30638ae38F2B94eA64F066045B7D45f44");
+export const MOONWELL_MWEETH = lc("0xb8051464C8c92209C92F3a4CD9C73746C4c3CFb3");
+export const MOONWELL_MAERO = lc("0x73902f619CEB9B31FD8EFecf435CbDf89E369Ba6");
+export const MOONWELL_MCBBTC = lc("0xF877ACaFA28c19b96727966690b2f44d35aD5976");
+export const MOONWELL_MWRSETH = lc("0xfC41B49d064Ac646015b459C522820DB9472F4B5");
+export const MOONWELL_MTBTC = lc("0x9A858ebfF1bEb0D3495BB0e2897c1528eD84A218");
+export const MOONWELL_MLBTC = lc("0x10fF57877b79e9bD949B3815220ec87B9fc5D2ee");
+export const MOONWELL_MVIRTUAL = lc("0xdE8Df9d942D78edE3Ca06e60712582F79CfffC64");
+export const MOONWELL_MWELL = lc("0xdc7810B47eAab250De623F0Ee07764afa5F71eD1");
+export const MOONWELL_MUSDS = lc("0xb6419c6C2e60c4025D6D06eE4F913ce89425a357");
 
 /**
  * Aave v3 Pool on Base. Source: bgd-labs/aave-address-book AaveV3Base.POOL.
@@ -84,6 +118,14 @@ export const AAVE_V3_POOL = lc("0xA238Dd80C259a72e81d7e4664a9801593F98d1c5");
  * Blockscout (verified 2026-06-06): name "WrappedTokenGatewayV3", verified.
  */
 export const AAVE_V3_WETH_GATEWAY = lc("0x8be473dCfA93132658821E67CbEB684ec8Ea2E74");
+/**
+ * Current Aave v3 WrappedTokenGatewayV3 on Base — the gateway app.aave.com uses
+ * for native-ETH supplies today (the 0x8be4… above is the older "2.0" gateway;
+ * both still see traffic). An ETH supply now has `to` = this (audit gap,
+ * 2026-06-09). Blockscout: name "WrappedTokenGatewayV3", verified. Source:
+ * bgd-labs/aave-address-book AaveV3Base.WETH_GATEWAY.
+ */
+export const AAVE_V3_WETH_GATEWAY_V3 = lc("0xa0d9c1e9e48ca30c8d8c3b5d69ff5dc1f6dffc24");
 
 /**
  * Basenames registrar controllers. Source: base/web usernames addresses.
@@ -95,6 +137,16 @@ export const AAVE_V3_WETH_GATEWAY = lc("0x8be473dCfA93132658821E67CbEB684ec8Ea2E
 export const BASENAMES_EA_CONTROLLER = lc("0xd3e6775Ed9B7dC12B205C8E608Dc3767B9e5eFdA");
 export const BASENAMES_UPGRADEABLE_CONTROLLER = lc(
   "0xa7d2607c6BD39Ae9521e514026CBB078405Ab322",
+);
+/**
+ * Legacy public Basenames RegistrarController — the public registration entrypoint
+ * from mid-2024 until the Upgradeable controller migration. A large cohort of
+ * existing Basename holders registered through it (still receives `register` calls),
+ * and they were undetected (audit gap, 2026-06-09). Blockscout: name
+ * "RegistrarController", verified. Source: base/basenames README (Original/Legacy).
+ */
+export const BASENAMES_LEGACY_CONTROLLER = lc(
+  "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5",
 );
 
 /**
@@ -192,6 +244,13 @@ export const COMPOUND_V3_USDC = lc("0xb125E6687d4313864e53df431d5425969c15Eb2F")
 export const COMPOUND_V3_WETH = lc("0x46e6b214b524310239732D51387075E0e70970bf");
 export const COMPOUND_V3_AERO = lc("0x784efeB622244d2348d4F2522f8860B96fbEcE89");
 export const COMPOUND_V3_USDBC = lc("0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf");
+/**
+ * Compound III BaseBulker on Base — the single shared bulker app.compound.finance
+ * routes ETH supplies and batched actions through (instead of the Comet directly),
+ * so those supplies have `to` = this (audit gap, 2026-06-09). Blockscout: name
+ * "BaseBulker", verified. Source: compound-finance/comet deployments/base roots.json.
+ */
+export const COMPOUND_V3_BULKER = lc("0x78d0677032A35c63D142a48A2037048871212a8C");
 
 /**
  * Pendle Router V4 on Base (yield / PT-YT trading). Single entry router.
@@ -255,22 +314,41 @@ export const UNISWAP_ROUTERS = new Set([
   UNISWAP_UNIVERSAL_ROUTER_V1_2,
   UNISWAP_UNIVERSAL_ROUTER_V2,
   UNISWAP_UNIVERSAL_ROUTER_V3,
+  UNISWAP_UNIVERSAL_ROUTER_V4,
   UNISWAP_SWAP_ROUTER_02,
 ]);
 export const MOONWELL_CONTRACTS = new Set([
   MOONWELL_COMPTROLLER,
+  MOONWELL_WETH_ROUTER,
   MOONWELL_MWETH,
   MOONWELL_MUSDC,
   MOONWELL_MCBETH,
   MOONWELL_MDAI,
   MOONWELL_MEURC,
+  MOONWELL_MUSDBC,
+  MOONWELL_MWSTETH,
+  MOONWELL_MRETH,
+  MOONWELL_MWEETH,
+  MOONWELL_MAERO,
+  MOONWELL_MCBBTC,
+  MOONWELL_MWRSETH,
+  MOONWELL_MTBTC,
+  MOONWELL_MLBTC,
+  MOONWELL_MVIRTUAL,
+  MOONWELL_MWELL,
+  MOONWELL_MUSDS,
 ]);
-export const AAVE_CONTRACTS = new Set([AAVE_V3_POOL, AAVE_V3_WETH_GATEWAY]);
+export const AAVE_CONTRACTS = new Set([
+  AAVE_V3_POOL,
+  AAVE_V3_WETH_GATEWAY,
+  AAVE_V3_WETH_GATEWAY_V3,
+]);
 export const COMPOUND_CONTRACTS = new Set([
   COMPOUND_V3_USDC,
   COMPOUND_V3_WETH,
   COMPOUND_V3_AERO,
   COMPOUND_V3_USDBC,
+  COMPOUND_V3_BULKER,
 ]);
 export const MORPHO_CONTRACTS = new Set([MORPHO_BLUE, MORPHO_BUNDLER3]);
 export const PANCAKESWAP_ROUTERS = new Set([
@@ -285,6 +363,7 @@ export const EXTRA_FINANCE_CONTRACTS = new Set([
 export const BASENAMES_CONTROLLERS = new Set([
   BASENAMES_EA_CONTROLLER,
   BASENAMES_UPGRADEABLE_CONTROLLER,
+  BASENAMES_LEGACY_CONTROLLER,
 ]);
 
 /**
