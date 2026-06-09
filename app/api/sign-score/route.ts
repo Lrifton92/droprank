@@ -7,6 +7,10 @@ import { signAttestation } from "@/lib/sign-attestation";
 import { checkRateLimit } from "@/lib/cache";
 import { BADGE_CHAIN_ID } from "@/lib/badge-abi";
 
+// Re-scans the wallet (scoreAddress) to recompute the score server-side; a
+// deep-history wallet can exceed Vercel's default function timeout. 60 = Hobby max.
+export const maxDuration = 60;
+
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 /** Normalize a private key from env to a 0x-prefixed string viem accepts. */

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAddress } from "viem";
-import { fetchWalletData, BlockscoutError } from "@/lib/providers/blockscout";
+import { BlockscoutError } from "@/lib/providers/blockscout";
+import { fetchWalletDataChained } from "@/lib/score-address";
 import { fetchTalentBuilderScore } from "@/lib/providers/talent";
 import { computeQuests } from "@/lib/quests";
 import { LruCache, checkRateLimit } from "@/lib/cache";
 import { getOrSetCached } from "@/lib/shared-cache";
 import type { QuestsResult } from "@/lib/types";
+
+// Deep-history wallets (heavy farmers, >10k txs) need two 10k-tx fetches + a
+// 20k-tx parse on a cold scan — well past Vercel's default function timeout,
+// which was already truncating these scans. Raise the ceiling so the cold scan
+// completes (cached 5min after). 60 = the Hobby max.
+export const maxDuration = 60;
 
 const cache = new LruCache<QuestsResult>(500, 5 * 60 * 1000);
 const QUESTS_TTL_S = 5 * 60;
@@ -57,7 +64,7 @@ export async function GET(
     const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
       // Talent Builder Score runs in parallel with the on-chain scan (never-fail).
       const [data, talentBuilderScore] = await Promise.all([
-        fetchWalletData(addr, req.signal),
+        fetchWalletDataChained(addr, req.signal),
         fetchTalentBuilderScore(addr, req.signal),
       ]);
       return computeQuests(data.txs, addr, {

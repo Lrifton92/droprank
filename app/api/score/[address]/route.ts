@@ -7,6 +7,10 @@ import { LruCache, checkRateLimit } from "@/lib/cache";
 import { getOrSetCached } from "@/lib/shared-cache";
 import type { ScoreResult } from "@/lib/types";
 
+// Deep-history wallets need a 10k-tx (+ asc) fetch and parse on a cold scan,
+// past Vercel's default function timeout. Raise the ceiling (60 = Hobby max).
+export const maxDuration = 60;
+
 const cache = new LruCache<ScoreResult>(500, 5 * 60 * 1000);
 const SCORE_TTL_S = 5 * 60;
 

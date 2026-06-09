@@ -72,8 +72,15 @@ async function fetchViaKeylessChain(
  *
  * Etherscan failures (throw/timeout/chain-not-supported) transparently drop to
  * the keyless chain. An aborted request (caller cancelled) is NOT retried.
+ *
+ * Exported so BOTH /api/score and /api/quests scan through the SAME fast chain
+ * (single-call etherscan-compat, 10k-tx cap, deep-history asc pull). The quests
+ * route used to call blockscout.fetchWalletData directly — the slow v2 cursor
+ * (3k-tx cap, ~60 sequential pages), which truncated heavy farmers' founding
+ * protocol txs AND timed out. Sharing this chain fixes both and keeps the two
+ * routes consistent. The module-level Etherscan breaker is shared on purpose.
  */
-async function fetchWalletData(
+export async function fetchWalletDataChained(
   address: string,
   signal?: AbortSignal,
 ): Promise<WalletData> {
@@ -118,7 +125,7 @@ export async function scoreAddress(
   // The keyless onchain Talent Builder Score read runs in parallel with the scan
   // so it never lengthens the cold scan. Never-fail: 0 on any RPC error.
   const [data, talentBuilderScore] = await Promise.all([
-    fetchWalletData(addr, signal),
+    fetchWalletDataChained(addr, signal),
     fetchTalentBuilderScore(addr, signal),
   ]);
   const quests = computeQuests(data.txs, addr, {
