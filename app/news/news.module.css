@@ -529,14 +529,18 @@
   }
 }
 
-/* Date section separator — full grid row, eyebrow label flanked by a hairline. */
+/* Date section separator — full grid row, eyebrow label flanked by a hairline.
+   Generous top+bottom margin so the label never crowds the cards below it: with
+   only the 10px row-gap the low-contrast centred text grazed the card tops and
+   read as "smothered" (esp. the first separator, pinned under the count line). */
 .dateSep {
   grid-column: 1 / -1;
   list-style: none;
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 10px;
+  margin-top: 24px;
+  margin-bottom: 16px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.26em;
