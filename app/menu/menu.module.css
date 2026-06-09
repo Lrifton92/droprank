@@ -228,13 +228,68 @@
   column-gap: 16px;
   padding: 20px;
   color: var(--text);
+  /* Directional tint at rest so the card no longer reads as a flat grey-blue
+     slab: a faint Base wash flows up from the bottom-left (where the glyph
+     lives) over the panel surface. Subtle (≤7%) — sobriety preserved.
+     Layered ON TOP of the inherited --panel glass (kept as the second layer)
+     so the backdrop-blur surface is preserved. */
+  background:
+    radial-gradient(
+      120% 90% at 0% 100%,
+      color-mix(in srgb, var(--base) 7%, transparent),
+      transparent 58%
+    ),
+    var(--panel);
   transition:
     transform var(--hover-dur) var(--ease-out),
     border-color var(--hover-dur) var(--ease-out),
-    box-shadow var(--hover-dur) var(--ease-out);
+    box-shadow var(--hover-dur) var(--ease-out),
+    background var(--hover-dur) var(--ease-out);
+}
+/* Top hairline of Base light — a thin "active rail" reading across the card
+   head. Present at rest (quiet), brightens + widens on hover. */
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--base-300) 55%, transparent),
+    transparent
+  );
+  opacity: 0.5;
+  transition:
+    opacity var(--hover-dur) var(--ease-out),
+    left var(--hover-dur) var(--ease-out),
+    right var(--hover-dur) var(--ease-out);
+  pointer-events: none;
 }
 .card:hover {
   transform: translateY(-2px);
+  border-color: var(--border-strong);
+  background:
+    radial-gradient(
+      120% 95% at 0% 100%,
+      color-mix(in srgb, var(--base) 13%, transparent),
+      transparent 62%
+    ),
+    var(--panel);
+  box-shadow: 0 14px 40px -22px var(--base-glow);
+}
+.card:hover::after,
+.card:focus-visible::after {
+  opacity: 1;
+  left: 8px;
+  right: 8px;
+}
+/* Keyboard focus: the shared :focus-visible ring from globals stays; we add the
+   same accent lift as hover so tabbing through the menu feels identical. */
+.card:focus-visible {
   border-color: var(--border-strong);
   box-shadow: 0 14px 40px -22px var(--base-glow);
 }
@@ -244,10 +299,17 @@
   transform: translateX(4px);
   color: var(--base-200);
 }
-.card:hover .glyph {
+.card:hover .glyph,
+.card:focus-visible .glyph {
   transform: scale(1.06);
-  border-color: color-mix(in srgb, var(--base-300) 36%, transparent);
-  box-shadow: 0 0 22px -6px var(--base-glow);
+  border-color: color-mix(in srgb, var(--base-300) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--base-200) 45%, transparent),
+    0 0 28px -6px var(--base-glow);
+}
+.card:hover .glyph::before,
+.card:focus-visible .glyph::before {
+  opacity: 1;
 }
 /* Snappy tactile press feedback on click. */
 .card:active {
@@ -263,41 +325,109 @@
 
 .idx {
   grid-area: idx;
+  /* HUD slug, not a faint footnote: a mono marker that anchors the card head.
+     Brighter than before (dim, not faint) with a leading accent tick so it
+     reads as a deliberate index, not stray text. Kept centred in the content
+     column to match Soufian's 2026-06-05 centred layout. */
+  position: relative;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.2em;
-  color: var(--text-faint);
-  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  color: var(--text-dim);
+  transition: color var(--hover-dur) var(--ease-out);
+}
+.idx::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--base-300);
+  box-shadow: 0 0 7px -1px var(--base-glow);
+  opacity: 0.85;
+  transition:
+    box-shadow var(--hover-dur) var(--ease-out),
+    opacity var(--hover-dur) var(--ease-out);
+}
+.card:hover .idx,
+.card:focus-visible .idx {
+  color: var(--text);
+}
+.card:hover .idx::before,
+.card:focus-visible .idx::before {
+  opacity: 1;
+  box-shadow: 0 0 11px 0 var(--base-glow);
 }
 .glyph {
   grid-area: glyph;
-  width: 52px;
-  height: 52px;
+  position: relative;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
   border-radius: var(--r-md);
-  color: var(--base-300);
-  background: var(--base-soft);
-  border: 1px solid var(--border);
+  color: var(--base-200);
+  /* A lit module, not a washed tile: a vertical Base gradient with a brighter
+     inner-top highlight gives it volume even at rest. */
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--base) 26%, transparent),
+    color-mix(in srgb, var(--base) 9%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--base-200) 30%, transparent),
+    0 0 18px -10px var(--base-glow);
   transition:
     transform var(--hover-dur) var(--ease-snap),
     border-color var(--hover-dur) var(--ease-out),
     box-shadow var(--hover-dur) var(--ease-out);
 }
+.glyph svg {
+  position: relative;
+  z-index: 1;
+  /* Crisp icon over the lit module. */
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--base-300) 45%, transparent));
+}
+/* Soft halo blooming behind the glyph — the "powered" glow. Quiet at rest,
+   intensifies on hover. Sits under the icon (z-index), clipped to the tile. */
+.glyph::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    70% 70% at 50% 30%,
+    color-mix(in srgb, var(--base-300) 32%, transparent),
+    transparent 70%
+  );
+  opacity: 0.6;
+  transition: opacity var(--hover-dur) var(--ease-out);
+  pointer-events: none;
+}
 .cardTitle {
   grid-area: title;
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-top: 2px;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
   text-align: center;
+  /* Whisper-thin Base sheen on the title so it sits a hair above pure-white
+     plain text — premium without colouring the data. */
+  text-shadow: 0 0 18px color-mix(in srgb, var(--base-300) 22%, transparent);
 }
 .cardSub {
   grid-area: sub;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-dim);
-  margin-top: 3px;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
   text-align: center;
 }
 .arrow {
@@ -307,7 +437,9 @@
   align-items: center;
   justify-content: flex-end;
   width: 30px;
-  color: var(--text-faint);
+  /* Lifted from faint→dim so the affordance is visible at rest now that the
+     glyph reads as lit; hover still pushes it to --base-200. */
+  color: var(--text-dim);
   transition: transform 0.26s var(--ease-out), color 0.2s var(--ease-out);
 }
 .arrow svg {
