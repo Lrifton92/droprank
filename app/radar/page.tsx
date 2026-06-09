@@ -78,6 +78,7 @@ function DiagArrow() {
 
 import Counter from "../_components/Counter";
 import BackArrow from "../_components/BackArrow";
+import InfoTip from "../_components/InfoTip";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./radar.module.css";
@@ -180,6 +181,7 @@ function RadarInner() {
                 <span>
                   <Counter value={data.earned} className={styles.big} duration={1100} />
                   <span className={styles.total}>{t("pts", { total: data.total })}</span>
+                  <InfoTip label={t("pointsAbout")} />
                 </span>
                 <span className={styles.completed}>
                   <Counter value={doneCount} duration={900} />

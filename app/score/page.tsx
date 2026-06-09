@@ -185,6 +185,7 @@ function ScoreInner() {
                           return d ? td(d.key, d.values) : b.detail;
                         })()}
                       </span>
+                      {b.key === "identity" && <InfoTip label={t("identityAbout")} />}
                       {b.points < b.max ? (
                         (() => {
                           const imp = improveFor(b.key);

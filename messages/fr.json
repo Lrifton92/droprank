@@ -95,6 +95,7 @@
     "startYourJourney": "LANCE-TOI",
     "freshWalletPost": " — complète des quêtes sur le radar pour grimper.",
     "breakdownTitle": "score.breakdown[]",
+    "identityAbout": "L'identité vaut 8 points : un Basename (4) + l'usage d'un Smart Wallet (4). Un 4/8 ici veut dire que tu as l'un des deux — obtiens l'autre pour passer au max.",
     "about": "Ton score DropRank (/100) évalue à quel point ce wallet est prêt pour un airdrop Base — d'après le détail ci-dessous (transactions, mois actifs, régularité d'activité, volume, contrats, diversité de protocoles, bridge, identité, quêtes). Inspiré de critères d'airdrop publiés (Arbitrum, Optimism), il signale aussi les patterns sybil (burst, dust). C'est notre propre score transparent, calculé différemment de l'Onchain Score de base.org (Coinbase, propriétaire) — d'où des chiffres différents.",
     "improve": {
       "maxed": "au max",
@@ -175,6 +176,7 @@
     "done": "faites",
     "cleared": "validée",
     "dash": "—",
+    "pointsAbout": "Chaque quête validée rapporte ses points (+1 ou +2, selon la difficulté), réparties en 7 catégories (DEX, Lending, Identité, Bridge, NFT, Perps, Social). Il y a 19 quêtes mais le total est plafonné à 20 pts — ces points alimentent le critère « Quêtes » de ton Score /100.",
     "diversityTitle": "{count}/7 catégories touchées",
     "diversityNote": "chaque nouvelle catégorie compte dans le critère diversité de votre score",
     "bridgeBonus": "+4 score",

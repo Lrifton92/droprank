@@ -95,6 +95,7 @@
     "startYourJourney": "START YOUR JOURNEY",
     "freshWalletPost": " — complete quests on the radar to climb the ranks.",
     "breakdownTitle": "score.breakdown[]",
+    "identityAbout": "Identity is worth 8 points: a Basename (4) + using a Smart Wallet (4). A 4/8 here means you have one of the two — get the other to max it out.",
     "about": "Your DropRank score (/100) rates how ready this wallet is for a Base airdrop — from the breakdown below (transactions, active months, activity spread, volume, contracts, protocol diversity, bridge, identity, quests). Inspired by published airdrop criteria (Arbitrum, Optimism), it also flags sybil patterns (burst, dust). It's our own transparent score, computed differently from base.org's Onchain Score (Coinbase, proprietary) — so the two numbers differ.",
     "improve": {
       "maxed": "maxed",
@@ -175,6 +176,7 @@
     "done": "done",
     "cleared": "cleared",
     "dash": "—",
+    "pointsAbout": "Each completed quest earns its points (+1 or +2, depending on difficulty), across 7 categories (DEX, Lending, Identity, Bridge, NFT, Perps, Social). There are 19 quests but the total is capped at 20 pts — these points feed the \"Quests\" criterion of your /100 Score.",
     "diversityTitle": "{count}/7 categories touched",
     "diversityNote": "each new category counts toward the diversity criterion of your score",
     "bridgeBonus": "+4 score",

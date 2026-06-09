@@ -19,7 +19,14 @@ export default function InfoTip({ label }: { label: string }) {
     if (!open) return;
     const place = () => {
       const r = btnRef.current?.getBoundingClientRect();
-      if (r) setPos({ top: r.bottom + 8, left: r.right });
+      if (!r) return;
+      // The bubble is fixed and grows LEFT from `left` (translateX -100%), width
+      // min(300, 78vw). Clamp so its left edge never spills off-screen — the
+      // radar's "i" sits near the left edge, where the bubble overflowed left on
+      // mobile. Keeps an 8px gutter on both sides.
+      const bw = Math.min(300, window.innerWidth * 0.78);
+      const left = Math.min(window.innerWidth - 8, Math.max(bw + 8, r.right));
+      setPos({ top: r.bottom + 8, left });
     };
     place();
     const onDoc = (e: MouseEvent) => {
