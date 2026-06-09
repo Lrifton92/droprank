@@ -219,7 +219,12 @@ function RadarInner() {
             )}
 
             <ul className={`dr-enter ${styles.list}`} style={{ "--i": 4 } as CSSProperties}>
-              {data.quests.map((q, i) => {
+              {/* Incomplete quests float to the top (todo first, cleared below) so
+                  the list reads as a checklist of what's left, not a mix. Stable
+                  sort keeps each group in its original category order. */}
+              {[...data.quests]
+                .sort((a, b) => Number(a.done) - Number(b.done))
+                .map((q, i) => {
                 const link = q.link;
                 const cat = q.category ?? QUEST_CATEGORY[q.id];
                 return (
