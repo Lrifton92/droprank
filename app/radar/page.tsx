@@ -102,7 +102,10 @@ function RadarInner() {
     const ctrl = new AbortController();
     setData(null);
     setError(null);
-    fetch(`/api/quests/${address}`, { signal: ctrl.signal })
+    // A manual rescan (reload > 0) forces a fresh server scan (?fresh=1), so a
+    // quest the user JUST completed shows without waiting out the cache TTL.
+    const url = `/api/quests/${address}${reload > 0 ? "?fresh=1" : ""}`;
+    fetch(url, { signal: ctrl.signal })
       .then(async (r) => {
         if (!r.ok) throw new Error((await r.json()).error ?? `HTTP ${r.status}`);
         return r.json();
@@ -183,9 +186,20 @@ function RadarInner() {
                   <span className={styles.total}>{t("pts", { total: data.total })}</span>
                   <InfoTip label={t("pointsAbout")} />
                 </span>
-                <span className={styles.completed}>
-                  <Counter value={doneCount} duration={900} />
-                  <span className="syn-punct">/{data.quests.length}</span> {t("done")}
+                <span className={styles.completedWrap}>
+                  <span className={styles.completed}>
+                    <Counter value={doneCount} duration={900} />
+                    <span className="syn-punct">/{data.quests.length}</span> {t("done")}
+                  </span>
+                  {/* Force a fresh scan so a quest just completed shows now,
+                      without waiting out the cache (reported 2026-06-09). */}
+                  <button
+                    type="button"
+                    className={`mono ${styles.rescan}`}
+                    onClick={() => setReload((n) => n + 1)}
+                  >
+                    {tc("rescan")}
+                  </button>
                 </span>
               </div>
               <div className={styles.track}>

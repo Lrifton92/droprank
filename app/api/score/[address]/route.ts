@@ -11,8 +11,10 @@ import type { ScoreResult } from "@/lib/types";
 // past Vercel's default function timeout. Raise the ceiling (60 = Hobby max).
 export const maxDuration = 60;
 
-const cache = new LruCache<ScoreResult>(500, 5 * 60 * 1000);
-const SCORE_TTL_S = 5 * 60;
+// 90s TTL (was 5min) to match /api/quests: the score reflects the same on-chain
+// activity, so a freshly-completed quest should move it without a long lag.
+const cache = new LruCache<ScoreResult>(500, 90 * 1000);
+const SCORE_TTL_S = 90;
 
 export async function GET(
   req: NextRequest,
@@ -65,7 +67,7 @@ export async function GET(
       return r;
     });
     return NextResponse.json(result, {
-      headers: { "cache-control": "public, max-age=60, s-maxage=300" },
+      headers: { "cache-control": "public, max-age=30, s-maxage=90" },
     });
   } catch (e) {
     if (e instanceof BlockscoutError) {

@@ -63,6 +63,23 @@ describe("getOrSetCached namespaces", () => {
     expect(compute).toHaveBeenCalledTimes(1);
   });
 
+  it("force=true bypasses both tiers, recomputes, and refreshes the cache", async () => {
+    const l1 = new LruCache<string>(10);
+    await getOrSetCached(l1, "quests", "0xfresh", 60, async () => "old");
+    // normal read returns the cached "old"
+    expect(
+      await getOrSetCached(l1, "quests", "0xfresh", 60, async () => "new"),
+    ).toBe("old");
+    // force read recomputes "new" even though "old" is cached
+    expect(
+      await getOrSetCached(l1, "quests", "0xfresh", 60, async () => "new", true),
+    ).toBe("new");
+    // and the refreshed value is now what a normal read sees
+    expect(
+      await getOrSetCached(l1, "quests", "0xfresh", 60, async () => "ignored"),
+    ).toBe("new");
+  });
+
   it("degrades to compute when Redis is down (never fails the request)", async () => {
     failing = true;
     const out = await getOrSetCached(

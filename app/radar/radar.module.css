@@ -94,6 +94,37 @@
 .completed .mono {
   color: var(--text);
 }
+/* Right column of the header: the "x/19 done" line with a rescan button under
+   it, so a user who just did a quest can force a fresh scan. */
+.completedWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+}
+.rescan {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--base-300);
+  background: color-mix(in srgb, var(--base-300) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--base-300) 30%, transparent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition:
+    background 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    color 0.16s var(--ease-out),
+    transform 0.12s var(--ease-snap);
+}
+.rescan:hover {
+  background: color-mix(in srgb, var(--base-300) 18%, transparent);
+  border-color: color-mix(in srgb, var(--base-300) 60%, transparent);
+  color: var(--text);
+}
+.rescan:active {
+  transform: scale(0.96);
+}
 .track {
   margin-top: 12px;
   height: 6px;

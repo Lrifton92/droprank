@@ -15,8 +15,11 @@ import type { QuestsResult } from "@/lib/types";
 // completes (cached 5min after). 60 = the Hobby max.
 export const maxDuration = 60;
 
-const cache = new LruCache<QuestsResult>(500, 5 * 60 * 1000);
-const QUESTS_TTL_S = 5 * 60;
+// 90s TTL (was 5min): a farmer who just did a quest expects to see it fast. The
+// `?fresh=1` rescan bypasses this entirely; the short TTL just bounds how long a
+// passive view can lag. Cold scans are cached, so the extra recompute is modest.
+const cache = new LruCache<QuestsResult>(500, 90 * 1000);
+const QUESTS_TTL_S = 90;
 
 export async function GET(
   req: NextRequest,
@@ -66,6 +69,10 @@ export async function GET(
   // reused — bump to v8.
   const key = `v8:${addr}`;
 
+  // `?fresh=1` forces a recompute (skips both cache tiers) — the rescan button
+  // uses it so a quest the user JUST completed shows immediately.
+  const fresh = req.nextUrl.searchParams.get("fresh") === "1";
+
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
     const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
@@ -84,9 +91,13 @@ export async function GET(
         talentBuilderScore,
         ownsBasename,
       });
-    });
+    }, fresh);
     return NextResponse.json(result, {
-      headers: { "cache-control": "public, max-age=60, s-maxage=300" },
+      headers: {
+        "cache-control": fresh
+          ? "no-store"
+          : "public, max-age=30, s-maxage=90",
+      },
     });
   } catch (e) {
     if (e instanceof BlockscoutError) {

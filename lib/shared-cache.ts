@@ -51,6 +51,10 @@ function redisKey(ns: string, key: string): string {
  * @param key cache key within the namespace (callers fold lang/address into it).
  * @param ttlSeconds L2 (Redis) TTL. L1's TTL is whatever the LruCache was built with.
  * @param compute called only on a full miss; its result is cached in both tiers.
+ * @param force when true, skip BOTH tier reads and recompute, then refresh both
+ *   tiers. Powers a "rescan" that must reflect an action the user just took
+ *   (e.g. a quest tx) without waiting out the TTL. The refreshed value also
+ *   serves subsequent normal reads.
  *
  * Redis failures never propagate: a flaky/absent store degrades to recompute.
  */
@@ -60,21 +64,25 @@ export async function getOrSetCached<V>(
   key: string,
   ttlSeconds: number,
   compute: () => Promise<V>,
+  force = false,
 ): Promise<V> {
-  const hot = l1.get(key);
-  if (hot !== undefined) return hot;
-
   const client = getRedis();
-  if (client) {
-    try {
-      // @upstash/redis auto-deserializes JSON values written via `set`.
-      const cached = await client.get<V>(redisKey(ns, key));
-      if (cached != null) {
-        l1.set(key, cached);
-        return cached;
+
+  if (!force) {
+    const hot = l1.get(key);
+    if (hot !== undefined) return hot;
+
+    if (client) {
+      try {
+        // @upstash/redis auto-deserializes JSON values written via `set`.
+        const cached = await client.get<V>(redisKey(ns, key));
+        if (cached != null) {
+          l1.set(key, cached);
+          return cached;
+        }
+      } catch {
+        // Ignore: treat as a miss and compute.
       }
-    } catch {
-      // Ignore: treat as a miss and compute.
     }
   }
 
