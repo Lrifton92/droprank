@@ -2,26 +2,36 @@
   position: relative;
   display: inline-flex;
   vertical-align: middle;
+  /* Breathing room from the preceding label so the "i" never glues to a word. */
+  margin-left: 7px;
 }
 .btn {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--base-300) 45%, transparent);
-  background: none;
-  color: var(--base-300);
+  border: 1px solid color-mix(in srgb, var(--base-300) 38%, transparent);
+  background: color-mix(in srgb, var(--base-300) 8%, transparent);
+  color: color-mix(in srgb, var(--base-300) 90%, var(--text));
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-style: italic;
+  font-size: 9px;
+  font-style: normal;
   font-weight: 700;
-  line-height: 1;
-  display: grid;
-  place-items: center;
+  /* Optical centering: the lowercase "i" sits a hair high in the metrics box;
+     nudge it down so it reads dead-centre in the circle. */
+  line-height: 15px;
+  text-align: center;
+  display: block;
+  padding: 0;
   cursor: pointer;
-  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out), transform 0.12s var(--ease-snap);
+  transition:
+    background 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    color 0.16s var(--ease-out),
+    transform 0.12s var(--ease-snap);
 }
 .btn:hover {
-  background: var(--base-soft);
+  background: color-mix(in srgb, var(--base-300) 20%, transparent);
+  border-color: color-mix(in srgb, var(--base-300) 70%, transparent);
   color: var(--text);
 }
 .btn:active {
