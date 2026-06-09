@@ -150,6 +150,16 @@ export const BASENAMES_LEGACY_CONTROLLER = lc(
 );
 
 /**
+ * Basenames BaseRegistrar — the .base.eth ERC-721 NFT contract. `balanceOf > 0`
+ * means the wallet OWNS a Basename, regardless of how it got it (registered via
+ * any controller, or received by transfer) — the truthful "has a Basename" check
+ * the registration-tx signal only approximates. Blockscout: name "BaseRegistrar",
+ * token "Basenames" / ERC-721, verified. Confirmed live 2026-06-09: holder
+ * 0x1deeaEc4…5A72 -> 1, a swapper with no basename -> 0.
+ */
+export const BASENAMES_REGISTRAR = lc("0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a");
+
+/**
  * Canonical OP-stack L2 Standard Bridge on Base.
  * Blockscout: proxy impl "L2StandardBridge", verified.
  * Detection: an L2 interaction with this contract appears in the normal tx list

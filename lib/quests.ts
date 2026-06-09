@@ -79,6 +79,15 @@ export interface QuestContext {
    * TALENT_CONTRACTS tx signal.
    */
   talentBuilderScore?: number;
+  /**
+   * The wallet OWNS a .base.eth Basename (balanceOf > 0 on the BaseRegistrar
+   * ERC-721). Read keyless onchain via lib/providers/basename.ts. This is the
+   * truthful "has a Basename" signal: it catches holders who received one by
+   * transfer, or whose registration tx is older than the scan window — neither
+   * shows a controller tx. On any RPC error this is false and the quest falls
+   * back to the registration-tx signal (touched BASENAMES_CONTROLLERS).
+   */
+  ownsBasename?: boolean;
 }
 
 interface QuestDef {
@@ -181,7 +190,10 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://base.org/names",
     category: "Identity",
-    check: (txs, _a, ctx) => touched(BASENAMES_CONTROLLERS, txs, ctx),
+    // Truthful ownership (owns the .base.eth NFT) OR a registration tx. Ownership
+    // catches holders who received one or registered before the scan window.
+    check: (txs, _a, ctx) =>
+      ctx.ownsBasename === true || touched(BASENAMES_CONTROLLERS, txs, ctx),
   },
   {
     id: "smart-wallet",

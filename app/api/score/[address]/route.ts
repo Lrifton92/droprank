@@ -48,9 +48,13 @@ export async function GET(
   // WrappedTokenGatewayV3, Compound BaseBulker, Moonwell WETHRouter + mTokens,
   // Basenames legacy) raise the quests criterion further, so v7 payloads MUST NOT
   // be reused — bump to v8.
+  // v9 (2026-06-09): the scan now runs the fast chain (etherscan-compat 10k + asc)
+  // instead of the 3k cursor (deep-history wallets surface more), and the basename
+  // quest validates on NFT ownership — both can raise the score, so v8 payloads
+  // MUST NOT be reused — bump to v9.
   // Stale payloads expire on their own; the UI tolerates either shape. NB: `key` is the
   // cache key only; `addr` is what reaches the data layer.
-  const key = `v8:${addr}`;
+  const key = `v9:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.

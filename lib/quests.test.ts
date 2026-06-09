@@ -157,6 +157,13 @@ describe("computeQuests", () => {
     expect(r.quests.find((q) => q.id === "smart-wallet")!.done).toBe(true);
   });
 
+  it("validates the basename quest on ownership, even with no registration tx", () => {
+    // A holder who RECEIVED a basename (or whose registration tx is beyond the
+    // scan window) has no controller tx, but owns the .base.eth NFT.
+    const r = computeQuests([], ADDR, { ownsBasename: true });
+    expect(r.quests.find((q) => q.id === "basename")!.done).toBe(true);
+  });
+
   it("detects 30 distinct active days", () => {
     const now = 1_700_000_000;
     const txs = Array.from({ length: 30 }, (_, i) =>

@@ -3,6 +3,7 @@ import { isAddress } from "viem";
 import { BlockscoutError } from "@/lib/providers/blockscout";
 import { fetchWalletDataChained } from "@/lib/score-address";
 import { fetchTalentBuilderScore } from "@/lib/providers/talent";
+import { fetchOwnsBasename } from "@/lib/providers/basename";
 import { computeQuests } from "@/lib/quests";
 import { LruCache, checkRateLimit } from "@/lib/cache";
 import { getOrSetCached } from "@/lib/shared-cache";
@@ -57,15 +58,22 @@ export async function GET(
   // entrypoints (Uniswap v4 UR, Aave WrappedTokenGatewayV3, Compound BaseBulker,
   // Moonwell WETHRouter + 12 mTokens, Basenames legacy controller) — these also
   // flip quests done=true, so v6 payloads MUST NOT be reused — bump to v7.
-  const key = `v7:${addr}`;
+  // v8 (2026-06-09): two changes flip results. (1) The scan now runs through the
+  // fast chain (etherscan-compat 10k + asc) instead of the 3k-cap cursor, so deep-
+  // history wallets surface founding protocol txs they were missing. (2) The
+  // basename quest now validates on NFT ownership (balanceOf), catching holders
+  // who received one or registered before the window. v7 payloads MUST NOT be
+  // reused — bump to v8.
+  const key = `v8:${addr}`;
 
   try {
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
     const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
       // Talent Builder Score runs in parallel with the on-chain scan (never-fail).
-      const [data, talentBuilderScore] = await Promise.all([
+      const [data, talentBuilderScore, ownsBasename] = await Promise.all([
         fetchWalletDataChained(addr, req.signal),
         fetchTalentBuilderScore(addr, req.signal),
+        fetchOwnsBasename(addr, req.signal),
       ]);
       return computeQuests(data.txs, addr, {
         isSmartWallet: data.usedSmartWallet,
@@ -74,6 +82,7 @@ export async function GET(
         receivedUsdc: data.receivedUsdc,
         mintedNft: data.mintedNft,
         talentBuilderScore,
+        ownsBasename,
       });
     });
     return NextResponse.json(result, {
