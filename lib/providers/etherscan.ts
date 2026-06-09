@@ -297,7 +297,11 @@ export const __test = {
     detectInboundBridge(toInternalRows(items), address),
 };
 
-function buildTxlistUrl(address: string, opts: ClientOptions): string {
+function buildTxlistUrl(
+  address: string,
+  opts: ClientOptions,
+  sort: "asc" | "desc" = "desc",
+): string {
   const u = new URL(opts.baseUrl ?? BASE_URL);
   u.searchParams.set("chainid", String(chainId()));
   u.searchParams.set("module", "account");
@@ -307,7 +311,7 @@ function buildTxlistUrl(address: string, opts: ClientOptions): string {
   u.searchParams.set("endblock", "99999999");
   u.searchParams.set("page", "1");
   u.searchParams.set("offset", String(ETHERSCAN_PAGE_CAP));
-  u.searchParams.set("sort", "desc");
+  u.searchParams.set("sort", sort);
   if (opts.requireApiKey !== false) u.searchParams.set("apikey", apiKey());
   return u.toString();
 }
@@ -343,17 +347,62 @@ function buildGetCodeUrl(address: string, opts: ClientOptions): string {
   return u.toString();
 }
 
+/** Merge two tx lists, dropping duplicates by hash (first occurrence wins). */
+function mergeDedupeByHash(primary: Tx[], extra: Tx[]): Tx[] {
+  const seen = new Set(primary.map((t) => t.hash));
+  const merged = primary.slice();
+  for (const t of extra) {
+    if (!seen.has(t.hash)) {
+      seen.add(t.hash);
+      merged.push(t);
+    }
+  }
+  return merged;
+}
+
 /**
  * Fetch the tx list for an address. Returns [] for an unused wallet.
- * @throws EtherscanError on a real API error (rate limit, bad key, ...).
+ *
+ * Deep-history wallets: a single txlist page is capped at ETHERSCAN_PAGE_CAP
+ * (10000) and sorted newest-first. A heavy farmer's FOUNDING protocol
+ * interactions (first swap on Aerodrome, first Morpho deposit…) sit older than
+ * that cap, so a desc-only scan never sees them and those quests stay incomplete
+ * forever. When the recent page is full (== cap), the wallet has more history
+ * than one page, so we also pull the OLDEST page (sort=asc) and merge — covering
+ * both ends of the history where founding + recent interactions live. The asc
+ * pull is best-effort: if it fails we keep the recent page rather than failing
+ * the whole scan.
+ *
+ * @throws EtherscanError on a real API error from the primary (desc) call.
  */
 async function fetchTxs(
   address: string,
   signal: AbortSignal | undefined,
   opts: ClientOptions,
 ): Promise<Tx[]> {
+  const recent = await fetchTxsPage(address, signal, opts, "desc");
+  if (recent.length < ETHERSCAN_PAGE_CAP) return recent;
+  try {
+    const oldest = await fetchTxsPage(address, signal, opts, "asc");
+    return mergeDedupeByHash(recent, oldest);
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    return recent;
+  }
+}
+
+/**
+ * One txlist page (newest- or oldest-first). Returns [] for an unused wallet.
+ * @throws EtherscanError on a real API error (rate limit, bad key, ...).
+ */
+async function fetchTxsPage(
+  address: string,
+  signal: AbortSignal | undefined,
+  opts: ClientOptions,
+  sort: "asc" | "desc",
+): Promise<Tx[]> {
   const env = await getEnvelope<EsTx[] | string>(
-    buildTxlistUrl(address, opts),
+    buildTxlistUrl(address, opts, sort),
     signal,
   );
   if (env.status === "1") {

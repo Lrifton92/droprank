@@ -5,6 +5,7 @@ import {
   BLOCKSCOUT_COMPAT_URL,
   BLOCKSCOUT_V2_URL,
   BASE_RPC_URL,
+  ETHERSCAN_PAGE_CAP,
   EtherscanError,
   __test,
 } from "./etherscan";
@@ -305,6 +306,80 @@ describe("fetchWalletData", () => {
   it("throws a typed EtherscanError on a non-ok HTTP response", async () => {
     fetchMock.mockResolvedValue(envelope({}, 500));
     await expect(fetchWalletData(ADDR)).rejects.toBeInstanceOf(EtherscanError);
+  });
+
+  // Deep-history wallets: the txlist page is capped at ETHERSCAN_PAGE_CAP newest
+  // txs (sort=desc). A heavy farmer's founding protocol interactions (swap on
+  // Aerodrome, lend on Morpho…) sit OLDER than that cap, so a desc-only scan
+  // misses them and the quests stay incomplete. When the recent page hits the
+  // cap we must also pull the OLDEST page (sort=asc) and merge.
+  it("also fetches the oldest page when the recent page hits the cap, surfacing a buried founding tx", async () => {
+    const AERO = "0xcf77a3ba9a5ca399b7c97c74d54e5b1beb874e43";
+    // recent page = exactly CAP txs, none touching Aerodrome (founding swap is older)
+    const recent = Array.from({ length: ETHERSCAN_PAGE_CAP }, () => esTx());
+    // oldest page = the founding Aerodrome swap, buried beyond the cap
+    const oldest = [esTx({ to: AERO, hash: "0xaerodromefounding" })];
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
+      if (url.includes("action=txlist")) {
+        return Promise.resolve(
+          txlistOk(url.includes("sort=asc") ? oldest : recent),
+        );
+      }
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.txs.some((t) => t.to === AERO)).toBe(true);
+  });
+
+  it("does not fetch the oldest page when the recent page is under the cap", async () => {
+    let ascCalls = 0;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
+      if (url.includes("action=txlist")) {
+        if (url.includes("sort=asc")) {
+          ascCalls++;
+          return Promise.resolve(txlistOk([]));
+        }
+        return Promise.resolve(txlistOk([esTx(), esTx()])); // under cap
+      }
+      return Promise.resolve(getCode("0x"));
+    });
+    await fetchWalletData(ADDR);
+    expect(ascCalls).toBe(0);
+  });
+
+  it("keeps the recent page when the oldest-page (asc) pull fails — never fails the scan", async () => {
+    const recent = Array.from({ length: ETHERSCAN_PAGE_CAP }, () => esTx());
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
+      if (url.includes("action=txlist")) {
+        if (url.includes("sort=asc")) return Promise.resolve(envelope({}, 500)); // asc fails
+        return Promise.resolve(txlistOk(recent));
+      }
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    expect(data.txCount).toBe(ETHERSCAN_PAGE_CAP); // recent kept, scan did not throw
+  });
+
+  it("dedupes by hash when the same tx appears in both the recent and oldest pages", async () => {
+    const shared = esTx({ hash: "0xshared" });
+    const recent = [shared, ...Array.from({ length: ETHERSCAN_PAGE_CAP - 1 }, () => esTx())];
+    const oldest = [shared, esTx({ hash: "0xoldonly" })];
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("action=txlistinternal")) return Promise.resolve(internalOk([]));
+      if (url.includes("action=txlist")) {
+        return Promise.resolve(
+          txlistOk(url.includes("sort=asc") ? oldest : recent),
+        );
+      }
+      return Promise.resolve(getCode("0x"));
+    });
+    const data = await fetchWalletData(ADDR);
+    const sharedCount = data.txs.filter((t) => t.hash === "0xshared").length;
+    expect(sharedCount).toBe(1);
+    expect(data.txs.some((t) => t.hash === "0xoldonly")).toBe(true);
   });
 });
 
