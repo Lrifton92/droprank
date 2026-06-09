@@ -44,9 +44,22 @@
   text-transform: uppercase;
 }
 
+/* Both card containers establish the shared 3D vanishing point for the tilt.
+   `perspective` on the parent (not each card) so neighbouring tilts share one
+   horizon, exactly like the dashboard's `.tiles`. */
+.heroWrap,
 .list {
   list-style: none;
+  perspective: 1100px;
+  perspective-origin: 50% 40%;
+}
+
+.heroWrap {
   margin-top: 16px;
+}
+
+.list {
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -69,26 +82,228 @@
   }
 }
 
+/* --- Card shell -----------------------------------------------------------
+   The card is the tilting surface. --rx/--ry are written by the pointer handler
+   (0 at rest) and spring back via the transition on leave. preserve-3d lets the
+   inner content + cover monogram lift on Z. `backwards` on the entry keeps it
+   from forwards-filling the transform (which would block the tilt afterwards),
+   matching the dashboard tile's reasoning. */
 .item {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 15px;
+  padding: 13px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: rgba(12, 17, 28, 0.5);
-  animation: dr-rise-lg 0.5s var(--ease-out) both;
+  /* No `overflow:hidden` here: clipping is delegated to `.sheen` and `.cover`
+     (each has its own overflow). On the card itself, overflow != visible forces
+     some engines to FLATTEN preserve-3d, which would kill the translateZ depth —
+     same reasoning as the dashboard tile. */
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  animation: dr-rise-lg 0.5s var(--ease-out) backwards;
   transition:
     border-color var(--hover-dur) var(--ease-out),
     background var(--hover-dur) var(--ease-out),
-    transform var(--hover-dur) var(--ease-out),
+    transform 0.5s var(--ease-out),
     box-shadow var(--hover-dur) var(--ease-out);
+  will-change: transform;
 }
 .item:hover {
   border-color: var(--border-strong);
   background: rgba(14, 20, 33, 0.62);
-  transform: translateY(-2px);
-  box-shadow: inset 2px 0 0 var(--base-300), 0 14px 38px -24px var(--base-glow);
+  box-shadow: inset 2px 0 0 var(--base-300), 0 18px 44px -24px var(--base-glow);
+}
+
+/* One-shot diagonal sheen on entry, then a slow second pass on hover — same
+   holographic cue as the dashboard tile. transform-only, clipped by overflow. */
+.sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+}
+.sheen::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 45%;
+  height: 180%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(138, 176, 255, 0.1) 50%,
+    transparent 60%
+  );
+  transform: translateX(0) rotate(8deg);
+  animation: discover-sheen 1.4s var(--ease-out) 0.45s 1 both;
+}
+.item:hover .sheen::before {
+  animation: discover-sheen 1.1s var(--ease-out) 0s 1 both;
+}
+@keyframes discover-sheen {
+  from { transform: translateX(0) rotate(8deg); }
+  to { transform: translateX(360%) rotate(8deg); }
+}
+
+/* Content rides forward on Z so it floats above the lit cover during tilt. */
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateZ(20px);
+  z-index: 2;
+}
+
+/* --- Generated cover / sigil ---------------------------------------------
+   No imagery ships in the data, so each item gets a deterministic on-brand HUD
+   plate built from the seed (see coverVars in page.tsx): a holographic
+   graticule, a seeded depth glow, a looping scanline and the monogram. Hue is
+   --ch (HSL, kept in the blue band), focal point --cx/--cy, sweep angle --ca. */
+.cover {
+  position: relative;
+  display: block;
+  height: 72px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 140% at var(--cx) var(--cy),
+      hsla(var(--ch), 90%, 62%, 0.22),
+      transparent 62%
+    ),
+    linear-gradient(150deg, rgba(8, 13, 24, 0.9), rgba(10, 16, 30, 0.7));
+  border: 1px solid color-mix(in srgb, var(--base-300) 16%, transparent);
+}
+/* Holographic graticule — two fine cross-hatched grids, faint, rotated by the
+   seeded angle so no two covers share the same weave. */
+.coverGrid {
+  position: absolute;
+  inset: -30%;
+  background:
+    repeating-linear-gradient(0deg, hsla(var(--ch), 80%, 70%, 0.08) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, hsla(var(--ch), 80%, 70%, 0.08) 0 1px, transparent 1px 11px);
+  transform: rotate(var(--ca));
+  opacity: 0.7;
+  transition: opacity 0.3s var(--ease-out);
+}
+.item:hover .coverGrid {
+  opacity: 1;
+}
+/* Cursor-tracked spotlight on the cover (shares --mx/--my with the tilt). */
+.coverGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    90px 90px at var(--mx) var(--my),
+    hsla(var(--ch), 95%, 72%, 0.2),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+.item:hover .coverGlow {
+  opacity: 1;
+}
+/* Slow scanline sweeping top→bottom forever — the "alive" cue when imagery is
+   absent. transform-only → composited. */
+.coverScan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 28%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    hsla(var(--ch), 92%, 74%, 0.14) 60%,
+    hsla(var(--ch), 92%, 80%, 0.22) 88%,
+    transparent
+  );
+  animation: discover-scan 4.2s linear infinite;
+}
+@keyframes discover-scan {
+  0% { transform: translateY(-110%); }
+  100% { transform: translateY(440%); }
+}
+/* The monogram — derived from the title, lifted on Z above the plate. */
+.coverMono {
+  position: absolute;
+  left: 12px;
+  bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: hsla(var(--ch), 70%, 88%, 0.92);
+  text-shadow: 0 0 14px hsla(var(--ch), 90%, 60%, 0.5);
+  transform: translateZ(14px);
+}
+/* A seeded focal ring drawn around the glow point — pure HUD furniture. */
+.coverRing {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  left: var(--cx);
+  top: var(--cy);
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  border: 1px solid hsla(var(--ch), 90%, 70%, 0.28);
+  box-shadow: 0 0 0 4px hsla(var(--ch), 90%, 65%, 0.06);
+}
+
+/* Hero (feature) card — the first item when the list is short. Wider, taller
+   cover, content laid out beside it from md so a 1–3 item result reads as a
+   deliberate feature rather than a stubby row. */
+.hero {
+  padding: 16px;
+}
+.hero .inner {
+  gap: 14px;
+}
+.coverHero {
+  height: 120px;
+}
+.coverHero .coverMono {
+  font-size: 40px;
+  left: 16px;
+  bottom: 12px;
+}
+@media (min-width: 768px) {
+  .hero .inner {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .hero .coverHero {
+    flex: 0 0 42%;
+    height: auto;
+    min-height: 132px;
+  }
+  .hero .body {
+    flex: 1;
+    justify-content: center;
+  }
+  .hero .title {
+    font-size: 18px;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .meta {
@@ -234,5 +449,37 @@ a.title:hover .read {
 @media (min-width: 1600px) {
   .list {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Touch devices never get the JS tilt; remove the perspective context so cards
+   sit perfectly flat (no sub-pixel skew from a stray --rx/--ry) and give back a
+   simple lift on tap/hover instead. */
+@media (hover: none) {
+  .heroWrap,
+  .list {
+    perspective: none;
+  }
+  .item {
+    transform: none;
+  }
+}
+
+/* Reduced motion: kill every roaming/looping effect and land on the final
+   readable frame. The JS tilt already no-ops via REDUCE(); this guarantees the
+   cover is static and the card flat & opaque. */
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transform: none;
+    animation: none;
+  }
+  .sheen::before,
+  .coverScan,
+  .coverGlow {
+    display: none;
+  }
+  .coverGrid {
+    opacity: 0.7;
+    transition: none;
   }
 }
