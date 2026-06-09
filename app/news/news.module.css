@@ -64,7 +64,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 14px;
-    align-items: start;
+    /* stretch: every card in a row shares the tallest one's height so the bottom
+       edges align (Soufian rejects ragged card bottoms). The slack falls below
+       the content as lit HUD surface — the .itemFace graticule fills it, so it
+       reads as designed space, not empty padding. */
+    align-items: stretch;
   }
 }
 @media (min-width: 1240px) {
