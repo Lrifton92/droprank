@@ -327,10 +327,10 @@
   grid-area: idx;
   /* HUD slug, not a faint footnote: a mono marker that anchors the card head.
      Brighter than before (dim, not faint) with a leading accent tick so it
-     reads as a deliberate index, not stray text. Kept centred in the content
-     column to match Soufian's 2026-06-05 centred layout. */
+     reads as a deliberate index, not stray text. Left-aligned so the cards read
+     as a proper menu list (Soufian 2026-06-09). */
   position: relative;
-  justify-self: center;
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -417,7 +417,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   margin-top: 4px;
-  text-align: center;
+  text-align: left;
   /* Whisper-thin Base sheen on the title so it sits a hair above pure-white
      plain text — premium without colouring the data. */
   text-shadow: 0 0 18px color-mix(in srgb, var(--base-300) 22%, transparent);
@@ -428,7 +428,7 @@
   color: var(--text-dim);
   letter-spacing: 0.02em;
   margin-top: 4px;
-  text-align: center;
+  text-align: left;
 }
 .arrow {
   position: relative;
