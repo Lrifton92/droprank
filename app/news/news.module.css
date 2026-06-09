@@ -64,11 +64,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 14px;
-    /* stretch: every card in a row shares the tallest one's height so the bottom
-       edges align (Soufian rejects ragged card bottoms). The slack falls below
-       the content as lit HUD surface — the .itemFace graticule fills it, so it
-       reads as designed space, not empty padding. */
-    align-items: stretch;
+    /* start (not stretch): each card keeps its natural height. Stretch was tried
+       to align ragged bottoms but it pads short cards with a large empty gap
+       below the content — ugly under the 3D relief. A slightly ragged bottom is
+       the lesser evil for a variable-length article feed. */
+    align-items: start;
   }
 }
 @media (min-width: 1240px) {
