@@ -121,6 +121,13 @@
     "nextGains": "leviers principaux",
     "allMaxed": "✓ tous les leviers au max — wallet based"
   },
+  "activity": {
+    "title": "ACTIVITÉ RÉCENTE",
+    "received": "Reçu",
+    "deploy": "Déploiement",
+    "transfer": "Transfert",
+    "interaction": "Interaction"
+  },
   "detail": {
     "tx": "{count} tx",
     "months": "{count} mois",

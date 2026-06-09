@@ -121,6 +121,13 @@
     "nextGains": "biggest levers",
     "allMaxed": "✓ all levers maxed — based wallet"
   },
+  "activity": {
+    "title": "RECENT ACTIVITY",
+    "received": "Received",
+    "deploy": "Deploy",
+    "transfer": "Transfer",
+    "interaction": "Interaction"
+  },
   "detail": {
     "tx": "{count} tx",
     "months": "{count} months",
