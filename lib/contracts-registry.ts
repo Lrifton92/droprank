@@ -305,6 +305,18 @@ export const PANCAKESWAP_V3_SWAP_ROUTER = lc("0x1b81D678ffb9C0263b24A97847620C99
 export const PANCAKESWAP_UNIVERSAL_ROUTER = lc(
   "0xFE6508f0015C778Bdcc1fB5465bA5ebE224C9912",
 );
+/**
+ * PancakeSwap Infinity Aggregator on Base — the entrypoint the current
+ * pancakeswap.finance UI now routes swaps through (so a swap done today has
+ * `to` = this, not the Universal Router above; the reported gap, fixed
+ * 2026-06-11 after a real swap 0xb51c4d98…302cbcd9 missed the quest).
+ * Blockscout: name "Aggregator", verified; source imports
+ * `infinity-periphery`/`infinity-core` (PancakeSwap Infinity) and IAggregator.
+ * One fixed contract for all swaps (not per-token).
+ */
+export const PANCAKESWAP_INFINITY_AGGREGATOR = lc(
+  "0x40A1Fe393A7F566F27dF6acE18e6773be844dAfc",
+);
 
 /**
  * OpenSea Seaport 1.6 (NFT marketplace — new category). Same canonical address
@@ -365,6 +377,7 @@ export const PANCAKESWAP_ROUTERS = new Set([
   PANCAKESWAP_SMART_ROUTER,
   PANCAKESWAP_V3_SWAP_ROUTER,
   PANCAKESWAP_UNIVERSAL_ROUTER,
+  PANCAKESWAP_INFINITY_AGGREGATOR,
 ]);
 export const EXTRA_FINANCE_CONTRACTS = new Set([
   EXTRA_FINANCE_LENDING_POOL,

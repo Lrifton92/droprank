@@ -31,6 +31,7 @@ import {
   COMPOUND_V3_USDBC,
   PANCAKESWAP_V3_SWAP_ROUTER,
   PANCAKESWAP_UNIVERSAL_ROUTER,
+  PANCAKESWAP_INFINITY_AGGREGATOR,
   EXTRA_FINANCE_POSITION_MANAGER,
   UNISWAP_UNIVERSAL_ROUTER_V4,
   AAVE_V3_WETH_GATEWAY_V3,
@@ -254,6 +255,14 @@ describe("computeQuests", () => {
       // SmartRouter/V3 router — the reported gap. Case-insensitive on `to`.
       expect(done(computeQuests([tx({ to: PANCAKESWAP_UNIVERSAL_ROUTER })], ADDR), "swap-pancakeswap")).toBe(true);
       expect(done(computeQuests([tx({ to: PANCAKESWAP_UNIVERSAL_ROUTER.toUpperCase() })], ADDR), "swap-pancakeswap")).toBe(true);
+    });
+
+    it("detects a PancakeSwap swap via the Infinity Aggregator (current UI)", () => {
+      // pancakeswap.finance now routes swaps through the PancakeSwap Infinity
+      // Aggregator, not the Universal Router — a real swap (0xb51c…cbcd9) had
+      // `to` = this aggregator, the reported gap. Case-insensitive on `to`.
+      expect(done(computeQuests([tx({ to: PANCAKESWAP_INFINITY_AGGREGATOR })], ADDR), "swap-pancakeswap")).toBe(true);
+      expect(done(computeQuests([tx({ to: PANCAKESWAP_INFINITY_AGGREGATOR.toUpperCase() })], ADDR), "swap-pancakeswap")).toBe(true);
     });
 
     it("detects Extra Finance via the VeloPositionManager", () => {

@@ -67,7 +67,12 @@ export async function GET(
   // basename quest now validates on NFT ownership (balanceOf), catching holders
   // who received one or registered before the window. v7 payloads MUST NOT be
   // reused — bump to v8.
-  const key = `v8:${addr}`;
+  // v9 (2026-06-11): swap-pancakeswap now also matches the PancakeSwap Infinity
+  // Aggregator (0x40A1Fe…), the entrypoint the current pancakeswap.finance UI
+  // routes through (a real swap 0xb51c4d98… had `to` = this). Wallets that
+  // swapped via it were cached done=false and the fix FLIPS them — v8 payloads
+  // MUST NOT be reused — bump to v9.
+  const key = `v9:${addr}`;
 
   // `?fresh=1` forces a recompute (skips both cache tiers) — the rescan button
   // uses it so a quest the user JUST completed shows immediately.
