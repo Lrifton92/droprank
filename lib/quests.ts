@@ -88,6 +88,16 @@ export interface QuestContext {
    * back to the registration-tx signal (touched BASENAMES_CONTROLLERS).
    */
   ownsBasename?: boolean;
+  /**
+   * Per-quest router addresses the canary discovered at runtime (read from KV),
+   * keyed by quest id (e.g. "swap-pancakeswap"). These are folded into that
+   * quest's Set check ON TOP of the hardcoded registry, so when a DEX migrates
+   * its UI router the quest keeps working the day the canary writes the new
+   * address — no code deploy. Lowercased; per-quest so one protocol's new router
+   * never satisfies another's quest. Absent/empty = pure base-set behaviour.
+   * See lib/canary.ts and app/api/canary/route.ts.
+   */
+  extraRouters?: Record<string, readonly string[]>;
 }
 
 interface QuestDef {
@@ -112,25 +122,43 @@ const to = (t: Tx) => (t.to ? t.to.toLowerCase() : null);
  * an OUTGOING internal-tx `to` (ctx.internalOutTo). The internal leg is what makes
  * a 4337 smart-wallet interaction count, where the protocol call is dispatched
  * internally rather than as a top-level tx the user signed (FIX A). Pure.
+ *
+ * `extra` is an optional list of canary-discovered addresses (ctx.extraRouters
+ * for this quest) folded in ON TOP of the hardcoded `set`, so a migrated DEX
+ * router matches the day the canary writes it to KV — no deploy.
  */
-function touched(set: ReadonlySet<string>, txs: Tx[], ctx: QuestContext): boolean {
+function touched(
+  set: ReadonlySet<string>,
+  txs: Tx[],
+  ctx: QuestContext,
+  extra?: readonly string[],
+): boolean {
+  const has = (a: string) =>
+    set.has(a) || (extra !== undefined && extra.includes(a));
   for (const t of txs) {
     const a = to(t);
-    if (a !== null && set.has(a)) return true;
+    if (a !== null && has(a)) return true;
   }
   const internal = ctx.internalOutTo;
   if (internal) {
     for (const a of internal) {
-      if (set.has(a)) return true;
+      if (has(a)) return true;
     }
   }
   return false;
 }
 
 /** Single-address variant of {@link touched} (one known contract, not a Set). */
-function touchedOne(addr: string, txs: Tx[], ctx: QuestContext): boolean {
-  if (txs.some((t) => to(t) === addr)) return true;
-  return ctx.internalOutTo?.includes(addr) === true;
+function touchedOne(
+  addr: string,
+  txs: Tx[],
+  ctx: QuestContext,
+  extra?: readonly string[],
+): boolean {
+  const has = (a: string | null) =>
+    a !== null && (a === addr || (extra !== undefined && extra.includes(a)));
+  if (txs.some((t) => has(to(t)))) return true;
+  return ctx.internalOutTo?.some((a) => has(a)) === true;
 }
 
 export const QUESTS: ReadonlyArray<QuestDef> = [
@@ -140,7 +168,8 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://aerodrome.finance",
     category: "DEX",
-    check: (txs, _a, ctx) => touched(AERODROME_ROUTERS, txs, ctx),
+    check: (txs, _a, ctx) =>
+      touched(AERODROME_ROUTERS, txs, ctx, ctx.extraRouters?.["swap-aerodrome"]),
   },
   {
     id: "swap-uniswap",
@@ -148,7 +177,8 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.uniswap.org",
     category: "DEX",
-    check: (txs, _a, ctx) => touched(UNISWAP_ROUTERS, txs, ctx),
+    check: (txs, _a, ctx) =>
+      touched(UNISWAP_ROUTERS, txs, ctx, ctx.extraRouters?.["swap-uniswap"]),
   },
   {
     id: "lend-moonwell",
@@ -260,7 +290,8 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 2,
     link: "https://app.pendle.finance",
     category: "Lending",
-    check: (txs, _a, ctx) => touchedOne(PENDLE_ROUTER_V4, txs, ctx),
+    check: (txs, _a, ctx) =>
+      touchedOne(PENDLE_ROUTER_V4, txs, ctx, ctx.extraRouters?.["yield-pendle"]),
   },
   {
     id: "perps-avantis",
@@ -284,7 +315,8 @@ export const QUESTS: ReadonlyArray<QuestDef> = [
     points: 1,
     link: "https://pancakeswap.finance",
     category: "DEX",
-    check: (txs, _a, ctx) => touched(PANCAKESWAP_ROUTERS, txs, ctx),
+    check: (txs, _a, ctx) =>
+      touched(PANCAKESWAP_ROUTERS, txs, ctx, ctx.extraRouters?.["swap-pancakeswap"]),
   },
   {
     id: "trade-opensea",

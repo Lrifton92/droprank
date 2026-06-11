@@ -24,7 +24,7 @@ import { LruCache } from "./cache";
 let redis: Redis | null | undefined;
 
 /** Lazily build the Redis client from env, once. null when unconfigured. */
-function getRedis(): Redis | null {
+export function getRedis(): Redis | null {
   if (redis !== undefined) return redis;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;

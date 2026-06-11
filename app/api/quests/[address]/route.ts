@@ -5,6 +5,7 @@ import { fetchWalletDataChained } from "@/lib/score-address";
 import { fetchTalentBuilderScore } from "@/lib/providers/talent";
 import { fetchOwnsBasename } from "@/lib/providers/basename";
 import { computeQuests } from "@/lib/quests";
+import { getExtraRouters } from "@/lib/canary-store";
 import { LruCache, checkRateLimit } from "@/lib/cache";
 import { getOrSetCached } from "@/lib/shared-cache";
 import type { QuestsResult } from "@/lib/types";
@@ -82,11 +83,16 @@ export async function GET(
     // L1 (in-memory) -> L2 (Upstash) -> compute. Never fails on store errors.
     const result = await getOrSetCached(cache, "quests", key, QUESTS_TTL_S, async () => {
       // Talent Builder Score runs in parallel with the on-chain scan (never-fail).
-      const [data, talentBuilderScore, ownsBasename] = await Promise.all([
-        fetchWalletDataChained(addr, req.signal),
-        fetchTalentBuilderScore(addr, req.signal),
-        fetchOwnsBasename(addr, req.signal),
-      ]);
+      // extraRouters = the canary's KV allowlist additions (never-fail: {} on any
+      // store error), so a DEX that migrated its router still matches without a
+      // code deploy. See lib/canary-store.ts.
+      const [data, talentBuilderScore, ownsBasename, extraRouters] =
+        await Promise.all([
+          fetchWalletDataChained(addr, req.signal),
+          fetchTalentBuilderScore(addr, req.signal),
+          fetchOwnsBasename(addr, req.signal),
+          getExtraRouters(),
+        ]);
       return computeQuests(data.txs, addr, {
         isSmartWallet: data.usedSmartWallet,
         inboundBridge: data.inboundBridge,
@@ -95,6 +101,7 @@ export async function GET(
         mintedNft: data.mintedNft,
         talentBuilderScore,
         ownsBasename,
+        extraRouters,
       });
     }, fresh);
     return NextResponse.json(result, {

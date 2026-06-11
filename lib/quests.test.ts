@@ -98,6 +98,34 @@ describe("quests registry", () => {
   });
 });
 
+describe("KV-augmented router extras (canary auto-fix)", () => {
+  const done = (r: ReturnType<typeof computeQuests>, id: string) =>
+    r.quests.find((q) => q.id === id)!.done;
+  // A router the canary discovered after a protocol migrated, supplied at runtime
+  // via ctx.extraRouters (read from KV) — deliberately NOT in the registry, so a
+  // green test proves the extraRouters path, not the base set.
+  const NEW = "0xca9a9a0000000000000000000000000000000001";
+
+  it("completes a DEX quest when the wallet hit a canary-discovered router", () => {
+    expect(done(computeQuests([tx({ to: NEW })], ADDR), "swap-pancakeswap")).toBe(false);
+    const ctx = { extraRouters: { "swap-pancakeswap": [NEW] } };
+    expect(done(computeQuests([tx({ to: NEW })], ADDR, ctx), "swap-pancakeswap")).toBe(true);
+  });
+
+  it("does not let one protocol's extra satisfy another protocol's quest", () => {
+    const ctx = { extraRouters: { "swap-pancakeswap": [NEW] } };
+    expect(done(computeQuests([tx({ to: NEW })], ADDR, ctx), "swap-uniswap")).toBe(false);
+  });
+
+  it("matches an extra router reached via a smart-wallet internal call", () => {
+    const ctx = {
+      extraRouters: { "swap-aerodrome": [NEW] },
+      internalOutTo: [NEW],
+    };
+    expect(done(computeQuests([tx({})], ADDR, ctx), "swap-aerodrome")).toBe(true);
+  });
+});
+
 describe("computeQuests", () => {
   it("returns 0 earned and all undone for an empty wallet", () => {
     const r = computeQuests([], ADDR);
