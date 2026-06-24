@@ -8,7 +8,7 @@ import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BaseBanner from "../_components/BaseBanner";
 import BasenameCard from "../_components/BasenameCard";
 import BrandLogo from "../_components/BrandLogo";
-import AllocationEstimate from "../_components/AllocationEstimate";
+import AirdropHero from "./AirdropHero";
 import Leaderboard from "../_components/Leaderboard";
 import RecentActivity from "./RecentActivity";
 import SessionTicker from "./SessionTicker";
@@ -20,18 +20,11 @@ import styles from "./menu.module.css";
 function CardArrow() {
   return (
     <span className={styles.arrow} aria-hidden>
-      <svg viewBox="0 0 20 12" width="20" height="12" fill="none">
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
         <path
-          className={styles.arrowShaft}
-          d="M2 6h14"
+          d="M4.5 2.5 8 6l-3.5 3.5"
           stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        <path
-          d="M12.5 1.5 17 6l-4.5 4.5"
-          stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -105,12 +98,12 @@ function MenuInner() {
         </div>
 
         <div className={styles.board}>
-        <div className={`dr-enter ${styles.zoneIdentity}`} style={{ "--i": 2 } as CSSProperties}>
-          <BasenameCard address={address} />
+        <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 2 } as CSSProperties}>
+          <AirdropHero address={address} />
         </div>
 
-        <div className={`dr-enter ${styles.zoneAlloc}`} style={{ "--i": 3 } as CSSProperties}>
-          <AllocationEstimate address={address} />
+        <div className={`dr-enter ${styles.zoneIdentity}`} style={{ "--i": 3 } as CSSProperties}>
+          <BasenameCard address={address} />
         </div>
 
         <nav className={`${styles.grid} ${styles.zoneNav}`}>

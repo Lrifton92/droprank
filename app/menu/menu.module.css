@@ -222,9 +222,9 @@
     display: grid;
     grid-template-columns: 1.45fr 1fr;
     grid-template-areas:
+      "hero     hero"
       "identity identity"
       "nav      nav"
-      "alloc    board"
       "activity board"
       "banner   banner"
       "session  session";
@@ -233,8 +233,8 @@
     row-gap: 16px;
     margin-top: 4px;
   }
+  .zoneHero { grid-area: hero; }
   .zoneIdentity { grid-area: identity; }
-  .zoneAlloc { grid-area: alloc; }
   /* Nav spans the full width on its own row so the destination cards keep their
      native responsive columns (no cramped column, no truncated titles). */
   .zoneNav { grid-area: nav; }
@@ -472,36 +472,48 @@
   margin-top: 4px;
   text-align: left;
 }
+/* Circular chevron button — body removed, chevron alone in a ring. Reads as a
+   round action button: lights up on hover, springs on press (card click). */
 .arrow {
   position: relative;
   grid-area: arrow;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 30px;
-  /* Lifted from faint→dim so the affordance is visible at rest now that the
-     glyph reads as lit; hover still pushes it to --base-200. */
-  color: var(--text-dim);
-  transition: transform 0.26s var(--ease-out), color 0.2s var(--ease-out);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--base-200);
+  background: rgba(0, 82, 255, 0.12);
+  border: 1px solid color-mix(in srgb, var(--base-300) 34%, transparent);
+  box-shadow: inset 0 0 0 0 var(--base);
+  transition:
+    transform var(--hover-dur) var(--ease-snap),
+    background var(--hover-dur) var(--ease-out),
+    border-color var(--hover-dur) var(--ease-out),
+    color var(--hover-dur) var(--ease-out),
+    box-shadow var(--hover-dur) var(--ease-out);
 }
 .arrow svg {
   display: block;
+  transition: transform var(--hover-dur) var(--ease-out);
 }
-/* Shaft hidden at rest (chevron alone), drawn from the head leftward on
-   hover/focus — the arrow "grows" instead of two stacked strokes. */
-.arrowShaft {
-  transform: scaleX(0);
-  transform-box: fill-box;
-  transform-origin: right center;
-  transition: transform 0.26s var(--ease-out);
+.card:hover .arrow,
+.card:focus-visible .arrow {
+  background: var(--base);
+  border-color: var(--base-300);
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 8px 22px -8px var(--base-glow);
 }
-.card:hover .arrowShaft,
-.card:focus-visible .arrowShaft {
-  transform: scaleX(1);
+.card:hover .arrow svg,
+.card:focus-visible .arrow svg {
+  transform: translateX(1px);
 }
+/* Button press on card click. */
 .card:active .arrow {
-  transform: translateX(3px);
-  transition-duration: 0.06s;
+  transform: scale(0.86);
+  transition-duration: 0.07s;
+  background: var(--base-300);
 }
 
 .hint {
