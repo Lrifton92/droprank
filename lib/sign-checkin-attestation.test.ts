@@ -31,6 +31,13 @@ describe("buildCheckinAttestation", () => {
     });
     expect(a.message.score).toBe(0);
   });
+
+  it("clamps an above-range score into uint16 bounds", () => {
+    const a = buildCheckinAttestation({
+      wallet: WALLET, score: 70000, nonce: 0n, contract: CONTRACT, chainId: 8453,
+    });
+    expect(a.message.score).toBe(65535);
+  });
 });
 
 describe("signCheckinAttestation", () => {
