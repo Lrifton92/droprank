@@ -181,12 +181,14 @@ function StepCarousel() {
               </>
             ) : (
               <>
-                <span className={styles.carIcon} aria-hidden>
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
-                    {STEP_ICONS[c.icon]}
-                  </svg>
-                </span>
-                <span className={styles.carTitle}>{c.title}</span>
+                <div className={styles.carHead}>
+                  <span className={styles.carIcon} aria-hidden>
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+                      {STEP_ICONS[c.icon]}
+                    </svg>
+                  </span>
+                  <span className={styles.carTitle}>{c.title}</span>
+                </div>
                 <span className={styles.carDesc}>{c.desc}</span>
               </>
             )}
