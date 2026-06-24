@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
-import { useAccount, useAccountEffect } from "wagmi";
+import { useAccount } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BrandLogo from "./_components/BrandLogo";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
+import Leaderboard from "./_components/Leaderboard";
 import styles from "./landing.module.css";
 
-/* CTA arrow: chevron head at rest, the shaft draws in on hover while the arrow
-   slides right. One element, nothing can overlap the glyph. */
+/* CTA arrow: chevron head at rest, the shaft draws in on hover. */
 function BtnArrow() {
   return (
     <span className={styles.btnArrow} aria-hidden>
@@ -35,12 +35,41 @@ function BtnArrow() {
   );
 }
 
+const STEP_ICONS = [
+  // scan
+  <path
+    key="i1"
+    d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />,
+  // estimate
+  <path
+    key="i2"
+    d="M4 19V5m0 14h16M7 16l3.5-4 3 2.5L20 7"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />,
+  // grow
+  <path
+    key="i3"
+    d="M12 20V8m0 0-4 4m4-4 4 4M5 4h14"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />,
+];
+
 /**
- * Landing — a premium, conversion-first Base hero. The whole screen drives one
- * question ("how much is your Base airdrop worth?") to one action (scan). A deep
- * Base-blue stage (the familiar Base look) holds a bright white scan card — the
- * light/dark mix — so the eye lands on the action. Scan logic unchanged: connect
- * (OnchainKit) or paste an address, both route to /enter.
+ * Landing — a premium, conversion-first Base website. A deep-blue Base hero (the
+ * hook + scan), then sections that alternate light/dark and walk the visitor
+ * through the funnel: how it works → the number → grow it → social proof (live
+ * leaderboard) → final CTA. Scan logic unchanged (connect or paste → /enter).
  */
 export default function Home() {
   const router = useRouter();
@@ -54,15 +83,14 @@ export default function Home() {
     if (!isMiniAppReady) setMiniAppReady();
   }, [setMiniAppReady, isMiniAppReady]);
 
-  useAccountEffect({
-    onConnect({ address: addr, isReconnected }) {
-      if (!isReconnected && addr) router.push(`/enter?address=${addr}`);
-    },
-  });
+  // No auto-redirect on connect: the landing IS the site and must stay viewable
+  // even with a wallet connected. Entering the app is an explicit click (Enter).
 
   const trimmed = pasted.trim();
   const pastedValid = isAddress(trimmed);
   const dirty = trimmed.length > 0;
+
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <main className={styles.page}>
@@ -77,6 +105,7 @@ export default function Home() {
         </span>
       </header>
 
+      {/* ── Hero ── */}
       <section className={styles.hero}>
         <span className={styles.glow} aria-hidden />
         <div className={styles.heroInner}>
@@ -146,6 +175,133 @@ export default function Home() {
           </span>
         </div>
       </section>
+
+      {/* ── How it works (light) ── */}
+      <section className={`${styles.section} ${styles.light}`}>
+        <div className={styles.sectionInner}>
+          <p className={`${styles.eyebrow} ${styles.eyebrowDark}`}>{t("how.eyebrow")}</p>
+          <h2 className={`${styles.h2} ${styles.h2Dark}`}>{t("how.title")}</h2>
+          <div className={styles.steps}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={styles.step}>
+                <span className={styles.stepNo}>0{i + 1}</span>
+                <span className={styles.stepIcon} aria-hidden>
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+                    {STEP_ICONS[i]}
+                  </svg>
+                </span>
+                <span className={styles.stepTitle}>{t(`how.s${i + 1}t`)}</span>
+                <span className={styles.stepDesc}>{t(`how.s${i + 1}d`)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── The number (dark) ── */}
+      <section className={`${styles.section} ${styles.dark}`}>
+        <div className={`${styles.sectionInner} ${styles.revealGrid}`}>
+          <div className={styles.revealCopy}>
+            <p className={styles.eyebrow}>{t("reveal.eyebrow")}</p>
+            <h2 className={styles.h2}>{t("reveal.title")}</h2>
+            <p className={styles.sectionSub}>{t("reveal.sub")}</p>
+            <p className={styles.revealNote}>{t("reveal.note")}</p>
+          </div>
+          <div className={styles.revealCard}>
+            <span className={styles.revealExample}>{t("reveal.example")}</span>
+            <div className={styles.ringWrap}>
+              <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden>
+                <defs>
+                  <linearGradient id="land-ring" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#8ab0ff" />
+                    <stop offset="55%" stopColor="#4d86ff" />
+                    <stop offset="100%" stopColor="#0052ff" />
+                  </linearGradient>
+                </defs>
+                <circle className={styles.ringTrack} cx="100" cy="100" r="86" />
+                <circle
+                  className={styles.ringProg}
+                  cx="100"
+                  cy="100"
+                  r="86"
+                  strokeDasharray={2 * Math.PI * 86}
+                  strokeDashoffset={2 * Math.PI * 86 * 0.28}
+                />
+              </svg>
+              <div className={styles.ringCenter}>
+                <span className={styles.ringLow}>
+                  <span className={styles.cur}>$</span>1,200
+                </span>
+                <span className={styles.ringDash} aria-hidden />
+                <span className={styles.ringHigh}>
+                  <span className={styles.cur}>$</span>3,400
+                </span>
+              </div>
+            </div>
+            <span className={styles.revealRangeLabel}>{t("reveal.rangeLabel")}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Grow it (light) ── */}
+      <section className={`${styles.section} ${styles.light}`}>
+        <div className={styles.sectionInner}>
+          <p className={`${styles.eyebrow} ${styles.eyebrowDark}`}>{t("grow.eyebrow")}</p>
+          <h2 className={`${styles.h2} ${styles.h2Dark}`}>{t("grow.title")}</h2>
+          <p className={`${styles.sectionSub} ${styles.subDark}`}>{t("grow.sub")}</p>
+          <div className={styles.levers}>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className={styles.lever}>
+                <span className={styles.leverMark} aria-hidden>
+                  +
+                </span>
+                <div className={styles.leverText}>
+                  <span className={styles.leverTitle}>{t(`grow.l${i}t`)}</span>
+                  <span className={styles.leverDesc}>{t(`grow.l${i}d`)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Social proof (dark, live leaderboard) ── */}
+      <section className={`${styles.section} ${styles.dark}`}>
+        <div className={styles.sectionInner}>
+          <p className={styles.eyebrow}>{t("social.eyebrow")}</p>
+          <h2 className={styles.h2}>{t("social.title")}</h2>
+          <p className={styles.sectionSub}>{t("social.sub")}</p>
+          <div className={styles.socialBoard}>
+            <Leaderboard address="" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA (blue) ── */}
+      <section className={`${styles.section} ${styles.ctaSection}`}>
+        <span className={styles.glow} aria-hidden />
+        <div className={styles.sectionInner}>
+          <h2 className={styles.ctaTitle}>{t("final.title")}</h2>
+          <p className={styles.sub}>{t("final.sub")}</p>
+          <button className={`${styles.primaryCta} ${styles.ctaBig}`} onClick={toTop}>
+            {t("final.cta")}
+            <BtnArrow />
+          </button>
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <BrandLogo size={26} />
+        <span className={styles.footTag}>{t("footerTag")}</span>
+        <a
+          href="https://x.com/lrifton6240"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.footCredit}
+        >
+          {t("footerCredit")}
+        </a>
+      </footer>
     </main>
   );
 }
