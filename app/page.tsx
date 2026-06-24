@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
@@ -32,6 +32,32 @@ function BtnArrow() {
         />
       </svg>
     </span>
+  );
+}
+
+/** Splits a phrase into kinetic word spans that rise + unblur, staggered. */
+function Kinetic({
+  text,
+  start = 0,
+  accent = false,
+}: {
+  text: string;
+  start?: number;
+  accent?: boolean;
+}) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span
+          key={`${w}-${i}`}
+          className={`${styles.word}${accent ? ` ${styles.titleAccent}` : ""}`}
+          style={{ "--w": start + i } as CSSProperties}
+        >
+          {w}
+          {i < text.split(" ").length - 1 ? " " : ""}
+        </span>
+      ))}
+    </>
   );
 }
 
@@ -83,6 +109,31 @@ export default function Home() {
     if (!isMiniAppReady) setMiniAppReady();
   }, [setMiniAppReady, isMiniAppReady]);
 
+  // Scroll-reveal: elements tagged .reveal fade/slide/blur in as they enter the
+  // viewport (agency-grade motion, à la the reference). One-shot per element;
+  // snaps in under reduced-motion or without IntersectionObserver.
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(`.${styles.reveal}`));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) {
+      els.forEach((e) => e.classList.add(styles.revealIn));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add(styles.revealIn);
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
+    );
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  }, []);
+
   // No auto-redirect on connect: the landing IS the site and must stay viewable
   // even with a wallet connected. Entering the app is an explicit click (Enter).
 
@@ -95,7 +146,7 @@ export default function Home() {
   return (
     <main className={styles.page}>
       <header className={styles.head}>
-        <BrandLogo size={34} />
+        <BrandLogo size={48} />
         <span className={styles.headRight}>
           <span className={styles.status}>
             <i className={styles.statusDot} />
@@ -111,8 +162,8 @@ export default function Home() {
         <div className={styles.heroInner}>
           <p className={styles.eyebrow}>{t("eyebrow")}</p>
           <h1 className={styles.title}>
-            {t("titleLine1")}{" "}
-            <span className={styles.titleAccent}>{t("titleAccent")}</span>
+            <Kinetic text={t("titleLine1")} start={0} />{" "}
+            <Kinetic text={t("titleAccent")} start={3} accent />
           </h1>
           <p className={styles.sub}>{t("sub")}</p>
 
@@ -183,7 +234,11 @@ export default function Home() {
           <h2 className={`${styles.h2} ${styles.h2Dark}`}>{t("how.title")}</h2>
           <div className={styles.steps}>
             {[0, 1, 2].map((i) => (
-              <div key={i} className={styles.step}>
+              <div
+                key={i}
+                className={`${styles.step} ${styles.reveal}`}
+                style={{ transitionDelay: `${i * 0.1}s` }}
+              >
                 <span className={styles.stepNo}>0{i + 1}</span>
                 <span className={styles.stepIcon} aria-hidden>
                   <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
@@ -198,16 +253,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── The number (dark) ── */}
-      <section className={`${styles.section} ${styles.dark}`}>
+      {/* ── The number — the one Base-blue moment ── */}
+      <section className={`${styles.section} ${styles.numberSection}`}>
         <div className={`${styles.sectionInner} ${styles.revealGrid}`}>
-          <div className={styles.revealCopy}>
+          <div className={`${styles.revealCopy} ${styles.reveal}`}>
             <p className={styles.eyebrow}>{t("reveal.eyebrow")}</p>
             <h2 className={styles.h2}>{t("reveal.title")}</h2>
             <p className={styles.sectionSub}>{t("reveal.sub")}</p>
             <p className={styles.revealNote}>{t("reveal.note")}</p>
           </div>
-          <div className={styles.revealCard}>
+          <div className={`${styles.revealCard} ${styles.reveal}`}>
             <span className={styles.revealExample}>{t("reveal.example")}</span>
             <div className={styles.ringWrap}>
               <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden>
@@ -251,7 +306,11 @@ export default function Home() {
           <p className={`${styles.sectionSub} ${styles.subDark}`}>{t("grow.sub")}</p>
           <div className={styles.levers}>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className={styles.lever}>
+              <div
+                key={i}
+                className={`${styles.lever} ${styles.reveal}`}
+                style={{ transitionDelay: `${(i - 1) * 0.08}s` }}
+              >
                 <span className={styles.leverMark} aria-hidden>
                   +
                 </span>
@@ -271,7 +330,7 @@ export default function Home() {
           <p className={styles.eyebrow}>{t("social.eyebrow")}</p>
           <h2 className={styles.h2}>{t("social.title")}</h2>
           <p className={styles.sectionSub}>{t("social.sub")}</p>
-          <div className={styles.socialBoard}>
+          <div className={`${styles.socialBoard} ${styles.reveal}`}>
             <Leaderboard address="" />
           </div>
         </div>
@@ -279,8 +338,7 @@ export default function Home() {
 
       {/* ── Final CTA (blue) ── */}
       <section className={`${styles.section} ${styles.ctaSection}`}>
-        <span className={styles.glow} aria-hidden />
-        <div className={styles.sectionInner}>
+        <div className={`${styles.sectionInner} ${styles.reveal}`}>
           <h2 className={styles.ctaTitle}>{t("final.title")}</h2>
           <p className={styles.sub}>{t("final.sub")}</p>
           <button className={`${styles.primaryCta} ${styles.ctaBig}`} onClick={toTop}>
