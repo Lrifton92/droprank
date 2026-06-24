@@ -98,10 +98,9 @@ export function useSponsoredWrite(chainId: number) {
       callsStatus.receipts?.[0]?.transactionHash) || null;
   const isSuccess = Boolean(sponsoredReceiptHash) || fallbackConfirmed;
   const txHash = (sponsoredReceiptHash as `0x${string}` | null) ?? fallbackHash;
+  // `pending` is an intent flag (set on submit); isPending also gates on
+  // !isSuccess so a confirmed tx reads as not-pending without mutating state.
   const isPending = pending && !isSuccess;
-
-  // settle the pending flag once either path confirms
-  if (isSuccess && pending) setPending(false);
 
   return { submit, isPending, isSuccess, txHash, error, reset, sponsored,
     sending: sendingCalls };
