@@ -2,7 +2,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
@@ -221,7 +220,6 @@ export default function Home() {
   const tc = useTranslations("common");
   const { setMiniAppReady, isMiniAppReady } = useMiniKit();
   const { address, isConnected } = useAccount();
-  const [pasted, setPasted] = useState("");
 
   useEffect(() => {
     if (!isMiniAppReady) setMiniAppReady();
@@ -254,12 +252,6 @@ export default function Home() {
 
   // No auto-redirect on connect: the landing IS the site and must stay viewable
   // even with a wallet connected. Entering the app is an explicit click (Enter).
-
-  const trimmed = pasted.trim();
-  const pastedValid = isAddress(trimmed);
-  const dirty = trimmed.length > 0;
-
-  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <main className={styles.page}>
@@ -307,31 +299,6 @@ export default function Home() {
                 <BtnArrow />
               </button>
             )}
-
-            <div className={styles.paste}>
-              <input
-                id="paste-address"
-                className={styles.input}
-                value={pasted}
-                onChange={(e) => setPasted(e.target.value)}
-                placeholder={t("addressPlaceholder")}
-                spellCheck={false}
-                autoComplete="off"
-                autoCapitalize="off"
-                aria-label={t("walletAddress")}
-              />
-              {dirty && !pastedValid && (
-                <p className={styles.inputErr}>{t("invalidAddress")}</p>
-              )}
-              <button
-                className={styles.primaryCta}
-                disabled={!pastedValid}
-                onClick={() => router.push(`/enter?address=${trimmed}`)}
-              >
-                {t("scanThisWallet")}
-                <BtnArrow />
-              </button>
-            </div>
           </div>
           </div>
 
@@ -341,19 +308,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The number / grow / social-proof now live in the hero carousel. */}
-
-      {/* ── Final CTA (blue) ── */}
-      <section className={`${styles.section} ${styles.ctaSection}`}>
-        <div className={`${styles.sectionInner} ${styles.reveal}`}>
-          <h2 className={styles.ctaTitle}>{t("final.title")}</h2>
-          <p className={styles.sub}>{t("final.sub")}</p>
-          <button className={`${styles.primaryCta} ${styles.ctaBig}`} onClick={toTop}>
-            {t("final.cta")}
-            <BtnArrow />
-          </button>
-        </div>
-      </section>
+      {/* Everything (number / grow / social-proof) lives in the hero carousel;
+          the connect card is the single CTA — no duplicate footer CTA. */}
 
       <footer className={styles.footer}>
         <BrandLogo size={26} />
