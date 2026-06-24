@@ -20,10 +20,11 @@
     "fr": "FR"
   },
   "landing": {
-    "eyebrow": "// onchain reputation engine",
-    "titleLine1": "Your Base airdrop score,",
-    "titleAccent": "ranked.",
-    "sub": "Scan any wallet. Get a /100 score, your percentile and a 19-quest radar. Mint your rank as a soulbound badge.",
+    "eyebrow": "// base airdrop estimator",
+    "titleLine1": "How much is your",
+    "titleAccent": "Base airdrop worth?",
+    "sub": "Scan your wallet. See your estimated allocation in seconds — then exactly how to grow it.",
+    "scrollCue": "see how it works",
     "orScan": "or scan read-only",
     "walletAddress": "wallet address",
     "addressPlaceholder": "0x…",

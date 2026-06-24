@@ -1,18 +1,16 @@
 "use client";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { isAddress } from "viem";
 import { useAccount, useAccountEffect } from "wagmi";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import BaseCube from "./_components/BaseCube";
 import BrandLogo from "./_components/BrandLogo";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
 import styles from "./landing.module.css";
 
-/* CTA arrow: same single-SVG model as the menu CardArrow — chevron head at
-   rest, the shaft draws in from the head on button hover while the arrow
+/* CTA arrow: chevron head at rest, the shaft draws in on hover while the arrow
    slides right. One element, nothing can overlap the glyph. */
 function BtnArrow() {
   return (
@@ -22,13 +20,13 @@ function BtnArrow() {
           className={styles.btnArrowShaft}
           d="M2 6h14"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.7"
           strokeLinecap="round"
         />
         <path
           d="M12.5 1.5 17 6l-4.5 4.5"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.7"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -38,9 +36,11 @@ function BtnArrow() {
 }
 
 /**
- * Landing. Premium UI over the existing logic:
- *  - Connect Wallet (OnchainKit) -> on connect, go to /enter.
- *  - Paste address (read-only) -> /enter for that address.
+ * Landing — a premium, conversion-first Base hero. The whole screen drives one
+ * question ("how much is your Base airdrop worth?") to one action (scan). A deep
+ * Base-blue stage (the familiar Base look) holds a bright white scan card — the
+ * light/dark mix — so the eye lands on the action. Scan logic unchanged: connect
+ * (OnchainKit) or paste an address, both route to /enter.
  */
 export default function Home() {
   const router = useRouter();
@@ -54,9 +54,6 @@ export default function Home() {
     if (!isMiniAppReady) setMiniAppReady();
   }, [setMiniAppReady, isMiniAppReady]);
 
-  // Redirect to the entrance ONLY on a fresh user connect — not on autoConnect
-  // reconnection at page load (isReconnected). On reload, the wallet silently
-  // reconnects and the user stays on the landing (with an "Enter" CTA below).
   useAccountEffect({
     onConnect({ address: addr, isReconnected }) {
       if (!isReconnected && addr) router.push(`/enter?address=${addr}`);
@@ -68,96 +65,87 @@ export default function Home() {
   const dirty = trimmed.length > 0;
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className={`dr-shell dr-wide ${styles.main}`}>
-        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <BrandLogo size={34} />
-          <span className={styles.headRight}>
-            <span className={styles.status}>
-              <i className={styles.statusDot} />
-              {tc("baseMainnet")}
-            </span>
-            <LocaleSwitcher />
+    <main className={styles.page}>
+      <header className={styles.head}>
+        <BrandLogo size={34} />
+        <span className={styles.headRight}>
+          <span className={styles.status}>
+            <i className={styles.statusDot} />
+            {tc("baseMainnet")}
           </span>
-        </header>
+          <LocaleSwitcher />
+        </span>
+      </header>
 
-        <div className={styles.layout}>
-        <div className={styles.lead}>
-          <BaseCube />
+      <section className={styles.hero}>
+        <span className={styles.glow} aria-hidden />
+        <div className={styles.heroInner}>
+          <p className={styles.eyebrow}>{t("eyebrow")}</p>
+          <h1 className={styles.title}>
+            {t("titleLine1")}{" "}
+            <span className={styles.titleAccent}>{t("titleAccent")}</span>
+          </h1>
+          <p className={styles.sub}>{t("sub")}</p>
 
-          <section className={styles.hero}>
-            <p className="dr-eyebrow">{t("eyebrow")}</p>
-            <h1 className={styles.title}>
-              {t("titleLine1")}
-              <br />
-              <span className={styles.titleAccent}>{t("titleAccent")}</span>
-              <span className="dr-cursor" />
-            </h1>
-            <p className={styles.sub}>{t("sub")}</p>
-          </section>
-        </div>
+          <div className={styles.scanCard}>
+            <div className={`ockWrap ${styles.connect}`}>
+              <Wallet />
+            </div>
 
-        <section className={`${styles.actions} ${styles.rail}`}>
-          <div className={`ockWrap ${styles.connect}`}>
-            <Wallet />
-          </div>
-
-          {isConnected && address && (
-            <button
-              className={`dr-btn ${styles.cta}`}
-              onClick={() => router.push(`/enter?address=${address}`)}
-            >
-              {t("enter")}
-              <BtnArrow />
-            </button>
-          )}
-
-          <div className={styles.divider}>
-            <span>{t("orScan")}</span>
-          </div>
-
-          <div className={styles.paste}>
-            <label htmlFor="paste-address" className="dr-eyebrow">
-              {t("walletAddress")}
-            </label>
-            <input
-              id="paste-address"
-              className="dr-input"
-              value={pasted}
-              onChange={(e) => setPasted(e.target.value)}
-              placeholder={t("addressPlaceholder")}
-              spellCheck={false}
-              autoComplete="off"
-              autoCapitalize="off"
-            />
-            {dirty && !pastedValid && (
-              <p className={styles.inputErr}>{t("invalidAddress")}</p>
+            {isConnected && address && (
+              <button
+                className={styles.primaryCta}
+                onClick={() => router.push(`/enter?address=${address}`)}
+              >
+                {t("enter")}
+                <BtnArrow />
+              </button>
             )}
-            <button
-              className={`dr-btn dr-btn--ghost ${styles.cta}`}
-              disabled={!pastedValid}
-              onClick={() => router.push(`/enter?address=${trimmed}`)}
-            >
-              {t("scanThisWallet")}
-              <BtnArrow />
-            </button>
-          </div>
-        </section>
-        </div>
 
-        <footer className={styles.foot}>
-          <span className="mono">v0.1.0</span>
-          <a
-            href="https://x.com/lrifton6240"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mono"
-          >
-            {t("footerCredit")}
-          </a>
-        </footer>
-      </main>
-    </>
+            <div className={styles.divider}>
+              <span>{t("orScan")}</span>
+            </div>
+
+            <div className={styles.paste}>
+              <input
+                id="paste-address"
+                className={styles.input}
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder={t("addressPlaceholder")}
+                spellCheck={false}
+                autoComplete="off"
+                autoCapitalize="off"
+                aria-label={t("walletAddress")}
+              />
+              {dirty && !pastedValid && (
+                <p className={styles.inputErr}>{t("invalidAddress")}</p>
+              )}
+              <button
+                className={styles.primaryCta}
+                disabled={!pastedValid}
+                onClick={() => router.push(`/enter?address=${trimmed}`)}
+              >
+                {t("scanThisWallet")}
+                <BtnArrow />
+              </button>
+            </div>
+          </div>
+
+          <span className={styles.scrollCue} aria-hidden>
+            {t("scrollCue")}
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+              <path
+                d="M8 3v10M3.5 8.5 8 13l4.5-4.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
+      </section>
+    </main>
   );
 }

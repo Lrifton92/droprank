@@ -20,10 +20,11 @@
     "fr": "FR"
   },
   "landing": {
-    "eyebrow": "// moteur de réputation onchain",
-    "titleLine1": "Ton score airdrop Base,",
-    "titleAccent": "classé.",
-    "sub": "Scanne n'importe quel wallet. Obtiens un score /100, ton percentile et un radar de 19 quêtes. Mint ton rang en badge soulbound.",
+    "eyebrow": "// estimateur d'airdrop base",
+    "titleLine1": "Combien vaut ton",
+    "titleAccent": "airdrop Base ?",
+    "sub": "Scanne ton wallet. Vois ton allocation estimée en quelques secondes — puis comment la faire grimper.",
+    "scrollCue": "voir comment ça marche",
     "orScan": "ou scan en lecture seule",
     "walletAddress": "adresse du wallet",
     "addressPlaceholder": "0x…",

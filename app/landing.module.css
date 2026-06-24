@@ -1,22 +1,28 @@
-.main {
-  gap: 8px;
+/* ── Premium Base hero ─────────────────────────────────────────────────────
+   A full-bleed deep-blue Base stage (familiar Base look) holding one headline
+   and one bright white scan card — the light/dark mix that funnels the eye to
+   the action. */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
 }
 
 .head {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 20px clamp(16px, 4vw, 36px);
+  color: #fff;
 }
-.head :global(.dr-brand) {
-  font-size: 20px;
-}
-
 .headRight {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
-
 .status {
   display: inline-flex;
   align-items: center;
@@ -24,144 +30,158 @@
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.18em;
-  color: var(--text-faint);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
 }
 .statusDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 8px var(--ok);
-  animation: pulse 2s var(--ease-in-out) infinite;
+  background: #41ffa6;
+  box-shadow: 0 0 8px #41ffa6;
+  animation: heroPulse 2s var(--ease-in-out) infinite;
 }
 
 .hero {
-  text-align: center;
-  margin-top: 4px;
-}
-.hero > * {
-  animation: dr-rise 0.6s var(--ease-out) both;
-}
-.hero :global(.dr-eyebrow) { animation-delay: 0.05s; }
-.title { animation-delay: 0.14s; }
-.sub { animation-delay: 0.22s; }
-
-.title {
-  margin-top: 12px;
-  font-size: 32px;
-  line-height: 1.08;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.titleAccent {
-  color: var(--base-300);
-  text-shadow: 0 0 30px var(--base-glow);
-}
-.sub {
-  margin: 14px auto 0;
-  max-width: 32ch;
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1.55;
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 96px 0 56px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(100% 70% at 50% 0%, #2f6bff 0%, transparent 55%),
+    radial-gradient(80% 60% at 88% 102%, #0a3bd0 0%, transparent 60%),
+    linear-gradient(165deg, #06329f 0%, #0052ff 46%, #0140d4 100%);
 }
 
-.actions {
-  margin-top: 28px;
+/* Living white bloom drifting behind the headline — the "alive" Base glow. */
+.glow {
+  position: absolute;
+  z-index: -1;
+  width: 62vmax;
+  height: 62vmax;
+  left: 50%;
+  top: 36%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.2), transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  animation: heroGlow 11s var(--ease-in-out) infinite;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  animation: dr-rise 0.6s var(--ease-out) 0.3s both;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+.heroInner > * {
+  animation: heroRise 0.7s var(--ease-out) both;
+}
+.eyebrow {
+  animation-delay: 0.05s;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+.title {
+  animation-delay: 0.12s;
+  font-size: clamp(38px, 7vw, 74px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: #fff;
+  text-wrap: balance;
+}
+.titleAccent {
+  background: linear-gradient(180deg, #ffffff, #bcd6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.35);
+}
+.sub {
+  animation-delay: 0.2s;
+  max-width: 46ch;
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
 }
 
-/* Desktop landing: a real website hero. Below 768px `.layout`, `.lead` and
-   `.rail` are transparent (display: contents) so the column flows exactly as
-   the validated webview. From md the cube + headline form a left presentation
-   panel, the connect / paste controls become a framed sign-in card on the
-   right, both vertically centred against the breathing grid. */
-.layout {
-  display: contents;
+/* The bright scan card — the light element on the blue stage. */
+.scanCard {
+  animation-delay: 0.3s;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 392px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 30px 80px -28px rgba(0, 28, 110, 0.65),
+    0 0 0 1px rgba(0, 82, 255, 0.05);
 }
-.lead {
-  display: contents;
-}
-@media (min-width: 768px) {
-  .main {
-    justify-content: center;
-  }
-  .layout {
-    display: grid;
-    grid-template-columns: 1fr minmax(320px, 380px);
-    align-items: center;
-    column-gap: var(--s-7);
-    margin: auto 0;
-    padding: var(--s-6) 0;
-  }
-  .lead {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-  }
-  .hero {
-    text-align: left;
-    margin-top: var(--s-4);
-  }
-  .title {
-    font-size: clamp(34px, 4vw, 46px);
-  }
-  .sub {
-    margin-left: 0;
-    margin-right: 0;
-    max-width: 38ch;
-    font-size: 15px;
-  }
-  /* Sign-in card: lift the action stack into a framed glass panel so the
-     connect/paste flow reads as a deliberate destination, not loose controls. */
-  .rail.actions {
-    margin-top: 0;
-    padding: var(--s-6);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    background: var(--panel);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    box-shadow: 0 30px 90px -40px var(--base-glow);
-  }
-}
-
 .connect {
-  position: relative;
   display: flex;
   justify-content: center;
 }
-/* Discreet breathing glow behind the Connect button — opacity-only pulse on a
-   blurred Base-blue halo, never moves or covers the button (pointer-events off,
-   sits behind via z-index). Draws the eye to the primary action. */
-.connect::before {
-  content: "";
-  position: absolute;
-  inset: 2px 12%;
-  z-index: -1;
-  border-radius: var(--r-md);
-  background: var(--base-glow);
-  filter: blur(16px);
-  opacity: 0.5;
-  pointer-events: none;
-  will-change: opacity;
-  animation: connectGlow 3.4s var(--ease-in-out) infinite;
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 13px;
+  background: #0052ff;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 26px -10px rgba(0, 82, 255, 0.75);
+  transition:
+    transform var(--hover-dur) var(--ease-out),
+    background var(--hover-dur) var(--ease-out),
+    box-shadow var(--hover-dur) var(--ease-out);
 }
-@keyframes connectGlow {
-  0%, 100% { opacity: 0.32; }
-  50% { opacity: 0.7; }
+.primaryCta:not(:disabled):hover {
+  background: #0046e0;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -12px rgba(0, 82, 255, 0.85);
 }
-@media (prefers-reduced-motion: reduce) {
-  .connect::before { animation: none; opacity: 0.4; }
+.primaryCta:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.06s;
+}
+.primaryCta:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-faint);
+  color: #8a93a8;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.16em;
@@ -172,44 +192,57 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--border);
+  background: #e4eaf6;
 }
 
 .paste {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
+}
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d8e1f5;
+  background: #f4f7ff;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: #0a1830;
+  outline: none;
+  transition: border-color 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
+}
+.input::placeholder {
+  color: #9aa6c0;
+}
+.input:focus {
+  border-color: #0052ff;
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.14);
 }
 .inputErr {
-  color: var(--no);
+  color: #d23150;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
-.foot {
-  margin-top: auto;
-  padding-top: 32px;
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-faint);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-/* CTA arrows — same single-SVG model as the menu cards: chevron alone at
-   rest, shaft draws in from the head on hover while the arrow slides right. */
-.cta {
+.scrollCue {
+  animation-delay: 0.42s;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 7px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
 }
+.scrollCue svg {
+  animation: heroBob 1.8s var(--ease-in-out) infinite;
+}
+
+/* CTA arrow — chevron at rest, shaft draws in on hover. */
 .btnArrow {
   display: inline-flex;
   align-items: center;
@@ -224,15 +257,47 @@
   transform-origin: right center;
   transition: transform 0.26s var(--ease-out);
 }
-.cta:not(:disabled):hover .btnArrow,
-.cta:not(:disabled):focus-visible .btnArrow {
+.primaryCta:not(:disabled):hover .btnArrow {
   transform: translateX(4px);
 }
-.cta:not(:disabled):hover .btnArrowShaft,
-.cta:not(:disabled):focus-visible .btnArrowShaft {
+.primaryCta:not(:disabled):hover .btnArrowShaft {
   transform: scaleX(1);
 }
-.cta:not(:disabled):active .btnArrow {
-  transform: translateX(3px);
-  transition-duration: 0.06s;
+
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes heroGlow {
+  0%, 100% {
+    transform: translate(-52%, -50%) scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-48%, -46%) scale(1.16);
+    opacity: 1;
+  }
+}
+@keyframes heroPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes heroBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroInner > *,
+  .glow,
+  .scrollCue svg,
+  .statusDot {
+    animation: none;
+  }
 }
