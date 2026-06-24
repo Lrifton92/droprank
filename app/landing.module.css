@@ -91,9 +91,9 @@
   max-width: 1180px;
   padding: 0 clamp(20px, 5vw, 40px);
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 1.05fr 0.85fr;
   align-items: center;
-  gap: clamp(32px, 5vw, 76px);
+  gap: clamp(48px, 8vw, 130px);
 }
 .heroLeft {
   display: flex;
@@ -106,6 +106,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* Nudge the carousel further right so it doesn't crowd the headline column. */
+  padding-left: clamp(0px, 3vw, 56px);
 }
 .carEyebrow {
   align-self: flex-start;
@@ -120,8 +122,9 @@
 }
 .carStage {
   flex: 1;
-  min-height: 264px;
+  min-height: 296px;
   display: grid;
+  align-content: center;
 }
 .carCard {
   display: flex;
@@ -257,6 +260,21 @@
 .connect {
   display: flex;
   justify-content: center;
+}
+/* Make the OnchainKit connect button match the scan CTA: full-width Base blue. */
+.connect :global([data-testid="ockConnectButton"]),
+.connect :global(.ockConnectWallet_Container button),
+.connect > :global(div),
+.connect :global(button[type="button"]) {
+  width: 100% !important;
+  background: #0000ff !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 255, 0.6) !important;
+}
+.connect :global([data-testid="ockConnectButton"]) :global(span),
+.connect :global(button[type="button"]) :global(span) {
+  color: #fff !important;
 }
 
 .primaryCta {

@@ -89,6 +89,24 @@ const STEP_ICONS = [
     strokeLinecap="round"
     strokeLinejoin="round"
   />,
+  // grow allocation (rising chart + arrow)
+  <path
+    key="i4"
+    d="M4 17l5-5 3 3 7-8m0 0v5m0-5h-5"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />,
+  // leaderboard / race (podium bars)
+  <path
+    key="i5"
+    d="M6 21v-7M12 21V5M18 21v-10M3 21h18"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />,
 ];
 
 /**
@@ -99,27 +117,42 @@ const STEP_ICONS = [
  */
 function StepCarousel() {
   const t = useTranslations("landing");
+  const cards = [
+    { icon: 0, title: t("how.s1t"), desc: t("how.s1d") },
+    { icon: 1, title: t("how.s2t"), desc: t("how.s2d") },
+    { icon: 2, title: t("how.s3t"), desc: t("how.s3d") },
+    { icon: 3, title: t("grow.title"), desc: t("grow.sub") },
+    { icon: 4, title: t("social.title"), desc: t("social.sub") },
+  ];
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(() => setActive((a) => (a + 1) % 3), 3800);
+    const id = window.setInterval(
+      () => setActive((a) => (a + 1) % cards.length),
+      3800,
+    );
     return () => window.clearInterval(id);
-  }, []);
+  }, [cards.length]);
+
+  const c = cards[active];
+  const total = String(cards.length).padStart(2, "0");
   return (
     <div className={styles.carousel}>
       <div className={styles.carStage}>
         <article key={active} className={styles.carCard}>
-          <span className={styles.carNo}>0{active + 1} / 03</span>
+          <span className={styles.carNo}>
+            {String(active + 1).padStart(2, "0")} / {total}
+          </span>
           <span className={styles.carIcon} aria-hidden>
             <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
-              {STEP_ICONS[active]}
+              {STEP_ICONS[c.icon]}
             </svg>
           </span>
-          <span className={styles.carTitle}>{t(`how.s${active + 1}t`)}</span>
-          <span className={styles.carDesc}>{t(`how.s${active + 1}d`)}</span>
+          <span className={styles.carTitle}>{c.title}</span>
+          <span className={styles.carDesc}>{c.desc}</span>
         </article>
       </div>
       <div className={styles.carRail} aria-hidden>
-        {[0, 1, 2].map((i) => (
+        {cards.map((_, i) => (
           <button
             key={i}
             type="button"
