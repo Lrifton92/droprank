@@ -92,6 +92,48 @@ const STEP_ICONS = [
 ];
 
 /**
+ * Vertical "how it works" carousel for the hero's right column. Cycles through
+ * the three explanations; each incoming card re-mounts (keyed by index) so it
+ * replays the same blur + rise reveal Soufian liked. A vertical dot rail tracks
+ * progress and lets you jump.
+ */
+function StepCarousel() {
+  const t = useTranslations("landing");
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setActive((a) => (a + 1) % 3), 3800);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <div className={styles.carousel}>
+      <div className={styles.carStage}>
+        <article key={active} className={styles.carCard}>
+          <span className={styles.carNo}>0{active + 1} / 03</span>
+          <span className={styles.carIcon} aria-hidden>
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+              {STEP_ICONS[active]}
+            </svg>
+          </span>
+          <span className={styles.carTitle}>{t(`how.s${active + 1}t`)}</span>
+          <span className={styles.carDesc}>{t(`how.s${active + 1}d`)}</span>
+        </article>
+      </div>
+      <div className={styles.carRail} aria-hidden>
+        {[0, 1, 2].map((i) => (
+          <button
+            key={i}
+            type="button"
+            tabIndex={-1}
+            className={`${styles.carDot} ${i === active ? styles.carDotOn : ""}`}
+            onClick={() => setActive(i)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Landing — a premium, conversion-first Base website. A deep-blue Base hero (the
  * hook + scan), then sections that alternate light/dark and walk the visitor
  * through the funnel: how it works → the number → grow it → social proof (live
@@ -160,6 +202,7 @@ export default function Home() {
       <section className={styles.hero}>
         <span className={styles.glow} aria-hidden />
         <div className={styles.heroInner}>
+          <div className={styles.heroLeft}>
           <p className={styles.eyebrow}>{t("eyebrow")}</p>
           <h1 className={styles.title}>
             <Kinetic text={t("titleLine1")} start={0} />{" "}
@@ -224,31 +267,13 @@ export default function Home() {
               />
             </svg>
           </span>
-        </div>
-      </section>
+          </div>
 
-      {/* ── How it works (light) ── */}
-      <section className={`${styles.section} ${styles.light}`}>
-        <div className={styles.sectionInner}>
-          <p className={`${styles.eyebrow} ${styles.eyebrowDark}`}>{t("how.eyebrow")}</p>
-          <h2 className={`${styles.h2} ${styles.h2Dark}`}>{t("how.title")}</h2>
-          <div className={styles.steps}>
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={`${styles.step} ${styles.reveal}`}
-                style={{ transitionDelay: `${i * 0.1}s` }}
-              >
-                <span className={styles.stepNo}>0{i + 1}</span>
-                <span className={styles.stepIcon} aria-hidden>
-                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
-                    {STEP_ICONS[i]}
-                  </svg>
-                </span>
-                <span className={styles.stepTitle}>{t(`how.s${i + 1}t`)}</span>
-                <span className={styles.stepDesc}>{t(`how.s${i + 1}d`)}</span>
-              </div>
-            ))}
+          <div className={styles.heroRight}>
+            <p className={`${styles.eyebrow} ${styles.carEyebrow}`}>
+              {t("how.eyebrow")}
+            </p>
+            <StepCarousel />
           </div>
         </div>
       </section>
