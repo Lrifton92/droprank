@@ -1,0 +1,15 @@
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.mark {
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px var(--base-glow));
+}
+
+.word {
+  line-height: 1;
+}

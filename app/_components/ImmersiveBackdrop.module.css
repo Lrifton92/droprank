@@ -1,0 +1,12 @@
+/* Full-viewport ambient canvas, layered over .dr-grid-bg, behind all content.
+   Radial mask fades it out toward the edges so it never competes with text. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(75% 65% at 50% 40%, #000 0%, transparent 82%);
+  mask: radial-gradient(75% 65% at 50% 40%, #000 0%, transparent 82%);
+}
