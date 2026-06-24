@@ -1,5 +1,21 @@
+import { readFileSync } from "node:fs";
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable, defineConfig } from "hardhat/config";
+
+// Load contracts/.env into process.env so `configVariable(...)` and the deploy
+// scripts (DEPLOYER_PRIVATE_KEY, SIGNER_ADDRESS, BASE_RPC_URL, ...) work without
+// manually exporting vars first. Dependency-free; never overrides an already-set
+// env var, so a CI/session value still wins.
+try {
+  for (const line of readFileSync(new URL("./.env", import.meta.url), "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].trim().replace(/^["']|["']$/g, "");
+    }
+  }
+} catch {
+  // No .env file — rely on real environment variables.
+}
 
 export default defineConfig({
   plugins: [hardhatToolboxViemPlugin],
