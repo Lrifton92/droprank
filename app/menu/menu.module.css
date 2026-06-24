@@ -207,6 +207,46 @@
   gap: 14px;
 }
 
+/* ── Dashboard layout ──────────────────────────────────────────────────────
+   Below 1024px the board is a pass-through (display:contents) so the blocks
+   stack exactly as the validated mobile/tablet column. From 1024px it becomes a
+   two-column dashboard so the key info (identity, score, allocation, leaderboard,
+   nav) sits near the top without a long scroll — the identity card spans the top,
+   the left column carries allocation → nav → activity, the leaderboard fills the
+   right column, banner + session close full-width. */
+.board {
+  display: contents;
+}
+@media (min-width: 1024px) {
+  .board {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    grid-template-areas:
+      "identity identity"
+      "alloc    board"
+      "nav      board"
+      "activity board"
+      "banner   banner"
+      "session  session";
+    align-items: start;
+    column-gap: 18px;
+    row-gap: 16px;
+    margin-top: 4px;
+  }
+  .zoneIdentity { grid-area: identity; }
+  .zoneAlloc { grid-area: alloc; }
+  .zoneNav { grid-area: nav; grid-template-columns: 1fr 1fr; }
+  .zoneBoard { grid-area: board; }
+  .zoneActivity { grid-area: activity; }
+  .zoneBanner { grid-area: banner; }
+  .zoneSession { grid-area: session; }
+  /* The grid's row-gap owns vertical rhythm now — drop the blocks' own
+     top-margins (.card, .grid, .act, .hint) so cells align to their grid row. */
+  .zoneNav,
+  .zoneSession { margin-top: 0; }
+  .board > * > :first-child { margin-top: 0; }
+}
+
 /* Desktop: lay the 4 destination cards out in 2 columns. The shell width is
    handled by the shared `.dr-wide` utility (860 → 1080). Mobile/webview
    (< 768px) stays a single 424px column. */

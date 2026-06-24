@@ -104,15 +104,16 @@ function MenuInner() {
           </button>
         </div>
 
-        <div className="dr-enter" style={{ "--i": 2 } as CSSProperties}>
+        <div className={styles.board}>
+        <div className={`dr-enter ${styles.zoneIdentity}`} style={{ "--i": 2 } as CSSProperties}>
           <BasenameCard address={address} />
         </div>
 
-        <div className="dr-enter" style={{ "--i": 3 } as CSSProperties}>
+        <div className={`dr-enter ${styles.zoneAlloc}`} style={{ "--i": 3 } as CSSProperties}>
           <AllocationEstimate address={address} />
         </div>
 
-        <nav className={styles.grid}>
+        <nav className={`${styles.grid} ${styles.zoneNav}`}>
           <Link href={`/score${qs}`} className={`dr-panel dr-enter ${styles.card}`} style={{ "--i": 4 } as CSSProperties}>
             <span className={styles.idx}>01</span>
             <span className={styles.glyph} aria-hidden>
@@ -183,19 +184,19 @@ function MenuInner() {
           </Link>
         </nav>
 
-        <div className="dr-enter" style={{ "--i": 9 } as CSSProperties}>
+        <div className={`dr-enter ${styles.zoneBoard}`} style={{ "--i": 9 } as CSSProperties}>
           <Leaderboard address={address} />
         </div>
 
-        <div className="dr-enter" style={{ "--i": 10 } as CSSProperties}>
+        <div className={`dr-enter ${styles.zoneActivity}`} style={{ "--i": 10 } as CSSProperties}>
           <RecentActivity address={address} />
         </div>
 
-        <div className="dr-enter" style={{ "--i": 11 } as CSSProperties}>
+        <div className={`dr-enter ${styles.zoneBanner}`} style={{ "--i": 11 } as CSSProperties}>
           <BaseBanner />
         </div>
 
-        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 12 } as CSSProperties}>
+        <div className={`dr-term dr-enter ${styles.hint} ${styles.term} ${styles.zoneSession}`} style={{ "--i": 12 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />
@@ -216,6 +217,7 @@ function MenuInner() {
               <span className={`syn-str ${styles.termVal}`}>{t("term.badgeValue")}</span>
             </div>
           </div>
+        </div>
         </div>
       </main>
     </>
