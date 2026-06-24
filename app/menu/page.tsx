@@ -80,7 +80,7 @@ function MenuInner() {
             </span>
             <span className={styles.backLabel}>WALLET</span>
           </button>
-          <BrandLogo />
+          <BrandLogo size={30} />
           <LocaleSwitcher />
         </header>
 

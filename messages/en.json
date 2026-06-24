@@ -134,7 +134,9 @@
   "leaderboard": {
     "title": "LEADERBOARD",
     "you": "YOU",
-    "empty": "No ranked wallets yet — scan one to join."
+    "empty": "No ranked wallets yet — scan one to join.",
+    "showMore": "Show {n} more",
+    "showLess": "Show less"
   },
   "activity": {
     "title": "RECENT ACTIVITY",

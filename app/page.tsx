@@ -74,7 +74,7 @@ export default function Home() {
       <ImmersiveBackdrop />
       <main className={`dr-shell dr-wide ${styles.main}`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <BrandLogo />
+          <BrandLogo size={34} />
           <span className={styles.headRight}>
             <span className={styles.status}>
               <i className={styles.statusDot} />

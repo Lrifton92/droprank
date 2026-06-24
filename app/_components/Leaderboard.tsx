@@ -15,9 +15,12 @@ type Entry = { address: string; score: number };
  * highlighted with a YOU tag. Basenames resolve via OnchainKit, falling back to
  * the address.
  */
+const COLLAPSED = 10;
+
 export default function Leaderboard({ address }: { address: string }) {
   const t = useTranslations("leaderboard");
   const [entries, setEntries] = useState<Entry[] | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -29,6 +32,9 @@ export default function Leaderboard({ address }: { address: string }) {
   }, []);
 
   const me = address.toLowerCase();
+  const total = entries?.length ?? 0;
+  const shown =
+    entries && !expanded ? entries.slice(0, COLLAPSED) : entries ?? [];
 
   return (
     <section className={`dr-panel ${styles.board}`} aria-label={t("title")}>
@@ -40,7 +46,7 @@ export default function Leaderboard({ address }: { address: string }) {
         <span className={styles.state}>{t("empty")}</span>
       ) : (
         <ol className={styles.list}>
-          {entries.map((e, i) => {
+          {shown.map((e, i) => {
             const tier = tierFor(e.score);
             const isMe = e.address.toLowerCase() === me;
             return (
@@ -69,6 +75,16 @@ export default function Leaderboard({ address }: { address: string }) {
             );
           })}
         </ol>
+      )}
+
+      {total > COLLAPSED && (
+        <button
+          type="button"
+          className={styles.toggle}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? t("showLess") : t("showMore", { n: total - COLLAPSED })}
+        </button>
       )}
     </section>
   );

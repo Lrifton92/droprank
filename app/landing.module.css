@@ -8,7 +8,7 @@
   justify-content: space-between;
 }
 .head :global(.dr-brand) {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .headRight {

@@ -134,7 +134,9 @@
   "leaderboard": {
     "title": "CLASSEMENT",
     "you": "TOI",
-    "empty": "Aucun wallet classé pour l'instant — scanne pour rejoindre."
+    "empty": "Aucun wallet classé pour l'instant — scanne pour rejoindre.",
+    "showMore": "Voir {n} de plus",
+    "showLess": "Voir moins"
   },
   "activity": {
     "title": "ACTIVITÉ RÉCENTE",
