@@ -8,7 +8,6 @@ import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BrandLogo from "./_components/BrandLogo";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
-import Leaderboard from "./_components/Leaderboard";
 import styles from "./landing.module.css";
 
 /* CTA arrow: chevron head at rest, the shaft draws in on hover. */
@@ -124,14 +123,15 @@ function StepCarousel() {
     { icon: 3, title: t("grow.title"), desc: t("grow.sub") },
     { icon: 4, title: t("social.title"), desc: t("social.sub") },
   ];
+  const count = cards.length;
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(
-      () => setActive((a) => (a + 1) % cards.length),
-      3800,
-    );
+    const id = window.setInterval(() => {
+      setActive((a) => (a + 1) % count);
+    }, 3500);
     return () => window.clearInterval(id);
-  }, [cards.length]);
+    // count is constant (5) for the lifetime of the component.
+  }, [count]);
 
   const c = cards[active];
   const total = String(cards.length).padStart(2, "0");
@@ -240,6 +240,13 @@ export default function Home() {
           <h1 className={styles.title}>
             <Kinetic text={t("titleLine1")} start={0} />{" "}
             <Kinetic text={t("titleAccent")} start={3} accent />
+            <span
+              className={`${styles.word} ${styles.titleAccent}`}
+              style={{ "--w": 6 } as CSSProperties}
+              aria-hidden
+            >
+              ?
+            </span>
           </h1>
           <p className={styles.sub}>{t("sub")}</p>
 
@@ -257,10 +264,6 @@ export default function Home() {
                 <BtnArrow />
               </button>
             )}
-
-            <div className={styles.divider}>
-              <span>{t("orScan")}</span>
-            </div>
 
             <div className={styles.paste}>
               <input
@@ -287,19 +290,6 @@ export default function Home() {
               </button>
             </div>
           </div>
-
-          <span className={styles.scrollCue} aria-hidden>
-            {t("scrollCue")}
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-              <path
-                d="M8 3v10M3.5 8.5 8 13l4.5-4.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
           </div>
 
           <div className={styles.heroRight}>
@@ -356,43 +346,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Grow it (light) ── */}
-      <section className={`${styles.section} ${styles.light}`}>
-        <div className={styles.sectionInner}>
-          <p className={`${styles.eyebrow} ${styles.eyebrowDark}`}>{t("grow.eyebrow")}</p>
-          <h2 className={`${styles.h2} ${styles.h2Dark}`}>{t("grow.title")}</h2>
-          <p className={`${styles.sectionSub} ${styles.subDark}`}>{t("grow.sub")}</p>
-          <div className={styles.levers}>
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className={`${styles.lever} ${styles.reveal}`}
-                style={{ transitionDelay: `${(i - 1) * 0.08}s` }}
-              >
-                <span className={styles.leverMark} aria-hidden>
-                  +
-                </span>
-                <div className={styles.leverText}>
-                  <span className={styles.leverTitle}>{t(`grow.l${i}t`)}</span>
-                  <span className={styles.leverDesc}>{t(`grow.l${i}d`)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Social proof (dark, live leaderboard) ── */}
-      <section className={`${styles.section} ${styles.dark}`}>
-        <div className={styles.sectionInner}>
-          <p className={styles.eyebrow}>{t("social.eyebrow")}</p>
-          <h2 className={styles.h2}>{t("social.title")}</h2>
-          <p className={styles.sectionSub}>{t("social.sub")}</p>
-          <div className={`${styles.socialBoard} ${styles.reveal}`}>
-            <Leaderboard address="" />
-          </div>
-        </div>
-      </section>
+      {/* Grow + social-proof now live in the hero carousel (no repetition). */}
 
       {/* ── Final CTA (blue) ── */}
       <section className={`${styles.section} ${styles.ctaSection}`}>

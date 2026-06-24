@@ -5,7 +5,6 @@ import { getLocale, getMessages } from "next-intl/server";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { minikitConfig } from "@/minikit.config";
 import { RootProvider } from "./rootProvider";
-import ImmersiveBackdrop from "./_components/ImmersiveBackdrop";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -62,7 +61,6 @@ export default async function RootLayout({
       <html lang={locale}>
         <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <ImmersiveBackdrop />
             <SafeArea>{children}</SafeArea>
           </NextIntlClientProvider>
         </body>
