@@ -121,6 +121,15 @@
     "nextGains": "leviers principaux",
     "allMaxed": "✓ tous les leviers au max — wallet based"
   },
+  "allocation": {
+    "title": "ESTIMATION ALLOCATION",
+    "rangeLabel": "Airdrop Base spéculatif",
+    "speculative": "Spéculatif — aucun airdrop Base confirmé. Dérivé de ton score et de ton rang, pas un chiffre officiel.",
+    "basis": "d'après ton score {score}/100 et ton rang",
+    "belowThreshold": "Sous le seuil probable d'éligibilité",
+    "belowThresholdSub": "Monte ton score pour entrer dans la fourchette estimée.",
+    "loading": "estimation…"
+  },
   "activity": {
     "title": "ACTIVITÉ RÉCENTE",
     "received": "Reçu",

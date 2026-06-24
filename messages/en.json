@@ -121,6 +121,15 @@
     "nextGains": "biggest levers",
     "allMaxed": "✓ all levers maxed — based wallet"
   },
+  "allocation": {
+    "title": "ESTIMATED ALLOCATION",
+    "rangeLabel": "Speculative Base airdrop",
+    "speculative": "Speculative — no confirmed Base airdrop. Derived from your score and rank, not an official figure.",
+    "basis": "based on your score {score}/100 and rank",
+    "belowThreshold": "Below the likely eligibility threshold",
+    "belowThresholdSub": "Raise your score to enter the estimated range.",
+    "loading": "estimating…"
+  },
   "activity": {
     "title": "RECENT ACTIVITY",
     "received": "Received",
