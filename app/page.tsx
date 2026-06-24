@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAccount } from "wagmi";
@@ -255,6 +255,23 @@ export default function Home() {
   // No auto-redirect on connect: the landing IS the site and must stay viewable
   // even with a wallet connected. Entering the app is an explicit click (Enter).
 
+  // Cursor "flashlight": an inverted (blue + white text) copy is layered exactly
+  // over the headline; a circular mask following the pointer reveals it, flipping
+  // the colours where the cursor goes. Coords are relative to the text block so
+  // the masked copy lines up pixel-for-pixel.
+  const heroTextRef = useRef<HTMLDivElement>(null);
+  const onHeroMove = (e: React.MouseEvent) => {
+    const el = heroTextRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+  const onHeroLeave = () => {
+    heroTextRef.current?.style.setProperty("--mx", "-600px");
+    heroTextRef.current?.style.setProperty("--my", "-600px");
+  };
+
   return (
     <main className={styles.page}>
       <header className={styles.head}>
@@ -269,23 +286,40 @@ export default function Home() {
       </header>
 
       {/* ── Hero ── */}
-      <section className={styles.hero}>
+      <section
+        className={styles.hero}
+        onMouseMove={onHeroMove}
+        onMouseLeave={onHeroLeave}
+      >
         <span className={styles.glow} aria-hidden />
         <div className={styles.heroInner}>
           <div className={styles.heroLeft}>
-          <p className={styles.eyebrow}>{t("eyebrow")}</p>
-          <h1 className={styles.title}>
-            <Kinetic text={t("titleLine1")} start={0} />{" "}
-            <Kinetic text={t("titleAccent")} start={3} accent />
-            <span
-              className={`${styles.word} ${styles.titleAccent}`}
-              style={{ "--w": 6 } as CSSProperties}
-              aria-hidden
-            >
-              ?
-            </span>
-          </h1>
-          <p className={styles.sub}>{t("sub")}</p>
+          <div className={styles.heroText} ref={heroTextRef}>
+            <p className={styles.eyebrow}>{t("eyebrow")}</p>
+            <h1 className={styles.title}>
+              <Kinetic text={t("titleLine1")} start={0} />{" "}
+              <Kinetic text={t("titleAccent")} start={3} accent />
+              <span
+                className={`${styles.word} ${styles.titleAccent}`}
+                style={{ "--w": 6 } as CSSProperties}
+                aria-hidden
+              >
+                ?
+              </span>
+            </h1>
+            <p className={styles.sub}>{t("sub")}</p>
+
+            {/* Inverted copy, layered exactly over the text, revealed by the
+                cursor mask — colours flip (blue bg, white text). */}
+            <div className={styles.heroTextInvert} aria-hidden>
+              <p className={styles.eyebrow}>{t("eyebrow")}</p>
+              <h1 className={styles.title}>
+                {t("titleLine1")}{" "}
+                <span className={styles.titleAccent}>{t("titleAccent")}</span>?
+              </h1>
+              <p className={styles.sub}>{t("sub")}</p>
+            </div>
+          </div>
 
           <div className={styles.scanCard}>
             <div className={`ockWrap ${styles.connect}`}>

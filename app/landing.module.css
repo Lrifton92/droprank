@@ -122,6 +122,61 @@
   align-self: flex-start;
 }
 
+/* ── Cursor flashlight: inverted copy layered exactly over the headline ──────
+   .heroTextInvert sits absolute over .heroText with identical flex layout, so
+   its white-on-blue duplicate lines up pixel-for-pixel; a circular mask at the
+   pointer reveals it. */
+.heroText {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+.heroTextInvert {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  background: #0000ff;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(
+    circle 150px at var(--mx, -600px) var(--my, -600px),
+    #000 0%,
+    #000 56%,
+    transparent 100%
+  );
+  mask: radial-gradient(
+    circle 150px at var(--mx, -600px) var(--my, -600px),
+    #000 0%,
+    #000 56%,
+    transparent 100%
+  );
+}
+.heroTextInvert .eyebrow {
+  background: none;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  animation: none;
+}
+.heroTextInvert .title {
+  color: #fff;
+}
+.heroTextInvert .titleAccent {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+.heroTextInvert .sub {
+  color: rgba(255, 255, 255, 0.92);
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroTextInvert {
+    display: none;
+  }
+}
+
 /* Vertical "how it works" carousel — card swaps replay the blur+rise reveal. */
 .carousel {
   position: relative;
