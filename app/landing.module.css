@@ -20,17 +20,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px clamp(18px, 4vw, 48px);
-  color: #0a0b0d;
+  padding: 20px clamp(18px, 4vw, 48px);
+  /* Black band, symmetric with the footer. */
+  background: #0a0b0d;
+  color: #fff;
 }
-/* Big, confident brand lockup on the light header (Soufian: make it prominent). */
+/* Big, confident brand lockup on the black header band. */
 .head :global(.dr-brand) {
-  color: #0a0b0d;
+  color: #fff;
   font-size: 30px;
   letter-spacing: 0.06em;
 }
 .head :global(.dr-brand .dot) {
-  color: #0000ff;
+  color: #4d7bff;
 }
 .headRight {
   display: inline-flex;
@@ -46,7 +48,7 @@
   font-size: 13px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #6a7080;
+  color: rgba(255, 255, 255, 0.72);
 }
 .statusDot {
   width: 8px;
@@ -56,10 +58,11 @@
   box-shadow: 0 0 9px rgba(0, 166, 81, 0.65);
   animation: heroPulse 2s var(--ease-in-out) infinite;
 }
-/* Enlarge the locale switcher (EN | FR) in the header. */
+/* Enlarge + lighten the locale switcher (EN | FR) on the black header band. */
 .headRight :global(button) {
   font-size: 14px !important;
   letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.86) !important;
 }
 
 /* ── Hero ── */
@@ -226,8 +229,9 @@
 }
 .carDesc {
   font-size: 17px;
+  font-weight: 600;
   line-height: 1.6;
-  color: #55617c;
+  color: #3a4256;
 }
 .carRail {
   display: flex;
@@ -372,8 +376,26 @@
   box-shadow: 0 24px 60px -34px rgba(10, 11, 40, 0.3);
 }
 .connect {
+  position: relative;
   display: block;
   width: 100%;
+}
+/* Pulsing blue ring drawing attention to the connect button. */
+.connect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  animation: connectPulse 2.2s var(--ease-in-out) infinite;
+}
+@keyframes connectPulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(0, 0, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connect::after { animation: none; }
 }
 /* Wrappers stretch full-width so the actual button fills the card (clickable
    across the whole blue area). Only the BUTTON carries the blue fill. */
