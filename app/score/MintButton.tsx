@@ -110,6 +110,7 @@ export default function MintButton({
       return;
     }
     setErrMsg("");
+    tx.reset();
     try {
       // Ensure the wallet is on the target chain before signing/writing,
       // otherwise the tx reverts on a chain mismatch (wallet may be on mainnet).
