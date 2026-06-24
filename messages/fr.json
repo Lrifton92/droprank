@@ -315,5 +315,20 @@
     "swap-pancakeswap": "Swap sur PancakeSwap (Base)",
     "trade-opensea": "Trader un NFT sur OpenSea",
     "talent-builder-score": "Créer un Builder Score Talent"
+  },
+  "checkin": {
+    "soon": "BIENTÔT",
+    "soonTitle": "Disponible une fois le contrat de check-in configuré",
+    "checkIn": "Graver le score onchain",
+    "attesting": "Attestation…",
+    "confirmInWallet": "Confirme dans le wallet",
+    "pending": "Gravure…",
+    "done": "Check-in fait",
+    "alreadyToday": "Déjà fait aujourd'hui",
+    "connectToCheckin": "Connecte-toi pour le check-in",
+    "onlyConnectedWallet": "Connecte le wallet scanné pour le check-in",
+    "cancelled": "Annulé",
+    "txSubmitted": "Transaction envoyée…",
+    "failed": "Attestation échouée ({status})"
   }
 }

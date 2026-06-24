@@ -12,6 +12,7 @@ import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import MintButton from "./MintButton";
+import CheckinButton from "./CheckinButton";
 import styles from "./score.module.css";
 
 function ScoreInner() {
@@ -133,6 +134,7 @@ function ScoreInner() {
               </div>
               <div className={styles.heroMint}>
                 <MintButton scannedAddress={address} empty={empty} score={data.score} max={data.max} />
+                <CheckinButton scannedAddress={address} score={data.score} />
               </div>
               {empty && (
                 <p className={styles.startMsg}>
