@@ -5,11 +5,10 @@ import {
   useAccount,
   useReadContract,
   useSwitchChain,
-  useWriteContract,
-  useWaitForTransactionReceipt,
 } from "wagmi";
 import { isAddress } from "viem";
 import { DROPRANK_BADGE_ABI, BADGE_CHAIN_ID } from "@/lib/badge-abi";
+import { useSponsoredWrite } from "../_components/useSponsoredWrite";
 import MintCelebration from "./MintCelebration";
 import styles from "./score.module.css";
 
@@ -50,13 +49,12 @@ export default function MintButton({
   const { address: connected, isConnected, chainId: walletChainId } = useAccount();
   const [phase, setPhase] = useState<Phase>("idle");
   const [errMsg, setErrMsg] = useState("");
-  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   // Captured at write time so the celebration label stays stable even after
   // balanceOf refetches and flips `owns`.
   const [wasRefresh, setWasRefresh] = useState(false);
 
-  const { writeContractAsync } = useWriteContract();
+  const tx = useSponsoredWrite(BADGE_CHAIN_ID);
   const { switchChainAsync } = useSwitchChain();
   const { data: balance } = useReadContract({
     abi: DROPRANK_BADGE_ABI,
@@ -66,20 +64,13 @@ export default function MintButton({
     chainId: BADGE_CHAIN_ID,
     query: { enabled: Boolean(CONTRACT && connected) },
   });
-  // Root cause of "never reaches success": the receipt watcher was invoked but
-  // its result discarded, so phase stayed "pending" forever. Capture isSuccess
-  // and flip the phase once the tx is confirmed onchain.
-  const { isSuccess: receiptConfirmed } = useWaitForTransactionReceipt({
-    hash: txHash ?? undefined,
-    chainId: BADGE_CHAIN_ID,
-    query: { enabled: Boolean(txHash) },
-  });
+
   useEffect(() => {
-    if (receiptConfirmed && phase === "pending") {
+    if (tx.isSuccess && phase === "pending") {
       setPhase("success");
       setCelebrate(true);
     }
-  }, [receiptConfirmed, phase]);
+  }, [tx.isSuccess, phase]);
 
   const owns = typeof balance === "bigint" && balance > BigInt(0);
   const sameWallet =
@@ -114,8 +105,8 @@ export default function MintButton({
                 : t("mintBadge");
 
   async function onMint() {
-    if (phase === "success" && txHash) {
-      window.open(`${EXPLORER}/tx/${txHash}`, "_blank");
+    if (phase === "success" && tx.txHash) {
+      window.open(`${EXPLORER}/tx/${tx.txHash}`, "_blank");
       return;
     }
     setErrMsg("");
@@ -139,14 +130,12 @@ export default function MintButton({
 
       setPhase("confirm");
       setWasRefresh(owns);
-      const hash = await writeContractAsync({
+      await tx.submit({
         abi: DROPRANK_BADGE_ABI,
         address: CONTRACT!,
         functionName: owns ? "refresh" : "mint",
         args: [Number(score), BigInt(deadline), signature as `0x${string}`],
-        chainId: BADGE_CHAIN_ID,
       });
-      setTxHash(hash);
       setPhase("pending");
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
@@ -183,12 +172,12 @@ export default function MintButton({
       {phase !== "error" && phase !== "pending" && hint && (
         <span className={`mono ${styles.mintNote}`}>{hint}</span>
       )}
-      {celebrate && txHash && (
+      {celebrate && tx.txHash && (
         <MintCelebration
           score={score}
           max={max}
           refresh={wasRefresh}
-          txUrl={`${EXPLORER}/tx/${txHash}`}
+          txUrl={`${EXPLORER}/tx/${tx.txHash}`}
           onClose={() => setCelebrate(false)}
         />
       )}
