@@ -5,6 +5,18 @@
   gap: 16px;
 }
 
+/* Embedded inside the identity card: no panel chrome, tighter rhythm. The score
+   + rank tiles are dropped (the card header carries them), so the lone tasks
+   tile spans full width on every breakpoint. */
+.embed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.embed .tiles {
+  grid-template-columns: 1fr;
+}
+
 .title {
   color: var(--text-dim);
   letter-spacing: 0.28em;

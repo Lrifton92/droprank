@@ -2,16 +2,33 @@
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
   margin-top: 22px;
   padding: 18px 20px;
-  border-radius: var(--r-md);
-  border: 1px solid color-mix(in srgb, var(--base-300) 24%, transparent);
+  border-radius: var(--r-lg);
+  border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 24%, transparent);
   background:
     linear-gradient(120deg, color-mix(in srgb, var(--base) 22%, transparent), transparent 55%),
     rgba(10, 15, 26, 0.6);
   isolation: isolate;
+}
+
+/* Identity row: avatar + name on the left, the score head pinned right. */
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--tier, var(--base-300)) 35%, transparent),
+    transparent
+  );
 }
 .glow {
   position: absolute;
@@ -94,58 +111,74 @@
   letter-spacing: 0.04em;
 }
 
-.scoreBox {
+/* Score head — pinned right of the identity row. The number is tinted by the
+   tier (white→tier gradient + tier glow); the tier itself is carried by a
+   coloured dot + label, with the percentile rank beside it. No pill. */
+.scoreHead {
   margin-left: auto;
   flex-shrink: 0;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.scoreLine {
+  display: flex;
   align-items: baseline;
   gap: 4px;
-  position: relative;
 }
 .score {
   font-family: var(--font-mono);
   font-size: 44px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text);
+  line-height: 1;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 24px color-mix(in srgb, var(--tier, var(--base)) 55%, transparent);
+  background: linear-gradient(
+    180deg,
+    #fff,
+    color-mix(in srgb, var(--tier, var(--base-300)) 85%, #fff) 165%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--tier, var(--base)) 55%, transparent));
 }
 .max {
   font-family: var(--font-mono);
   font-size: 16px;
   color: var(--text-faint);
 }
-.tier {
-  position: relative;
-  margin-left: 8px;
-  align-self: center;
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
-  color: var(--tier, var(--base-300));
-  border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 45%, transparent);
-  border-radius: 999px;
-  padding: 3px 8px;
+  text-transform: uppercase;
 }
-/* Softly breathing glow on the tier pill — opacity-only halo, ~3.4s. */
-.tier::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 999px;
-  box-shadow: 0 0 16px 1px color-mix(in srgb, var(--tier, var(--base-300)) 50%, transparent);
-  pointer-events: none;
-  z-index: -1;
+.tierDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tier, var(--base-300));
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--tier, var(--base-300)) 70%, transparent);
   animation: dr-breathe 3.4s var(--ease-in-out) infinite;
+}
+.tierName {
+  color: var(--tier, var(--base-300));
+}
+.rank {
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .glow { animation: none; }
-  .tier::after { animation: none; opacity: 0.7; }
+  .tierDot { animation: none; }
 }
 @media (max-width: 420px) {
-  .tier { display: none; }
   .score { font-size: 34px; }
 }

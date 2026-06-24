@@ -8,7 +8,6 @@ import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BaseBanner from "../_components/BaseBanner";
 import BasenameCard from "../_components/BasenameCard";
 import BrandLogo from "../_components/BrandLogo";
-import WalletDashboard from "../_components/WalletDashboard";
 import AllocationEstimate from "../_components/AllocationEstimate";
 import RecentActivity from "./RecentActivity";
 import SessionTicker from "./SessionTicker";
@@ -184,18 +183,14 @@ function MenuInner() {
         </nav>
 
         <div className="dr-enter" style={{ "--i": 9 } as CSSProperties}>
-          <WalletDashboard address={address} />
-        </div>
-
-        <div className="dr-enter" style={{ "--i": 10 } as CSSProperties}>
           <RecentActivity address={address} />
         </div>
 
-        <div className="dr-enter" style={{ "--i": 11 } as CSSProperties}>
+        <div className="dr-enter" style={{ "--i": 10 } as CSSProperties}>
           <BaseBanner />
         </div>
 
-        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 12 } as CSSProperties}>
+        <div className={`dr-term dr-enter ${styles.hint} ${styles.term}`} style={{ "--i": 11 } as CSSProperties}>
           <div className="dr-term__bar">
             <i className="dr-term__dot" />
             <i className="dr-term__dot" />

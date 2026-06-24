@@ -100,7 +100,15 @@ function Tile({ children }: { children: ReactNode }) {
  * fixes them). Pulls from the existing /api/score + /api/quests endpoints (both
  * cached), so it adds no new data path.
  */
-export default function WalletDashboard({ address }: { address: string }) {
+export default function WalletDashboard({
+  address,
+  embedded = false,
+}: {
+  address: string;
+  /** When true, render bare (no panel/title/score tile) for nesting inside the
+   *  identity card — the card header already carries the score. */
+  embedded?: boolean;
+}) {
   const td = useTranslations("dashboard");
   const ts = useTranslations("score");
   const [score, setScore] = useState<ScoreResult | null>(null);
@@ -158,33 +166,39 @@ export default function WalletDashboard({ address }: { address: string }) {
 
   const loading = !score || !quests;
 
-  return (
-    <section className={`dr-panel ${styles.dash}`} aria-label={td("title")}>
-      <span className={`dr-eyebrow ${styles.title}`}>{td("title")}</span>
+  const body = (
+    <>
+      {!embedded && (
+        <span className={`dr-eyebrow ${styles.title}`}>{td("title")}</span>
+      )}
 
       <div className={styles.tiles}>
-        <Tile>
-          <span className={styles.tileLabel}>{td("score")}</span>
-          <span className={styles.tileVal}>
-            {score ? scoreN : "··"}
-            <span className={styles.tileUnit}>/100</span>
-          </span>
-          {tier && (
-            <span
-              className={styles.tier}
-              style={{ "--tier": tier.color } as CSSProperties}
-            >
-              {tier.name}
+        {!embedded && (
+          <Tile>
+            <span className={styles.tileLabel}>{td("score")}</span>
+            <span className={styles.tileVal}>
+              {score ? scoreN : "··"}
+              <span className={styles.tileUnit}>/100</span>
             </span>
-          )}
-        </Tile>
+            {tier && (
+              <span
+                className={styles.tier}
+                style={{ "--tier": tier.color } as CSSProperties}
+              >
+                {tier.name}
+              </span>
+            )}
+          </Tile>
+        )}
 
-        <Tile>
-          <span className={styles.tileLabel}>{td("rank")}</span>
-          <span className={styles.tileVal}>
-            {topPct !== null ? ts("topPercent", { pct: topPctN }) : "··"}
-          </span>
-        </Tile>
+        {!embedded && (
+          <Tile>
+            <span className={styles.tileLabel}>{td("rank")}</span>
+            <span className={styles.tileVal}>
+              {topPct !== null ? ts("topPercent", { pct: topPctN }) : "··"}
+            </span>
+          </Tile>
+        )}
 
         <Tile>
           <span className={styles.tileLabel}>{td("tasks")}</span>
@@ -238,6 +252,13 @@ export default function WalletDashboard({ address }: { address: string }) {
           <span className={styles.allMaxed}>{td("allMaxed")}</span>
         </div>
       )}
+    </>
+  );
+
+  if (embedded) return <div className={styles.embed}>{body}</div>;
+  return (
+    <section className={`dr-panel ${styles.dash}`} aria-label={td("title")}>
+      {body}
     </section>
   );
 }
