@@ -8,7 +8,9 @@
     "build": "hardhat build",
     "test": "hardhat test solidity",
     "deploy:sepolia": "hardhat run script/deploy.ts --network baseSepolia",
-    "deploy:base": "hardhat run script/deploy.ts --network base"
+    "deploy:base": "hardhat run script/deploy.ts --network base",
+    "deploy:sepolia:checkin": "hardhat run script/deploy-checkin.ts --network baseSepolia",
+    "deploy:base:checkin": "hardhat run script/deploy-checkin.ts --network base"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.0",
