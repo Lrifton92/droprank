@@ -131,6 +131,11 @@
     "belowThresholdSub": "Raise your score to enter the estimated range.",
     "loading": "estimating…"
   },
+  "leaderboard": {
+    "title": "LEADERBOARD",
+    "you": "YOU",
+    "empty": "No ranked wallets yet — scan one to join."
+  },
   "activity": {
     "title": "RECENT ACTIVITY",
     "received": "Received",

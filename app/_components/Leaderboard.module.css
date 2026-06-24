@@ -1,0 +1,104 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+}
+.head {
+  align-self: flex-start;
+}
+
+.state {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  padding: 6px 0;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 10px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  animation: dr-rise 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--rank) * 0.04s);
+}
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Connected wallet's row — soft Base wash + accent rail. */
+.me {
+  background: var(--base-soft);
+  box-shadow: inset 2px 0 0 var(--base-300);
+}
+
+.rank {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+/* Medal tints for the podium. */
+.row:nth-child(1) .rank {
+  color: #ffc24d;
+  text-shadow: 0 0 10px rgba(255, 194, 77, 0.5);
+}
+.row:nth-child(2) .rank {
+  color: #b9c4dd;
+}
+.row:nth-child(3) .rank {
+  color: #c98a4b;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.name {
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.youTag {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--base-300);
+  border: 1px solid color-mix(in srgb, var(--base-300) 45%, transparent);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tier, var(--base-300));
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--tier, var(--base-300)) 70%, transparent);
+}

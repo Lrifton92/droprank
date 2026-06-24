@@ -131,6 +131,11 @@
     "belowThresholdSub": "Monte ton score pour entrer dans la fourchette estimée.",
     "loading": "estimation…"
   },
+  "leaderboard": {
+    "title": "CLASSEMENT",
+    "you": "TOI",
+    "empty": "Aucun wallet classé pour l'instant — scanne pour rejoindre."
+  },
   "activity": {
     "title": "ACTIVITÉ RÉCENTE",
     "received": "Reçu",

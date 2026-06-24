@@ -22,7 +22,7 @@ const MIN_POPULATION = 30;
  * keep their v1 score and skew the percentile during the transition. A fresh key
  * starts the v2 population clean; the v1 set is left untouched (no migration).
  */
-const ZSET_KEY = "droprank:scores:v2";
+export const ZSET_KEY = "droprank:scores:v2";
 
 /**
  * Compute a percentile from raw sorted-set counts.
