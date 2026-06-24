@@ -223,8 +223,8 @@
     grid-template-columns: 1.45fr 1fr;
     grid-template-areas:
       "identity identity"
+      "nav      nav"
       "alloc    board"
-      "nav      board"
       "activity board"
       "banner   banner"
       "session  session";
@@ -235,7 +235,9 @@
   }
   .zoneIdentity { grid-area: identity; }
   .zoneAlloc { grid-area: alloc; }
-  .zoneNav { grid-area: nav; grid-template-columns: 1fr 1fr; }
+  /* Nav spans the full width on its own row so the destination cards keep their
+     native responsive columns (no cramped column, no truncated titles). */
+  .zoneNav { grid-area: nav; }
   .zoneBoard { grid-area: board; }
   .zoneActivity { grid-area: activity; }
   .zoneBanner { grid-area: banner; }

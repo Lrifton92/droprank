@@ -8,7 +8,6 @@ import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BaseCube from "./_components/BaseCube";
 import BrandLogo from "./_components/BrandLogo";
-import ImmersiveBackdrop from "./_components/ImmersiveBackdrop";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
 import styles from "./landing.module.css";
 
@@ -71,7 +70,6 @@ export default function Home() {
   return (
     <>
       <div className="dr-grid-bg" />
-      <ImmersiveBackdrop />
       <main className={`dr-shell dr-wide ${styles.main}`}>
         <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
           <BrandLogo size={34} />
