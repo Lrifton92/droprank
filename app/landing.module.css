@@ -112,8 +112,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  /* Slight right nudge; the wider column lets the card stretch right. */
-  padding-left: clamp(0px, 1.5vw, 28px);
+  /* Nudge the whole column right without resizing the card. */
+  transform: translateX(clamp(0px, 2.5vw, 52px));
 }
 .carEyebrow {
   align-self: flex-start;
