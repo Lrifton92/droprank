@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
@@ -36,7 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const inter = Inter({
+// Base's brand face is the proprietary "Base Sans" (based on Modern Gothic);
+// Space Grotesk is the closest free grotesque and carries the same Base feel.
+const spaceGrotesk = Space_Grotesk({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
@@ -58,7 +60,7 @@ export default async function RootLayout({
   return (
     <RootProvider>
       <html lang={locale}>
-        <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
+        <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ImmersiveBackdrop />
             <SafeArea>{children}</SafeArea>

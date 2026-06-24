@@ -20,17 +20,60 @@
     "fr": "FR"
   },
   "landing": {
-    "eyebrow": "// moteur de réputation onchain",
-    "titleLine1": "Ton score airdrop Base,",
-    "titleAccent": "classé.",
-    "sub": "Scanne n'importe quel wallet. Obtiens un score /100, ton percentile et un radar de 19 quêtes. Mint ton rang en badge soulbound.",
+    "eyebrow": "// estimateur d'airdrop base",
+    "titleLine1": "Combien vaut ton",
+    "titleAccent": "airdrop Base ?",
+    "sub": "Scanne ton wallet. Vois ton allocation estimée en quelques secondes — puis comment la faire grimper.",
+    "scrollCue": "voir comment ça marche",
     "orScan": "ou scan en lecture seule",
     "walletAddress": "adresse du wallet",
     "addressPlaceholder": "0x…",
     "invalidAddress": "! adresse invalide",
     "scanThisWallet": "Scanner ce wallet",
     "enter": "Entrer",
-    "footerCredit": "// built on base by @lrifton6240"
+    "footerCredit": "// built on base by @lrifton6240",
+    "how": {
+      "eyebrow": "// comment ça marche",
+      "title": "Ton airdrop, en trois gestes",
+      "s1t": "Scanne",
+      "s1d": "Connecte ou colle n'importe quel wallet — lecture seule, aucune signature.",
+      "s2t": "Vois ton estimation",
+      "s2d": "Une fourchette en dollars calibrée sur de vrais airdrops L2, placée sur ton score onchain.",
+      "s3t": "Fais-la grimper",
+      "s3d": "Des leviers clairs et 19 quêtes pour monter les tiers — et le chiffre."
+    },
+    "reveal": {
+      "eyebrow": "// le chiffre",
+      "title": "Vois ce que ton wallet pourrait toucher",
+      "sub": "On ne devine pas les chiffres de Base — ils n'existent pas encore. On modélise ce que des airdrops L2 comparables ont réellement payé aux wallets de ton niveau d'activité.",
+      "note": "Calibré sur des payouts réels — Arbitrum · Optimism · Starknet · zkSync.",
+      "example": "wallet d'exemple",
+      "rangeLabel": "airdrop Base estimé"
+    },
+    "grow": {
+      "eyebrow": "// fais grimper ton allocation",
+      "title": "Chaque action déplace le chiffre",
+      "sub": "Ton estimation suit ta réputation onchain. Grimpe-la volontairement.",
+      "l1t": "Sois actif sur Base",
+      "l1d": "Volume, contrats, régularité — l'usage réel compose.",
+      "l2t": "Complète les quêtes onchain",
+      "l2d": "19 quêtes sur les meilleurs protocoles Base.",
+      "l3t": "Réclame ton basename",
+      "l3d": "L'identité pèse dans chaque airdrop.",
+      "l4t": "Bridge & hold",
+      "l4d": "Amène tes actifs onchain et fais-les travailler."
+    },
+    "social": {
+      "eyebrow": "// la course est lancée",
+      "title": "Des builders sont déjà au max",
+      "sub": "Les meilleurs wallets sont à 100 / 100. Vois où tu te places."
+    },
+    "final": {
+      "title": "Prêt à voir ton chiffre ?",
+      "sub": "Un scan en lecture seule. Aucune signature, aucun risque.",
+      "cta": "Scanner mon wallet"
+    },
+    "footerTag": "l'économie onchain · L2 par Coinbase"
   },
   "enter": {
     "step": {

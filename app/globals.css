@@ -2,14 +2,16 @@
 
 @layer tokens {
   :root {
-    /* Surfaces — sombre premium, jamais noir pur */
-    --bg: #05070d;
-    --bg-1: #080b14;
-    --bg-2: #0c111c;
-    --panel: rgba(16, 22, 36, 0.66);
-    --panel-solid: #0b1120;
-    --border: rgba(120, 160, 255, 0.12);
-    --border-strong: rgba(120, 160, 255, 0.22);
+    /* Surfaces — deep Base blue (the "dark" half of the blue/white system),
+       shifted off near-black toward navy so the app reads as Base, not generic
+       dark. Panels are blue-tinted glass. */
+    --bg: #050f28;
+    --bg-1: #07142f;
+    --bg-2: #0b1c3d;
+    --panel: rgba(20, 38, 76, 0.6);
+    --panel-solid: #0c1e44;
+    --border: rgba(120, 160, 255, 0.16);
+    --border-strong: rgba(120, 160, 255, 0.3);
 
     /* Base blue — accent dominant */
     --base: #0052ff;
@@ -90,8 +92,8 @@
   body {
     color: var(--text);
     background:
-      radial-gradient(120% 80% at 50% -10%, rgba(0, 82, 255, 0.16), transparent 60%),
-      radial-gradient(80% 60% at 100% 110%, rgba(0, 82, 255, 0.08), transparent 55%),
+      radial-gradient(120% 80% at 50% -10%, rgba(0, 82, 255, 0.24), transparent 62%),
+      radial-gradient(80% 60% at 100% 110%, rgba(77, 134, 255, 0.12), transparent 58%),
       var(--bg);
     background-attachment: fixed;
     font-family: var(--font-sans);
@@ -515,23 +517,14 @@
    860/1080 rhythm so the app reads as a real website, never a stretched
    phone column. Pages opt in by adding `.dr-wide` to their .dr-shell. */
 @layer utilities {
+  /* Fill the viewport with comfortable side gutters instead of a narrow centred
+     column between two voids (Soufian: the page felt "figé"). A high cap keeps
+     ultra-wide screens from stretching data lines to extremes. */
   @media (min-width: 768px) {
     .dr-wide {
-      max-width: var(--shell-w-md);
-      padding-left: var(--s-6);
-      padding-right: var(--s-6);
-    }
-  }
-  @media (min-width: 1240px) {
-    .dr-wide {
-      max-width: var(--shell-w-lg);
-    }
-  }
-  /* XL desktops: widen further so very large screens don't read as a thin
-     centered strip between two voids. Pages' own grids add a 4th column here. */
-  @media (min-width: 1600px) {
-    .dr-wide {
-      max-width: 1320px;
+      max-width: 2000px;
+      padding-left: clamp(24px, 4vw, 72px);
+      padding-right: clamp(24px, 4vw, 72px);
     }
   }
 }

@@ -20,17 +20,60 @@
     "fr": "FR"
   },
   "landing": {
-    "eyebrow": "// onchain reputation engine",
-    "titleLine1": "Your Base airdrop score,",
-    "titleAccent": "ranked.",
-    "sub": "Scan any wallet. Get a /100 score, your percentile and a 19-quest radar. Mint your rank as a soulbound badge.",
+    "eyebrow": "// base airdrop estimator",
+    "titleLine1": "How much is your",
+    "titleAccent": "Base airdrop worth?",
+    "sub": "Scan your wallet. See your estimated allocation in seconds — then exactly how to grow it.",
+    "scrollCue": "see how it works",
     "orScan": "or scan read-only",
     "walletAddress": "wallet address",
     "addressPlaceholder": "0x…",
     "invalidAddress": "! not a valid address",
     "scanThisWallet": "Scan this wallet",
     "enter": "Enter",
-    "footerCredit": "// built on base by @lrifton6240"
+    "footerCredit": "// built on base by @lrifton6240",
+    "how": {
+      "eyebrow": "// how it works",
+      "title": "Your airdrop, in three moves",
+      "s1t": "Scan",
+      "s1d": "Connect or paste any wallet — read-only, no signature.",
+      "s2t": "See your estimate",
+      "s2d": "A dollar range modeled on real L2 airdrops, placed on your onchain score.",
+      "s3t": "Grow it",
+      "s3d": "Clear levers and 19 quests to climb the tiers — and the number."
+    },
+    "reveal": {
+      "eyebrow": "// the number",
+      "title": "See what your wallet could get",
+      "sub": "We don't guess Base's numbers — none exist yet. We model what comparable L2 airdrops actually paid wallets at your activity level.",
+      "note": "Modeled on real payouts — Arbitrum · Optimism · Starknet · zkSync.",
+      "example": "example wallet",
+      "rangeLabel": "estimated Base airdrop"
+    },
+    "grow": {
+      "eyebrow": "// grow your allocation",
+      "title": "Every action moves the number",
+      "sub": "Your estimate tracks your onchain reputation. Climb it on purpose.",
+      "l1t": "Be active on Base",
+      "l1d": "Volume, contracts, regularity — real usage compounds.",
+      "l2t": "Complete onchain quests",
+      "l2d": "19 quests across the top Base protocols.",
+      "l3t": "Claim your basename",
+      "l3d": "Identity signals weigh in every airdrop.",
+      "l4t": "Bridge & hold",
+      "l4d": "Bring assets onchain and keep them working."
+    },
+    "social": {
+      "eyebrow": "// the race is on",
+      "title": "Builders are already maxed out",
+      "sub": "Top wallets are sitting at 100 / 100. See where you land."
+    },
+    "final": {
+      "title": "Ready to see your number?",
+      "sub": "One read-only scan. No signature, no risk.",
+      "cta": "Scan my wallet"
+    },
+    "footerTag": "the onchain economy · L2 by Coinbase"
   },
   "enter": {
     "step": {
