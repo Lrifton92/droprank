@@ -134,7 +134,7 @@ function ScoreInner() {
               </div>
               <div className={styles.heroMint}>
                 <MintButton scannedAddress={address} empty={empty} score={data.score} max={data.max} />
-                <CheckinButton scannedAddress={address} score={data.score} />
+                <CheckinButton scannedAddress={address} />
               </div>
               {empty && (
                 <p className={styles.startMsg}>

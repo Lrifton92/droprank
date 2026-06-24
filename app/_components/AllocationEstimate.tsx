@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { ScoreResult } from "@/lib/types";
 import { estimateAllocation } from "@/lib/allocation";

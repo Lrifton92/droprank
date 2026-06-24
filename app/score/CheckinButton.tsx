@@ -15,8 +15,8 @@ const CONTRACT =
 type Phase = "idle" | "signing" | "confirm" | "pending" | "success" | "error";
 
 export default function CheckinButton({
-  scannedAddress, score,
-}: { scannedAddress: string; score: number }) {
+  scannedAddress,
+}: { scannedAddress: string }) {
   const t = useTranslations("checkin");
   const { address: connected, isConnected, chainId: walletChainId } = useAccount();
   const { switchChainAsync } = useSwitchChain();
