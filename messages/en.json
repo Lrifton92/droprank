@@ -124,8 +124,9 @@
   "allocation": {
     "title": "ESTIMATED ALLOCATION",
     "rangeLabel": "Speculative Base airdrop",
-    "speculative": "Speculative — no confirmed Base airdrop. Derived from your score and rank, not an official figure.",
-    "basis": "based on your score {score}/100 and rank",
+    "speculative": "Speculative — Base is exploring a token but confirmed no airdrop. No official figure exists.",
+    "method": "Modeled on real payouts: Arbitrum · Optimism · Starknet · zkSync",
+    "basis": "your score {score}/100 placed on that distribution",
     "belowThreshold": "Below the likely eligibility threshold",
     "belowThresholdSub": "Raise your score to enter the estimated range.",
     "loading": "estimating…"

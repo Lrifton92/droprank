@@ -152,6 +152,15 @@
   color: var(--text-faint);
 }
 
+.method {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+  color: var(--base-200);
+  opacity: 0.85;
+}
+
 .loading {
   margin: var(--s-6) 0;
   font-family: var(--font-mono);

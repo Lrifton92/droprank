@@ -124,8 +124,9 @@
   "allocation": {
     "title": "ESTIMATION ALLOCATION",
     "rangeLabel": "Airdrop Base spéculatif",
-    "speculative": "Spéculatif — aucun airdrop Base confirmé. Dérivé de ton score et de ton rang, pas un chiffre officiel.",
-    "basis": "d'après ton score {score}/100 et ton rang",
+    "speculative": "Spéculatif — Base explore un token mais n'a confirmé aucun airdrop. Aucun chiffre officiel n'existe.",
+    "method": "Calibré sur des payouts réels : Arbitrum · Optimism · Starknet · zkSync",
+    "basis": "ton score {score}/100 placé sur cette distribution",
     "belowThreshold": "Sous le seuil probable d'éligibilité",
     "belowThresholdSub": "Monte ton score pour entrer dans la fourchette estimée.",
     "loading": "estimation…"

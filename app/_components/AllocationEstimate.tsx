@@ -95,6 +95,7 @@ export default function AllocationEstimate({ address }: { address: string }) {
                 {t("basis", { score: score.score })}
               </span>
             )}
+            <span className={styles.method}>{t("method")}</span>
             <span className={styles.disclaimer}>{t("speculative")}</span>
           </div>
 
