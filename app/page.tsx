@@ -114,15 +114,20 @@ const STEP_ICONS = [
  * replays the same blur + rise reveal Soufian liked. A vertical dot rail tracks
  * progress and lets you jump.
  */
+const RING_C = 2 * Math.PI * 86;
+
 function StepCarousel() {
   const t = useTranslations("landing");
+  // Each card carries its own section label (shown above): the eyebrow switches
+  // as the carousel cycles — how-it-works steps, then the number, then the rest.
   const cards = [
-    { icon: 0, title: t("how.s1t"), desc: t("how.s1d") },
-    { icon: 1, title: t("how.s2t"), desc: t("how.s2d") },
-    { icon: 2, title: t("how.s3t"), desc: t("how.s3d") },
-    { icon: 3, title: t("grow.title"), desc: t("grow.sub") },
-    { icon: 4, title: t("social.title"), desc: t("social.sub") },
-  ];
+    { label: t("how.eyebrow"), type: "step", icon: 0, title: t("how.s1t"), desc: t("how.s1d") },
+    { label: t("how.eyebrow"), type: "step", icon: 1, title: t("how.s2t"), desc: t("how.s2d") },
+    { label: t("how.eyebrow"), type: "step", icon: 2, title: t("how.s3t"), desc: t("how.s3d") },
+    { label: t("reveal.eyebrow"), type: "number" },
+    { label: t("grow.eyebrow"), type: "step", icon: 3, title: t("grow.title"), desc: t("grow.sub") },
+    { label: t("social.eyebrow"), type: "step", icon: 4, title: t("social.title"), desc: t("social.sub") },
+  ] as const;
   const count = cards.length;
   const [active, setActive] = useState(0);
   useEffect(() => {
@@ -130,39 +135,77 @@ function StepCarousel() {
       setActive((a) => (a + 1) % count);
     }, 3500);
     return () => window.clearInterval(id);
-    // count is constant (5) for the lifetime of the component.
   }, [count]);
 
   const c = cards[active];
-  const total = String(cards.length).padStart(2, "0");
+  const total = String(count).padStart(2, "0");
   return (
-    <div className={styles.carousel}>
-      <div className={styles.carStage}>
-        <article key={active} className={styles.carCard}>
-          <span className={styles.carNo}>
-            {String(active + 1).padStart(2, "0")} / {total}
-          </span>
-          <span className={styles.carIcon} aria-hidden>
-            <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
-              {STEP_ICONS[c.icon]}
-            </svg>
-          </span>
-          <span className={styles.carTitle}>{c.title}</span>
-          <span className={styles.carDesc}>{c.desc}</span>
-        </article>
+    <>
+      <p className={`${styles.eyebrow} ${styles.carEyebrow}`}>{c.label}</p>
+      <div className={styles.carousel}>
+        <div className={styles.carStage}>
+          <article
+            key={active}
+            className={`${styles.carCard} ${
+              c.type === "number" ? styles.carNumber : ""
+            }`}
+          >
+            <span className={styles.carNo}>
+              {String(active + 1).padStart(2, "0")} / {total}
+            </span>
+            {c.type === "number" ? (
+              <>
+                <div className={styles.carRing}>
+                  <svg viewBox="0 0 200 200" aria-hidden>
+                    <circle className={styles.carRingTrack} cx="100" cy="100" r="86" />
+                    <circle
+                      className={styles.carRingProg}
+                      cx="100"
+                      cy="100"
+                      r="86"
+                      strokeDasharray={RING_C}
+                      strokeDashoffset={RING_C * 0.28}
+                    />
+                  </svg>
+                  <div className={styles.carRingVal}>
+                    <span>
+                      <span className={styles.cur}>$</span>1,200
+                    </span>
+                    <span>
+                      <span className={styles.cur}>$</span>3,400
+                    </span>
+                  </div>
+                </div>
+                <span className={styles.carNumberLabel}>
+                  {t("reveal.rangeLabel")}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className={styles.carIcon} aria-hidden>
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+                    {STEP_ICONS[c.icon]}
+                  </svg>
+                </span>
+                <span className={styles.carTitle}>{c.title}</span>
+                <span className={styles.carDesc}>{c.desc}</span>
+              </>
+            )}
+          </article>
+        </div>
+        <div className={styles.carRail} aria-hidden>
+          {cards.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              tabIndex={-1}
+              className={`${styles.carDot} ${i === active ? styles.carDotOn : ""}`}
+              onClick={() => setActive(i)}
+            />
+          ))}
+        </div>
       </div>
-      <div className={styles.carRail} aria-hidden>
-        {cards.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            tabIndex={-1}
-            className={`${styles.carDot} ${i === active ? styles.carDotOn : ""}`}
-            onClick={() => setActive(i)}
-          />
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -293,60 +336,12 @@ export default function Home() {
           </div>
 
           <div className={styles.heroRight}>
-            <p className={`${styles.eyebrow} ${styles.carEyebrow}`}>
-              {t("how.eyebrow")}
-            </p>
             <StepCarousel />
           </div>
         </div>
       </section>
 
-      {/* ── The number — the one Base-blue moment ── */}
-      <section className={`${styles.section} ${styles.numberSection}`}>
-        <div className={`${styles.sectionInner} ${styles.revealGrid}`}>
-          <div className={`${styles.revealCopy} ${styles.reveal}`}>
-            <p className={styles.eyebrow}>{t("reveal.eyebrow")}</p>
-            <h2 className={styles.h2}>{t("reveal.title")}</h2>
-            <p className={styles.sectionSub}>{t("reveal.sub")}</p>
-            <p className={styles.revealNote}>{t("reveal.note")}</p>
-          </div>
-          <div className={`${styles.revealCard} ${styles.reveal}`}>
-            <span className={styles.revealExample}>{t("reveal.example")}</span>
-            <div className={styles.ringWrap}>
-              <svg className={styles.ring} viewBox="0 0 200 200" aria-hidden>
-                <defs>
-                  <linearGradient id="land-ring" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#8ab0ff" />
-                    <stop offset="55%" stopColor="#4d86ff" />
-                    <stop offset="100%" stopColor="#0052ff" />
-                  </linearGradient>
-                </defs>
-                <circle className={styles.ringTrack} cx="100" cy="100" r="86" />
-                <circle
-                  className={styles.ringProg}
-                  cx="100"
-                  cy="100"
-                  r="86"
-                  strokeDasharray={2 * Math.PI * 86}
-                  strokeDashoffset={2 * Math.PI * 86 * 0.28}
-                />
-              </svg>
-              <div className={styles.ringCenter}>
-                <span className={styles.ringLow}>
-                  <span className={styles.cur}>$</span>1,200
-                </span>
-                <span className={styles.ringDash} aria-hidden />
-                <span className={styles.ringHigh}>
-                  <span className={styles.cur}>$</span>3,400
-                </span>
-              </div>
-            </div>
-            <span className={styles.revealRangeLabel}>{t("reveal.rangeLabel")}</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Grow + social-proof now live in the hero carousel (no repetition). */}
+      {/* The number / grow / social-proof now live in the hero carousel. */}
 
       {/* ── Final CTA (blue) ── */}
       <section className={`${styles.section} ${styles.ctaSection}`}>

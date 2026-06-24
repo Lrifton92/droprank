@@ -94,12 +94,12 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1180px;
-  padding: 0 clamp(20px, 5vw, 40px);
+  max-width: 1400px;
+  padding: 0 clamp(20px, 5vw, 48px);
   display: grid;
-  grid-template-columns: 1.05fr 0.85fr;
+  grid-template-columns: 0.92fr 1.08fr;
   align-items: center;
-  gap: clamp(48px, 8vw, 130px);
+  gap: clamp(56px, 7vw, 150px);
 }
 .heroLeft {
   display: flex;
@@ -112,8 +112,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  /* Nudge the carousel further right so it doesn't crowd the headline column. */
-  padding-left: clamp(0px, 3vw, 56px);
+  /* Slight right nudge; the wider column lets the card stretch right. */
+  padding-left: clamp(0px, 1.5vw, 28px);
 }
 .carEyebrow {
   align-self: flex-start;
@@ -128,20 +128,79 @@
 }
 .carStage {
   flex: 1;
-  min-height: 296px;
+  min-height: 400px;
   display: grid;
   align-content: center;
 }
 .carCard {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 32px;
-  border-radius: 22px;
+  gap: 18px;
+  padding: 46px 48px 54px;
+  border-radius: 26px;
   background: #ffffff;
   border: 1px solid rgba(10, 11, 13, 0.1);
   box-shadow: 0 26px 64px -38px rgba(10, 11, 40, 0.38);
   animation: carIn 0.7s var(--ease-out);
+}
+/* The allocation "number" card variant inside the carousel. */
+.carNumber {
+  align-items: center;
+  text-align: center;
+  background: #0000ff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.carNumber .carNo {
+  color: rgba(255, 255, 255, 0.75);
+}
+.carRing {
+  position: relative;
+  width: 168px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin: 4px 0;
+}
+.carRing svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.carRingTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 10;
+}
+.carRingProg {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 10;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+}
+.carRingVal {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.carRingVal .cur {
+  font-size: 0.6em;
+  vertical-align: 0.2em;
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: 1px;
+}
+.carNumberLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
 }
 .carNo {
   font-family: var(--font-mono);
@@ -161,12 +220,12 @@
 }
 .carTitle {
   font-family: var(--font-mono);
-  font-size: 24px;
+  font-size: 27px;
   font-weight: 700;
   color: #0a0b0d;
 }
 .carDesc {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.6;
   color: #55617c;
 }
