@@ -230,11 +230,11 @@ export default function WalletDashboard({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {ts(`improve.${g.labelKey}`)} ↗
+                    {ts(`improve.${g.labelKey}`)} ›
                   </a>
                 ) : g.kind === "radar" ? (
                   <Link className={styles.gainLink} href={`/radar${qs}`}>
-                    {ts(`improve.${g.labelKey}`)} →
+                    {ts(`improve.${g.labelKey}`)} ›
                   </Link>
                 ) : (
                   <span className={styles.gainTime}>

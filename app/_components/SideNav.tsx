@@ -91,7 +91,7 @@ export default function SideNav({ address }: { address: string }) {
 
         <div className={styles.foot}>
           <Link href={`/menu${qs}`} className={styles.home}>
-            ← {tc("back")}
+            ‹ {tc("back")}
           </Link>
           <LocaleSwitcher />
         </div>

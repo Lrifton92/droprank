@@ -59,15 +59,9 @@ function DiagArrow() {
     <span className={styles.diag} aria-hidden>
       <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
         <path
-          d="M3.5 8.5 8.5 3.5"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        <path
           d="M4.5 3.5h4v4"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -293,13 +287,13 @@ function RadarInner() {
               </span>
               <div className={styles.programLinks}>
                 <a className={styles.programLink} href="https://guild.xyz/base" target="_blank" rel="noopener noreferrer">
-                  Base Guild ↗
+                  Base Guild <DiagArrow />
                 </a>
                 <a className={styles.programLink} href="https://www.builderscore.xyz" target="_blank" rel="noopener noreferrer">
-                  Builder Rewards ↗
+                  Builder Rewards <DiagArrow />
                 </a>
                 <a className={styles.programLink} href="https://www.base.org/onchain-summer" target="_blank" rel="noopener noreferrer">
-                  Onchain Summer ↗
+                  Onchain Summer <DiagArrow />
                 </a>
               </div>
             </section>

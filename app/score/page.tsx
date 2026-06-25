@@ -13,6 +13,7 @@ import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
+import RecentActivity from "../menu/RecentActivity";
 import MintButton from "./MintButton";
 import CheckinButton from "./CheckinButton";
 import styles from "./score.module.css";
@@ -194,12 +195,12 @@ function ScoreInner() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  {t(`improve.${imp.labelKey}`)} ↗
+                                  {t(`improve.${imp.labelKey}`)} ›
                                 </a>
                               )}
                               {imp.kind === "radar" && (
                                 <Link className={styles.improveLink} href={`/radar${qs}`}>
-                                  {t(`improve.${imp.labelKey}`)} →
+                                  {t(`improve.${imp.labelKey}`)} ›
                                 </Link>
                               )}
                               {imp.kind === "time" && (
@@ -240,6 +241,10 @@ function ScoreInner() {
                 {shared ? t("linkCopied") : t("shareRank")}
               </button>
             </section>
+            </div>
+
+            <div className="dr-enter" style={{ "--i": 5 } as CSSProperties}>
+              <RecentActivity address={address} />
             </div>
           </>
         )}

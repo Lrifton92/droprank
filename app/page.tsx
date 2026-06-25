@@ -13,18 +13,11 @@ import styles from "./landing.module.css";
 function BtnArrow() {
   return (
     <span className={styles.btnArrow} aria-hidden>
-      <svg viewBox="0 0 20 12" width="18" height="11" fill="none">
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
         <path
-          className={styles.btnArrowShaft}
-          d="M2 6h14"
+          d="M4.5 2.5 8 6l-3.5 3.5"
           stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-        />
-        <path
-          d="M12.5 1.5 17 6l-4.5 4.5"
-          stroke="currentColor"
-          strokeWidth="1.7"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />

@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import BaseBanner from "../_components/BaseBanner";
 import AppShell from "../_components/AppShell";
 import AirdropHero from "./AirdropHero";
-import RecentActivity from "./RecentActivity";
 import styles from "./menu.module.css";
 
 function MenuInner() {
@@ -23,11 +22,7 @@ function MenuInner() {
         <AirdropHero address={address} />
       </div>
 
-      <div className={`dr-enter`} style={{ "--i": 2 } as CSSProperties}>
-        <RecentActivity address={address} />
-      </div>
-
-      <div className={`dr-term dr-enter ${styles.term}`} style={{ "--i": 3 } as CSSProperties}>
+      <div className={`dr-term dr-enter ${styles.term}`} style={{ "--i": 2 } as CSSProperties}>
         <div className="dr-term__bar">
           <i className="dr-term__dot" />
           <i className="dr-term__dot" />

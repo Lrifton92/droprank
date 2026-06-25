@@ -12,18 +12,11 @@ import styles from "./BackArrow.module.css";
 export default function BackArrow() {
   return (
     <span className={styles.wrap} aria-hidden>
-      <svg viewBox="0 0 20 12" width="16" height="10" fill="none">
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
         <path
-          className={styles.shaft}
-          d="M4 6h14"
+          d="M7.5 2.5 4 6l3.5 3.5"
           stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        <path
-          d="M7.5 1.5 3 6l4.5 4.5"
-          stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />

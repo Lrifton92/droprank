@@ -89,8 +89,9 @@
 /* Decorative corner tag, out of the centered flow. */
 .chip {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 20px;
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;

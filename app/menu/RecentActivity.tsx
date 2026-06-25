@@ -80,7 +80,7 @@ export default function RecentActivity({ address }: { address: string }) {
             <span className={`mono ${styles.actVal}`}>{tx.valueEth}</span>
             <span className={styles.actTime}>{timeAgo(tx.timestamp * 1000)}</span>
             <span className={styles.actArrow} aria-hidden>
-              ↗
+              ›
             </span>
           </a>
         ))}
