@@ -521,9 +521,9 @@
      ultra-wide screens from stretching data lines to extremes. */
   @media (min-width: 768px) {
     .dr-wide {
-      max-width: 2000px;
-      padding-left: clamp(24px, 4vw, 72px);
-      padding-right: clamp(24px, 4vw, 72px);
+      max-width: 100%;
+      padding-left: clamp(14px, 1.6vw, 30px);
+      padding-right: clamp(14px, 1.6vw, 30px);
     }
   }
 }

@@ -1,9 +1,12 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import type { ScoreResult } from "@/lib/types";
 import { estimateAllocation } from "@/lib/allocation";
-import { tierFor } from "../_components/presentation";
+import { tierFor, shortAddr } from "../_components/presentation";
+import BrandLogo from "../_components/BrandLogo";
+import LocaleSwitcher from "../_components/LocaleSwitcher";
 import styles from "./AirdropHero.module.css";
 
 const REDUCE = () =>
@@ -34,14 +37,19 @@ function useCountUp(value: number | null, duration = 1100): number {
 }
 
 /**
- * Airdrop hero — the dashboard now opens on the thing that matters: the money.
- * A cinematic deep-Base-blue band leads with the estimated allocation (giant,
- * count-up), framed by the score, tier and rank. Pulls the cached /api/score.
+ * Immersive airdrop hero — the dashboard opens on a full-bleed, cinematic
+ * Base-blue stage (animated grid floor + drifting glows), with the estimated
+ * allocation as the giant overlaid headline, a glassy nav pinned on top, the
+ * score/rank/wallet stats bottom-left and a secondary "scan" block bottom-right.
+ * Layout follows the reference: hero image + overlay nav + headline + stat row
+ * + secondary CTA card. Pulls the cached /api/score.
  */
 export default function AirdropHero({ address }: { address: string }) {
+  const router = useRouter();
   const t = useTranslations("allocation");
   const ts = useTranslations("score");
   const td = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const nf = new Intl.NumberFormat(locale);
   const [data, setData] = useState<ScoreResult | null>(null);
@@ -72,46 +80,88 @@ export default function AirdropHero({ address }: { address: string }) {
       style={tier ? ({ "--tier": tier.color } as CSSProperties) : undefined}
       aria-label={t("title")}
     >
-      <span className={styles.aura} aria-hidden />
-      <span className={styles.eyebrow}>{t("title")}</span>
+      {/* Cinematic animated Base background (no photo — it's Base). */}
+      <span className={styles.bg} aria-hidden />
+      <span className={styles.floor} aria-hidden />
+      <span className={styles.glowA} aria-hidden />
+      <span className={styles.glowB} aria-hidden />
+      <span className={styles.grain} aria-hidden />
+      <span className={styles.scrim} aria-hidden />
 
-      {est?.eligible ? (
-        <div className={styles.amount}>
-          <span className={styles.cur}>$</span>
-          {nf.format(lowN)}
-          <span className={styles.dash}>–</span>
-          <span className={styles.cur}>$</span>
-          {nf.format(highN)}
-        </div>
-      ) : (
-        <div className={styles.amount}>{data ? "—" : "··"}</div>
-      )}
-
-      <span className={styles.method}>{t("method")}</span>
-
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>{td("score")}</span>
-          <span className={styles.statVal}>
-            {data ? scoreN : "··"}
-            <small>/100</small>
+      {/* Glassy floating nav (logo left · live + locale right). */}
+      <nav className={styles.nav}>
+        <BrandLogo size={30} />
+        <div className={styles.navRight}>
+          <span className={styles.live}>
+            <i className={styles.liveDot} aria-hidden />
+            {tc("baseMainnet")}
           </span>
-          {tier && (
-            <span className={styles.tier}>
-              <i className={styles.tierDot} aria-hidden />
-              {tier.name}
-            </span>
-          )}
+          <LocaleSwitcher />
         </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>{td("rank")}</span>
-          <span className={styles.statVal}>
-            {topPct !== null ? ts("topPercent", { pct: topPct }) : "··"}
-          </span>
-        </div>
+      </nav>
+
+      {/* Headline — the money, overlaid on the stage. */}
+      <div className={styles.lead}>
+        <span className={styles.eyebrow}>{t("title")}</span>
+        {est?.eligible ? (
+          <div className={styles.amount}>
+            <span className={styles.cur}>$</span>
+            {nf.format(lowN)}
+            <span className={styles.dash}>–</span>
+            <span className={styles.cur}>$</span>
+            {nf.format(highN)}
+          </div>
+        ) : (
+          <div className={styles.amount}>{data ? "—" : "··"}</div>
+        )}
+        <span className={styles.method}>{t("method")}</span>
       </div>
 
-      <span className={styles.note}>{t("speculative")}</span>
+      {/* Footer band — stats left, secondary block + CTA right. */}
+      <div className={styles.foot}>
+        <div className={styles.stats}>
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>{td("score")}</span>
+            <span className={styles.statVal}>
+              {data ? scoreN : "··"}
+              <small>/100</small>
+            </span>
+            {tier && (
+              <span className={styles.tier}>
+                <i className={styles.tierDot} aria-hidden />
+                {tier.name}
+              </span>
+            )}
+          </div>
+          <span className={styles.statDiv} aria-hidden />
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>{td("rank")}</span>
+            <span className={styles.statVal}>
+              {topPct !== null ? ts("topPercent", { pct: topPct }) : "··"}
+            </span>
+          </div>
+          <span className={styles.statDiv} aria-hidden />
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>{tc("activeTarget")}</span>
+            <span className={`mono ${styles.statVal} ${styles.statAddr}`}>
+              {shortAddr(address)}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.secondary}>
+          <span className={styles.note}>{t("speculative")}</span>
+          <button
+            className={styles.cta}
+            onClick={() => router.replace("/")}
+          >
+            {tc("scanOther")}
+            <svg viewBox="0 0 20 12" width="16" height="11" fill="none" aria-hidden>
+              <path d="M2 6h14M12.5 1.5 17 6l-4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

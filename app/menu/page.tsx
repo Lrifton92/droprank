@@ -1,17 +1,13 @@
 "use client";
 import { Suspense, type CSSProperties } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { shortAddr } from "../_components/presentation";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BaseBanner from "../_components/BaseBanner";
 import BasenameCard from "../_components/BasenameCard";
-import BrandLogo from "../_components/BrandLogo";
 import AirdropHero from "./AirdropHero";
 import Leaderboard from "../_components/Leaderboard";
 import RecentActivity from "./RecentActivity";
-import SessionTicker from "./SessionTicker";
 import styles from "./menu.module.css";
 
 /* Card arrow: a single SVG — chevron head at rest, the shaft draws in on
@@ -34,10 +30,8 @@ function CardArrow() {
 }
 
 function MenuInner() {
-  const router = useRouter();
   const params = useSearchParams();
   const t = useTranslations("menu");
-  const tc = useTranslations("common");
   const address = params.get("address") ?? "";
   const qs = address ? `?address=${address}` : "";
 
@@ -45,60 +39,8 @@ function MenuInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
-        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <button
-            className={styles.back}
-            onClick={() => router.replace("/")}
-            aria-label={tc("back")}
-          >
-            {/* Mirrored CardArrow: chevron at rest, shaft draws toward the
-                label on hover while the arrow nudges left. */}
-            <span className={styles.backArrow} aria-hidden>
-              <svg viewBox="0 0 20 12" width="16" height="10" fill="none">
-                <path
-                  className={styles.backShaft}
-                  d="M4 6h14"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M7.5 1.5 3 6l4.5 4.5"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <span className={styles.backLabel}>WALLET</span>
-          </button>
-          <BrandLogo size={30} />
-          <LocaleSwitcher />
-        </header>
-
-        <div className={`dr-enter ${styles.target}`} style={{ "--i": 1 } as CSSProperties}>
-          <span className="dr-eyebrow">{tc("activeTarget")}</span>
-          <span className={styles.addrRow}>
-            <span className={`mono ${styles.addr}`}>{shortAddr(address)}</span>
-            {/* Practical-info ticker fills the gap and fades out before LIVE. */}
-            <SessionTicker address={address} />
-            {/* "LIVE" universel, pas de clé i18n nécessaire */}
-            <span className={`mono ${styles.liveBadge}`} aria-hidden>
-              <i className={styles.liveDot} />
-              LIVE
-            </span>
-          </span>
-          <button
-            className={`dr-btn dr-btn--ghost ${styles.scanBtn}`}
-            onClick={() => router.replace("/")}
-          >
-            {tc("scanOther")}
-          </button>
-        </div>
-
         <div className={styles.board}>
-        <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 2 } as CSSProperties}>
+        <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 0 } as CSSProperties}>
           <AirdropHero address={address} />
         </div>
 
