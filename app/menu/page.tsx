@@ -13,17 +13,13 @@ function MenuInner() {
   const qs = address ? `?address=${address}` : "";
 
   return (
-    <AppShell address={address}>
-      <div className={`dr-enter ${styles.bleed}`} style={{ "--i": 0 } as CSSProperties}>
-        <BaseBanner />
-      </div>
-
-      <div className={`dr-enter ${styles.bleed} ${styles.zoneHero}`} style={{ "--i": 1 } as CSSProperties}>
+    <AppShell
+      address={address}
+      header={<BaseBanner />}
+      footer={<DiscoverFeed qs={qs} />}
+    >
+      <div className={`dr-enter ${styles.bleed} ${styles.zoneHero}`} style={{ "--i": 0 } as CSSProperties}>
         <AirdropHero address={address} />
-      </div>
-
-      <div className={`dr-enter`} style={{ "--i": 2 } as CSSProperties}>
-        <DiscoverFeed qs={qs} />
       </div>
     </AppShell>
   );

@@ -1,8 +1,11 @@
+/* Full-width bottom band — confines the volet from below. */
 .feed {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 18px 18px 14px;
+  padding: 18px clamp(20px, 3vw, 44px) 26px;
+  background: #ffffff;
+  border-top: 1px solid var(--border);
 }
 .head {
   display: flex;

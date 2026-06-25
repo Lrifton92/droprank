@@ -26,7 +26,7 @@ export default function DiscoverFeed({ qs }: { qs: string }) {
   }, [locale]);
 
   return (
-    <section className={`dr-panel ${styles.feed}`} aria-label={t("eyebrow")}>
+    <section className={styles.feed} aria-label={t("eyebrow")}>
       <Link href={`/discover${qs}`} className={styles.head}>
         <span className="dr-eyebrow">{t("eyebrow")}</span>
         <span className={styles.all} aria-hidden>
