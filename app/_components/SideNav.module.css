@@ -3,6 +3,10 @@
   flex: none;
   width: 264px;
   align-self: stretch;
+  /* Background + border live here so the rail reaches the very bottom of the
+     page (full content height), while the content inside stays sticky. */
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
 }
 .sideInner {
   position: sticky;
@@ -12,8 +16,6 @@
   flex-direction: column;
   gap: 18px;
   padding: 22px 16px;
-  border-right: 1px solid var(--border);
-  background: var(--bg-1);
 }
 
 .brand {
@@ -140,6 +142,8 @@
 @media (max-width: 900px) {
   .side {
     width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
   }
   .sideInner {
     position: static;
@@ -148,8 +152,6 @@
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
     overflow-x: auto;
   }
   .brand {
