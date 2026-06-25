@@ -14,15 +14,17 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-  padding: 22px 16px;
+  justify-content: flex-start;
+  gap: 26px;
+  padding: 24px 16px;
 }
 
+/* Enlarged brand lockup, pinned top-left. */
 .brand {
   display: inline-flex;
   align-items: center;
-  padding: 6px 8px;
+  padding: 4px 6px;
+  font-size: 20px;
 }
 
 .nav {

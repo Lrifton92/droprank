@@ -62,7 +62,7 @@ export default function SideNav({ address }: { address: string }) {
     <aside className={styles.side}>
       <div className={styles.sideInner}>
         <Link href={`/menu${qs}`} className={styles.brand} aria-label="DropRank">
-          <BrandLogo size={30} />
+          <BrandLogo size={40} />
         </Link>
 
         <nav className={styles.nav}>
