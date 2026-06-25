@@ -7,10 +7,11 @@
   margin-top: 22px;
   padding: 18px 20px;
   border-radius: var(--r-lg);
-  border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 22%, var(--border));
   background:
-    linear-gradient(120deg, color-mix(in srgb, var(--base) 22%, transparent), transparent 55%),
-    rgba(10, 15, 26, 0.6);
+    linear-gradient(120deg, color-mix(in srgb, var(--base) 7%, transparent), transparent 52%),
+    #ffffff;
+  box-shadow: 0 22px 56px -34px rgba(10, 11, 40, 0.28);
   isolation: isolate;
 }
 
@@ -136,8 +137,8 @@
   font-variant-numeric: tabular-nums;
   background: linear-gradient(
     180deg,
-    #fff,
-    color-mix(in srgb, var(--tier, var(--base-300)) 85%, #fff) 165%
+    var(--text),
+    color-mix(in srgb, var(--tier, var(--base-300)) 85%, var(--text)) 165%
   );
   -webkit-background-clip: text;
   background-clip: text;

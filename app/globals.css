@@ -2,34 +2,34 @@
 
 @layer tokens {
   :root {
-    /* Surfaces — deep Base blue (the "dark" half of the blue/white system),
-       shifted off near-black toward navy so the app reads as Base, not generic
-       dark. Panels are blue-tinted glass. */
-    --bg: #050f28;
-    --bg-1: #07142f;
-    --bg-2: #0b1c3d;
-    --panel: rgba(20, 38, 76, 0.6);
-    --panel-solid: #0c1e44;
-    --border: rgba(120, 160, 255, 0.16);
-    --border-strong: rgba(120, 160, 255, 0.3);
+    /* Surfaces — Base LIGHT system (white + Base Blue). The site reads as a clean
+       Base website: white/near-white grounds, white cards separated by a subtle
+       border + soft shadow, Base-blue used sparingly as accent. */
+    --bg: #f7f8fb;
+    --bg-1: #ffffff;
+    --bg-2: #eef1f8;
+    --panel: #ffffff;
+    --panel-solid: #ffffff;
+    --border: rgba(10, 11, 13, 0.1);
+    --border-strong: rgba(0, 0, 255, 0.28);
 
-    /* Base blue — accent dominant */
-    --base: #0052ff;
-    --base-300: #4d86ff;
-    --base-200: #8ab0ff;
-    --base-glow: rgba(0, 82, 255, 0.55);
-    --base-soft: rgba(0, 82, 255, 0.14);
+    /* Base blue — accent (pure #0000FF, like the landing) */
+    --base: #0000ff;
+    --base-300: #2a2aff;
+    --base-200: #6a6aff;
+    --base-glow: rgba(0, 0, 255, 0.3);
+    --base-soft: rgba(0, 0, 255, 0.07);
 
-    /* Texte */
-    --text: #ffffff;
-    --text-dim: #aeb9d4;
-    --text-faint: #69748f;
+    /* Texte — near-black ink on white */
+    --text: #0a0b0d;
+    --text-dim: #55617c;
+    --text-faint: #8a93a6;
 
-    /* Sémantique */
-    --ok: #35e08a;
-    --ok-dim: rgba(53, 224, 138, 0.16);
-    --no: #ff5a6e;
-    --warn: #ffc24d;
+    /* Sémantique — darkened so they stay legible on white */
+    --ok: #12a150;
+    --ok-dim: rgba(18, 161, 80, 0.12);
+    --no: #e11d48;
+    --warn: #c2740a;
 
     /* Syntax highlight discret (terminal blocks) */
     --syn-key: #8ab0ff;
@@ -85,15 +85,15 @@
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     color: var(--text);
     background:
-      radial-gradient(120% 80% at 50% -10%, rgba(0, 82, 255, 0.24), transparent 62%),
-      radial-gradient(80% 60% at 100% 110%, rgba(77, 134, 255, 0.12), transparent 58%),
+      radial-gradient(120% 80% at 50% -10%, rgba(0, 0, 255, 0.07), transparent 62%),
+      radial-gradient(80% 60% at 100% 110%, rgba(0, 0, 255, 0.05), transparent 58%),
       var(--bg);
     background-attachment: fixed;
     font-family: var(--font-sans);
@@ -111,14 +111,14 @@
   /* Scrollbars discrètes */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(120, 160, 255, 0.18) transparent;
+    scrollbar-color: rgba(10, 11, 13, 0.18) transparent;
   }
   *::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   *::-webkit-scrollbar-thumb {
-    background: rgba(120, 160, 255, 0.18);
+    background: rgba(10, 11, 13, 0.18);
     border-radius: 999px;
   }
   *::-webkit-scrollbar-track {
@@ -178,8 +178,7 @@
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 22px 56px -34px rgba(10, 11, 40, 0.28);
     overflow: hidden;
   }
   .dr-panel::before {
@@ -328,7 +327,7 @@
   .dr-input {
     width: 100%;
     padding: 12px 14px;
-    background: rgba(8, 12, 22, 0.8);
+    background: #ffffff;
     border: 1px solid var(--border);
     border-radius: var(--r-md);
     color: var(--text);
@@ -371,13 +370,13 @@
     inset: 0;
     background: repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.025) 0px,
-      rgba(255, 255, 255, 0.025) 1px,
+      rgba(10, 11, 13, 0.025) 0px,
+      rgba(10, 11, 13, 0.025) 1px,
       transparent 1px,
       transparent 3px
     );
     pointer-events: none;
-    mix-blend-mode: overlay;
+    mix-blend-mode: multiply;
   }
 }
 
@@ -400,8 +399,8 @@
     position: absolute;
     inset: -40px;
     background-image:
-      repeating-linear-gradient(to right, rgba(120, 160, 255, 0.05) 0 1px, transparent 1px 40px),
-      repeating-linear-gradient(to bottom, rgba(120, 160, 255, 0.05) 0 1px, transparent 1px 40px);
+      repeating-linear-gradient(to right, rgba(0, 0, 255, 0.045) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 255, 0.045) 0 1px, transparent 1px 40px);
     will-change: transform;
     animation: dr-grid-drift 60s linear infinite;
   }
@@ -414,8 +413,8 @@
     position: absolute;
     inset: -20%;
     background:
-      radial-gradient(38% 34% at 30% 28%, rgba(0, 82, 255, 0.22), transparent 70%),
-      radial-gradient(34% 30% at 72% 64%, rgba(77, 134, 255, 0.16), transparent 72%);
+      radial-gradient(38% 34% at 30% 28%, rgba(0, 0, 255, 0.08), transparent 70%),
+      radial-gradient(34% 30% at 72% 64%, rgba(0, 0, 255, 0.06), transparent 72%);
     will-change: transform, opacity;
     animation: dr-ambient 6s var(--ease-in-out) infinite;
   }

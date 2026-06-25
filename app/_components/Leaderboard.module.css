@@ -52,14 +52,14 @@
 }
 /* Medal tints for the podium. */
 .row:nth-child(1) .rank {
-  color: #ffc24d;
-  text-shadow: 0 0 10px rgba(255, 194, 77, 0.5);
+  color: #c98a00;
+  text-shadow: 0 0 10px rgba(201, 138, 0, 0.25);
 }
 .row:nth-child(2) .rank {
-  color: #b9c4dd;
+  color: #7e8aa3;
 }
 .row:nth-child(3) .rank {
-  color: #c98a4b;
+  color: #b06a2c;
 }
 
 .who {
@@ -112,8 +112,8 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--base-200);
-  background: color-mix(in srgb, var(--base) 10%, transparent);
+  color: var(--base);
+  background: color-mix(in srgb, var(--base) 7%, transparent);
   border: 1px solid color-mix(in srgb, var(--base-300) 32%, transparent);
   border-radius: 999px;
   cursor: pointer;
@@ -124,8 +124,8 @@
 }
 .toggle:hover {
   color: #fff;
-  border-color: var(--base-300);
-  background: color-mix(in srgb, var(--base) 18%, transparent);
+  border-color: var(--base);
+  background: var(--base);
 }
 .toggle:active {
   transform: scale(0.97);
