@@ -522,8 +522,9 @@
   @media (min-width: 768px) {
     .dr-wide {
       max-width: 100%;
-      padding-left: clamp(14px, 1.6vw, 30px);
-      padding-right: clamp(14px, 1.6vw, 30px);
+      padding-top: 0;
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 }
