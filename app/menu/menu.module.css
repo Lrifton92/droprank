@@ -235,6 +235,13 @@
   }
 }
 
+/* Full-width band — breaks out of the main column's padding so it runs flush
+   from the volet's edge to the viewport's right edge (no side gaps). */
+.bleed {
+  margin-left: calc(-1 * var(--mc-px));
+  margin-right: calc(-1 * var(--mc-px));
+}
+
 /* Activity (flexible) + leaderboard (fixed compact card) side by side from lg. */
 .dataRow {
   display: grid;

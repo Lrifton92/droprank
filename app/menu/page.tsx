@@ -14,11 +14,11 @@ function MenuInner() {
 
   return (
     <AppShell address={address}>
-      <div className={`dr-enter`} style={{ "--i": 0 } as CSSProperties}>
+      <div className={`dr-enter ${styles.bleed}`} style={{ "--i": 0 } as CSSProperties}>
         <BaseBanner />
       </div>
 
-      <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 1 } as CSSProperties}>
+      <div className={`dr-enter ${styles.bleed} ${styles.zoneHero}`} style={{ "--i": 1 } as CSSProperties}>
         <AirdropHero address={address} />
       </div>
 

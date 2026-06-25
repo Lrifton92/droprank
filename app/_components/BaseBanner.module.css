@@ -7,13 +7,13 @@
   gap: 20px;
   margin-top: 0;
   margin-bottom: 0;
-  padding: 22px 28px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
+  padding: 18px 28px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
   background:
     linear-gradient(110deg, color-mix(in srgb, var(--base) 6%, transparent), transparent 58%),
     #ffffff;
-  box-shadow: 0 22px 56px -34px rgba(10, 11, 40, 0.28);
   isolation: isolate;
 }
 

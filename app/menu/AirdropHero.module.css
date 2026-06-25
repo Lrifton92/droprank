@@ -8,9 +8,10 @@
   overflow: hidden;
   margin-top: 0;
   min-height: clamp(460px, 64vh, 640px);
-  padding: clamp(18px, 2.4vw, 30px);
-  border-radius: var(--r-lg);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(18px, 2.4vw, 30px) clamp(20px, 3vw, 44px);
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   gap: 18px;
