@@ -81,6 +81,7 @@ import BackArrow from "../_components/BackArrow";
 import InfoTip from "../_components/InfoTip";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import ImmersiveHero from "../_components/ImmersiveHero";
 import styles from "./radar.module.css";
 
 function RadarInner() {
@@ -144,14 +145,7 @@ function RadarInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
-        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
-            <BackArrow />
-            <span className={styles.backLabel}>MENU</span>
-          </Link>
-          <span className="dr-eyebrow">{t("questRadar")}</span>
-          <LocaleSwitcher />
-        </header>
+        <ImmersiveHero label={t("questRadar")} backHref={`/menu${qs}`} />
 
         {!valid && (
           <div className={styles.state}>

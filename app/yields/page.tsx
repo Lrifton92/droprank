@@ -7,6 +7,7 @@ import { formatUsd } from "../_components/presentation";
 import { YIELD_CHAINS, ALL_SLUG, type ChainSlug, type YieldPool, type YieldsResult } from "@/lib/yields";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import ImmersiveHero from "../_components/ImmersiveHero";
 import BackArrow from "../_components/BackArrow";
 import styles from "./yields.module.css";
 
@@ -153,14 +154,7 @@ function YieldsInner() {
     <>
       <div className="dr-grid-bg" />
       <main className={`dr-shell dr-wide`}>
-        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
-            <BackArrow />
-            <span className={styles.backLabel}>MENU</span>
-          </Link>
-          <span className="dr-eyebrow">{t("eyebrow")}</span>
-          <LocaleSwitcher />
-        </header>
+        <ImmersiveHero label={t("eyebrow")} backHref={`/menu${qs}`} />
 
         {/* Chain selector — mono pills, one per supported chain. Picking a chain
             refetches (?chain=) and the active pill mirrors the active profile

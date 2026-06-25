@@ -1,0 +1,191 @@
+/* Shared immersive banner header — the dashboard's cinematic Base stage at
+   banner height, with a glassy nav and the page label as a giant overlaid title.
+   Mirrors AirdropHero's background recipe so the whole app reads as one site. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 14px;
+  min-height: clamp(220px, 34vh, 380px);
+  padding: clamp(16px, 2.2vw, 28px);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  color: #fff;
+  box-shadow: 0 46px 110px -56px rgba(0, 0, 255, 0.58);
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -6;
+  background:
+    radial-gradient(120% 78% at 50% -12%, #2323ff 0%, transparent 58%),
+    linear-gradient(180deg, #0b0be0 0%, #0000d2 42%, #00008c 100%);
+}
+.floor {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: -4%;
+  height: 66%;
+  z-index: -5;
+  background-image:
+    linear-gradient(rgba(200, 215, 255, 0.85) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 215, 255, 0.85) 1px, transparent 1px);
+  background-size: 50px 50px;
+  transform: perspective(420px) rotateX(66deg);
+  transform-origin: bottom center;
+  -webkit-mask: linear-gradient(to top, #000 8%, transparent 92%);
+  mask: linear-gradient(to top, #000 8%, transparent 92%);
+  opacity: 0.55;
+  animation: ihFloor 7s linear infinite;
+}
+@keyframes ihFloor {
+  from { background-position: 0 0; }
+  to { background-position: 0 50px; }
+}
+.glowA,
+.glowB {
+  position: absolute;
+  z-index: -4;
+  border-radius: 50%;
+  filter: blur(58px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.glowA {
+  width: 44%;
+  aspect-ratio: 1;
+  top: -16%;
+  left: 6%;
+  background: radial-gradient(closest-side, rgba(120, 150, 255, 0.55), transparent 70%);
+  animation: ihGlowA 11s var(--ease-in-out) infinite;
+}
+.glowB {
+  width: 38%;
+  aspect-ratio: 1;
+  bottom: -20%;
+  right: 4%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.32), transparent 70%);
+  animation: ihGlowB 13s var(--ease-in-out) infinite;
+}
+@keyframes ihGlowA {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  50% { transform: translate(6%, 4%) scale(1.12); opacity: 1; }
+}
+@keyframes ihGlowB {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  50% { transform: translate(-5%, -4%) scale(1.14); opacity: 1; }
+}
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0.5px, transparent 0.5px);
+  background-size: 4px 4px;
+  opacity: 0.04;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 40, 0.3) 0%, transparent 30%, transparent 55%, rgba(0, 0, 50, 0.45) 100%),
+    linear-gradient(90deg, rgba(0, 0, 40, 0.32) 0%, transparent 48%);
+}
+
+.nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.backLabel {
+  color: rgba(255, 255, 255, 0.92);
+}
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4dffa6;
+  box-shadow: 0 0 9px 1px rgba(77, 255, 166, 0.7);
+  animation: ihLive 2.4s var(--ease-in-out) infinite;
+}
+@keyframes ihLive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+.lead {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.title {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: clamp(30px, 5.4vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 8px 40px rgba(0, 0, 60, 0.5);
+}
+.slash {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 700;
+}
+
+/* Light-up the back arrow (BackArrow draws with currentColor). */
+.back :global(svg) {
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floor,
+  .glowA,
+  .glowB,
+  .liveDot {
+    animation: none;
+  }
+}

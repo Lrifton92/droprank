@@ -11,6 +11,7 @@ import BackArrow from "../_components/BackArrow";
 import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import ImmersiveHero from "../_components/ImmersiveHero";
 import MintButton from "./MintButton";
 import CheckinButton from "./CheckinButton";
 import styles from "./score.module.css";
@@ -72,14 +73,7 @@ function ScoreInner() {
     <>
       <div className="dr-grid-bg" />
       <main className="dr-shell dr-wide">
-        <header className={`dr-enter ${styles.head}`} style={{ "--i": 0 } as CSSProperties}>
-          <Link href={`/menu${qs}`} className={`dr-back-host ${styles.back}`} aria-label={tc("back")}>
-            <BackArrow />
-            <span className={styles.backLabel}>MENU</span>
-          </Link>
-          <span className="dr-eyebrow">{t("report")}</span>
-          <LocaleSwitcher />
-        </header>
+        <ImmersiveHero label={t("report")} backHref={`/menu${qs}`} />
 
         {!valid && (
           <div className={styles.state}>
