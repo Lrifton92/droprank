@@ -31,6 +31,7 @@
     "invalidAddress": "! not a valid address",
     "scanThisWallet": "Scan this wallet",
     "enter": "Enter",
+    "connectGhost": "Connect Wallet",
     "footerCredit": "// built on base by @lrifton6240",
     "how": {
       "eyebrow": "// how it works",

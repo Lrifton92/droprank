@@ -34,7 +34,9 @@ export function RootProvider({ children }: { children: ReactNode }) {
       }}
       miniKit={{
         enabled: true,
-        autoConnect: true,
+        // autoConnect spawns a Base wallet-connect popup on every browser reload
+        // (outside a MiniApp frame). Connection is explicit via the Connect button.
+        autoConnect: false,
         notificationProxyUrl: undefined,
       }}
     >

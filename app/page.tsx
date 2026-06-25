@@ -114,8 +114,18 @@ const STEP_ICONS = [
  * progress and lets you jump.
  */
 const RING_C = 2 * Math.PI * 86;
+export const CAROUSEL_COUNT = 6;
 
-function StepCarousel() {
+/** Controlled carousel: the active index + auto-advance live in <Home> so the
+ * real hero and its inverted (reveal) clone always show the same card in sync.
+ * onSelect is omitted for the clone (its dots are inert). */
+function StepCarousel({
+  active,
+  onSelect,
+}: {
+  active: number;
+  onSelect?: (i: number) => void;
+}) {
   const t = useTranslations("landing");
   // Each card carries its own section label (shown above): the eyebrow switches
   // as the carousel cycles — how-it-works steps, then the number, then the rest.
@@ -128,14 +138,6 @@ function StepCarousel() {
     { label: t("social.eyebrow"), type: "step", icon: 4, title: t("social.title"), desc: t("social.sub") },
   ] as const;
   const count = cards.length;
-  const [active, setActive] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActive((a) => (a + 1) % count);
-    }, 3500);
-    return () => window.clearInterval(id);
-  }, [count]);
-
   const c = cards[active];
   const total = String(count).padStart(2, "0");
   return (
@@ -201,7 +203,7 @@ function StepCarousel() {
               type="button"
               tabIndex={-1}
               className={`${styles.carDot} ${i === active ? styles.carDotOn : ""}`}
-              onClick={() => setActive(i)}
+              onClick={() => onSelect?.(i)}
             />
           ))}
         </div>
@@ -255,39 +257,99 @@ export default function Home() {
   // No auto-redirect on connect: the landing IS the site and must stay viewable
   // even with a wallet connected. Entering the app is an explicit click (Enter).
 
-  // Cursor "flashlight" reveal over the WHOLE hero. Two masked layers track the
-  // pointer: a full-bleed blue layer (.heroRevealBg) flips the white space to
-  // Base-blue everywhere — never clipped — and a white copy of the headline
-  // (.heroTextInvert), positioned exactly over the real text, flips the blue/ink
-  // type to white inside the same circle. The blue layer uses hero-relative
-  // coords (--hx/--hy); the text copy is pinned to the measured text box and
-  // masked with text-relative coords (--mx/--my) so it lines up pixel-for-pixel.
+  // Carousel index lives here so the real hero and its inverted reveal clone show
+  // the exact same card (identical layout/height → pixel-perfect overlay).
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setActive((a) => (a + 1) % CAROUSEL_COUNT),
+      3500,
+    );
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Cursor reveal over the WHOLE hero. A full clone of the hero content
+  // (.heroInvert), recoloured to an inverted blue/white scheme and laid exactly
+  // over the real content (same grid + padding → perfect superposition), is
+  // revealed through a soft feathered circle following the pointer (--hx/--hy).
+  // Inside it every element flips colours — title, connect button, carousel cards.
   const heroRef = useRef<HTMLElement>(null);
-  const heroTextRef = useRef<HTMLDivElement>(null);
   const invertRef = useRef<HTMLDivElement>(null);
   const onHeroMove = (e: React.MouseEvent) => {
     const hero = heroRef.current;
-    const txt = heroTextRef.current;
-    if (!hero || !txt) return;
-    const hr = hero.getBoundingClientRect();
-    const tr = txt.getBoundingClientRect();
-    hero.style.setProperty("--hx", `${e.clientX - hr.left}px`);
-    hero.style.setProperty("--hy", `${e.clientY - hr.top}px`);
     const inv = invertRef.current;
-    if (inv) {
-      inv.style.top = `${tr.top - hr.top}px`;
-      inv.style.left = `${tr.left - hr.left}px`;
-      inv.style.width = `${tr.width}px`;
-      inv.style.setProperty("--mx", `${e.clientX - tr.left}px`);
-      inv.style.setProperty("--my", `${e.clientY - tr.top}px`);
-    }
+    if (!hero || !inv) return;
+    const hr = hero.getBoundingClientRect();
+    inv.style.setProperty("--hx", `${e.clientX - hr.left}px`);
+    inv.style.setProperty("--hy", `${e.clientY - hr.top}px`);
   };
   const onHeroLeave = () => {
-    heroRef.current?.style.setProperty("--hx", "-3000px");
-    heroRef.current?.style.setProperty("--hy", "-3000px");
-    invertRef.current?.style.setProperty("--mx", "-3000px");
-    invertRef.current?.style.setProperty("--my", "-3000px");
+    invertRef.current?.style.setProperty("--hx", "-3000px");
+    invertRef.current?.style.setProperty("--hy", "-3000px");
   };
+
+  // The hero body, rendered twice: the real interactive layer and the inverted
+  // reveal clone (inert: no click handlers, dots/labels static).
+  const renderHero = (invert: boolean) => (
+    <div className={styles.heroInner}>
+      <div className={styles.heroLeft}>
+        <div className={styles.heroText}>
+          <p className={styles.eyebrow}>{t("eyebrow")}</p>
+          <h1 className={styles.title}>
+            {invert ? (
+              <>
+                {t("titleLine1")}{" "}
+                <span className={styles.titleAccent}>{t("titleAccent")}</span>?
+              </>
+            ) : (
+              <>
+                <Kinetic text={t("titleLine1")} start={0} />{" "}
+                <Kinetic text={t("titleAccent")} start={3} accent />
+                <span
+                  className={`${styles.word} ${styles.titleAccent}`}
+                  style={{ "--w": 6 } as CSSProperties}
+                  aria-hidden
+                >
+                  ?
+                </span>
+              </>
+            )}
+          </h1>
+          <p className={styles.sub}>{t("sub")}</p>
+        </div>
+
+        <div className={styles.scanCard}>
+          <div className={`ockWrap ${styles.connect}`}>
+            {/* The clone uses a static ghost (no real Wallet → no duplicate
+                OnchainKit/connect popups); it only needs to match the layout. */}
+            {invert ? (
+              <div className={styles.connectGhost}>{t("connectGhost")}</div>
+            ) : (
+              <Wallet />
+            )}
+          </div>
+
+          {isConnected && address && (
+            <button
+              className={styles.primaryCta}
+              onClick={
+                invert
+                  ? undefined
+                  : () => router.push(`/enter?address=${address}`)
+              }
+            >
+              {t("enter")}
+              <BtnArrow />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.heroRight}>
+        <StepCarousel active={active} onSelect={invert ? undefined : setActive} />
+      </div>
+    </div>
+  );
 
   return (
     <main className={styles.page}>
@@ -310,57 +372,11 @@ export default function Home() {
         onMouseLeave={onHeroLeave}
       >
         <span className={styles.glow} aria-hidden />
-        <div className={styles.heroInner}>
-          <div className={styles.heroLeft}>
-          <div className={styles.heroText} ref={heroTextRef}>
-            <p className={styles.eyebrow}>{t("eyebrow")}</p>
-            <h1 className={styles.title}>
-              <Kinetic text={t("titleLine1")} start={0} />{" "}
-              <Kinetic text={t("titleAccent")} start={3} accent />
-              <span
-                className={`${styles.word} ${styles.titleAccent}`}
-                style={{ "--w": 6 } as CSSProperties}
-                aria-hidden
-              >
-                ?
-              </span>
-            </h1>
-            <p className={styles.sub}>{t("sub")}</p>
-          </div>
+        {renderHero(false)}
 
-          <div className={styles.scanCard}>
-            <div className={`ockWrap ${styles.connect}`}>
-              <Wallet />
-            </div>
-
-            {isConnected && address && (
-              <button
-                className={styles.primaryCta}
-                onClick={() => router.push(`/enter?address=${address}`)}
-              >
-                {t("enter")}
-                <BtnArrow />
-              </button>
-            )}
-          </div>
-          </div>
-
-          <div className={styles.heroRight}>
-            <StepCarousel />
-          </div>
-        </div>
-
-        {/* Cursor reveal layers, above the hero content. The blue layer flips the
-            whitespace to Base-blue under the pointer; the white headline copy
-            flips the ink/blue type to white inside the same circle. */}
-        <div className={styles.heroRevealBg} aria-hidden />
-        <div className={styles.heroTextInvert} ref={invertRef} aria-hidden>
-          <p className={styles.eyebrow}>{t("eyebrow")}</p>
-          <h1 className={styles.title}>
-            {t("titleLine1")}{" "}
-            <span className={styles.titleAccent}>{t("titleAccent")}</span>?
-          </h1>
-          <p className={styles.sub}>{t("sub")}</p>
+        {/* Full inverted clone, revealed by the cursor drop/comet clip-path. */}
+        <div className={styles.heroInvert} ref={invertRef} aria-hidden>
+          {renderHero(true)}
         </div>
       </section>
 

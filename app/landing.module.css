@@ -71,7 +71,6 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 110px 0 64px;
   overflow: hidden;
   isolation: isolate;
   background:
@@ -98,7 +97,7 @@
   z-index: 1;
   width: 100%;
   max-width: 1400px;
-  padding: 0 clamp(20px, 5vw, 48px);
+  padding: 110px clamp(20px, 5vw, 48px) 64px;
   display: grid;
   grid-template-columns: 0.92fr 1.08fr;
   align-items: center;
@@ -133,71 +132,138 @@
   align-items: flex-start;
   gap: 20px;
 }
-/* The blue background reveal — covers the whole hero so the circle is never
-   clipped; the white text sits on top of it (see .heroTextInvert). */
-.heroRevealBg {
+/* Full inverted clone of the hero, revealed by the cursor circle. It mirrors
+   .hero's centring (grid + padding) so its duplicate content overlays the real
+   one pixel-for-pixel; a solid Base-blue base turns the whitespace blue, and the
+   recolour rules below flip every element to white inside the circle. */
+.heroInvert {
   position: absolute;
   inset: 0;
   z-index: 2;
-  pointer-events: none;
+  display: grid;
+  place-items: center;
   background: #0000ff;
-  -webkit-mask: radial-gradient(
-    circle 175px at var(--hx, -3000px) var(--hy, -3000px),
-    #000 0%,
-    #000 60%,
-    transparent 100%
-  );
-  mask: radial-gradient(
-    circle 175px at var(--hx, -3000px) var(--hy, -3000px),
-    #000 0%,
-    #000 60%,
-    transparent 100%
-  );
-}
-/* White (inverted) copy of the headline, aligned exactly over the text and shown
-   on top of the blue layer through the same cursor circle. Transparent bg. */
-.heroTextInvert {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 3;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
   pointer-events: none;
+  /* Revealed through a soft feathered circle following the pointer (set in JS via
+     --hx/--hy). Off-screen by default so nothing shows at rest. */
   -webkit-mask: radial-gradient(
-    circle 175px at var(--mx, -3000px) var(--my, -3000px),
+    circle 180px at var(--hx, -3000px) var(--hy, -3000px),
     #000 0%,
     #000 60%,
     transparent 100%
   );
   mask: radial-gradient(
-    circle 175px at var(--mx, -3000px) var(--my, -3000px),
+    circle 180px at var(--hx, -3000px) var(--hy, -3000px),
     #000 0%,
     #000 60%,
     transparent 100%
   );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
-.heroTextInvert .eyebrow {
+/* The clone never animates its words/cards (it must match the settled layout). */
+.heroInvert .word,
+.heroInvert .carCard {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+/* Inverted colour scheme (blue ground → white ink). */
+.heroInvert .eyebrow {
   background: none;
   color: #fff;
   -webkit-text-fill-color: #fff;
   animation: none;
 }
-.heroTextInvert .title {
-  color: #fff;
-}
-.heroTextInvert .titleAccent {
+.heroInvert .title,
+.heroInvert .titleAccent,
+.heroInvert .word {
   color: #fff;
   -webkit-text-fill-color: #fff;
 }
-.heroTextInvert .sub {
+.heroInvert .sub {
   color: rgba(255, 255, 255, 0.92);
 }
+.heroInvert .scanCard {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+.heroInvert .primaryCta {
+  background: #fff;
+  color: #0000ff;
+}
+.heroInvert .connect button,
+.heroInvert .ockWrap button {
+  background: #fff !important;
+  color: #0000ff !important;
+}
+/* Static stand-in for the connect button in the clone (matches its box). */
+.connectGhost {
+  box-sizing: border-box;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #fff;
+  color: #0000ff;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+/* Carousel card flips to a translucent-white card on blue, white type. */
+.heroInvert .carCard {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+.heroInvert .carNo {
+  color: rgba(255, 255, 255, 0.7);
+}
+.heroInvert .carTitle {
+  color: #fff;
+}
+.heroInvert .carDesc {
+  color: rgba(255, 255, 255, 0.9);
+}
+.heroInvert .carIcon {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.heroInvert .carDot {
+  background: rgba(255, 255, 255, 0.32);
+}
+.heroInvert .carDotOn {
+  background: #fff;
+}
+/* The "number" card is already blue in the normal scheme, so its inverted clone
+   flips the other way — a white card with blue type/ring — to read under reveal. */
+.heroInvert .carNumber {
+  background: #fff;
+  border-color: rgba(0, 0, 255, 0.18);
+}
+.heroInvert .carNumber .carNo {
+  color: rgba(0, 0, 255, 0.7);
+}
+.heroInvert .carNumberLabel {
+  color: #3a4256;
+}
+.heroInvert .carRingTrack {
+  stroke: rgba(0, 0, 255, 0.16);
+}
+.heroInvert .carRingProg {
+  stroke: #0000ff;
+  filter: none;
+}
+.heroInvert .carRingVal {
+  color: #0000ff;
+}
+.heroInvert .carRingVal .cur {
+  color: rgba(0, 0, 255, 0.8);
+}
 @media (prefers-reduced-motion: reduce) {
-  .heroTextInvert {
+  .heroInvert {
     display: none;
   }
 }
