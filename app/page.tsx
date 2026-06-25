@@ -255,21 +255,38 @@ export default function Home() {
   // No auto-redirect on connect: the landing IS the site and must stay viewable
   // even with a wallet connected. Entering the app is an explicit click (Enter).
 
-  // Cursor "flashlight": an inverted (blue + white text) copy is layered exactly
-  // over the headline; a circular mask following the pointer reveals it, flipping
-  // the colours where the cursor goes. Coords are relative to the text block so
-  // the masked copy lines up pixel-for-pixel.
+  // Cursor "flashlight" reveal over the WHOLE hero. Two masked layers track the
+  // pointer: a full-bleed blue layer (.heroRevealBg) flips the white space to
+  // Base-blue everywhere — never clipped — and a white copy of the headline
+  // (.heroTextInvert), positioned exactly over the real text, flips the blue/ink
+  // type to white inside the same circle. The blue layer uses hero-relative
+  // coords (--hx/--hy); the text copy is pinned to the measured text box and
+  // masked with text-relative coords (--mx/--my) so it lines up pixel-for-pixel.
+  const heroRef = useRef<HTMLElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);
+  const invertRef = useRef<HTMLDivElement>(null);
   const onHeroMove = (e: React.MouseEvent) => {
-    const el = heroTextRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    const hero = heroRef.current;
+    const txt = heroTextRef.current;
+    if (!hero || !txt) return;
+    const hr = hero.getBoundingClientRect();
+    const tr = txt.getBoundingClientRect();
+    hero.style.setProperty("--hx", `${e.clientX - hr.left}px`);
+    hero.style.setProperty("--hy", `${e.clientY - hr.top}px`);
+    const inv = invertRef.current;
+    if (inv) {
+      inv.style.top = `${tr.top - hr.top}px`;
+      inv.style.left = `${tr.left - hr.left}px`;
+      inv.style.width = `${tr.width}px`;
+      inv.style.setProperty("--mx", `${e.clientX - tr.left}px`);
+      inv.style.setProperty("--my", `${e.clientY - tr.top}px`);
+    }
   };
   const onHeroLeave = () => {
-    heroTextRef.current?.style.setProperty("--mx", "-600px");
-    heroTextRef.current?.style.setProperty("--my", "-600px");
+    heroRef.current?.style.setProperty("--hx", "-3000px");
+    heroRef.current?.style.setProperty("--hy", "-3000px");
+    invertRef.current?.style.setProperty("--mx", "-3000px");
+    invertRef.current?.style.setProperty("--my", "-3000px");
   };
 
   return (
@@ -288,6 +305,7 @@ export default function Home() {
       {/* ── Hero ── */}
       <section
         className={styles.hero}
+        ref={heroRef}
         onMouseMove={onHeroMove}
         onMouseLeave={onHeroLeave}
       >
@@ -308,17 +326,6 @@ export default function Home() {
               </span>
             </h1>
             <p className={styles.sub}>{t("sub")}</p>
-
-            {/* Inverted copy, layered exactly over the text, revealed by the
-                cursor mask — colours flip (blue bg, white text). */}
-            <div className={styles.heroTextInvert} aria-hidden>
-              <p className={styles.eyebrow}>{t("eyebrow")}</p>
-              <h1 className={styles.title}>
-                {t("titleLine1")}{" "}
-                <span className={styles.titleAccent}>{t("titleAccent")}</span>?
-              </h1>
-              <p className={styles.sub}>{t("sub")}</p>
-            </div>
           </div>
 
           <div className={styles.scanCard}>
@@ -341,6 +348,19 @@ export default function Home() {
           <div className={styles.heroRight}>
             <StepCarousel />
           </div>
+        </div>
+
+        {/* Cursor reveal layers, above the hero content. The blue layer flips the
+            whitespace to Base-blue under the pointer; the white headline copy
+            flips the ink/blue type to white inside the same circle. */}
+        <div className={styles.heroRevealBg} aria-hidden />
+        <div className={styles.heroTextInvert} ref={invertRef} aria-hidden>
+          <p className={styles.eyebrow}>{t("eyebrow")}</p>
+          <h1 className={styles.title}>
+            {t("titleLine1")}{" "}
+            <span className={styles.titleAccent}>{t("titleAccent")}</span>?
+          </h1>
+          <p className={styles.sub}>{t("sub")}</p>
         </div>
       </section>
 

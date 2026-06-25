@@ -133,25 +133,50 @@
   align-items: flex-start;
   gap: 20px;
 }
-.heroTextInvert {
+/* The blue background reveal — covers the whole hero so the circle is never
+   clipped; the white text sits on top of it (see .heroTextInvert). */
+.heroRevealBg {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: #0000ff;
+  -webkit-mask: radial-gradient(
+    circle 175px at var(--hx, -3000px) var(--hy, -3000px),
+    #000 0%,
+    #000 60%,
+    transparent 100%
+  );
+  mask: radial-gradient(
+    circle 175px at var(--hx, -3000px) var(--hy, -3000px),
+    #000 0%,
+    #000 60%,
+    transparent 100%
+  );
+}
+/* White (inverted) copy of the headline, aligned exactly over the text and shown
+   on top of the blue layer through the same cursor circle. Transparent bg. */
+.heroTextInvert {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 20px;
-  background: #0000ff;
   pointer-events: none;
   -webkit-mask: radial-gradient(
-    circle 150px at var(--mx, -600px) var(--my, -600px),
+    circle 175px at var(--mx, -3000px) var(--my, -3000px),
     #000 0%,
-    #000 56%,
+    #000 60%,
     transparent 100%
   );
   mask: radial-gradient(
-    circle 150px at var(--mx, -600px) var(--my, -600px),
+    circle 175px at var(--mx, -3000px) var(--my, -3000px),
     #000 0%,
-    #000 56%,
+    #000 60%,
     transparent 100%
   );
 }
