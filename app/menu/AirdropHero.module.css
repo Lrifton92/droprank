@@ -122,6 +122,16 @@
   align-items: center;
   gap: 16px;
 }
+/* Enlarged brand name, pinned top-right and white on the blue hero. */
+.navBrand {
+  font-size: 24px;
+}
+.navBrand :global(.dr-brand) {
+  color: #fff;
+}
+.navBrand :global(.dr-brand .dot) {
+  color: rgba(255, 255, 255, 0.6);
+}
 .live {
   display: inline-flex;
   align-items: center;

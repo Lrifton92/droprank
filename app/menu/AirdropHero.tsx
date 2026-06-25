@@ -88,15 +88,17 @@ export default function AirdropHero({ address }: { address: string }) {
       <span className={styles.grain} aria-hidden />
       <span className={styles.scrim} aria-hidden />
 
-      {/* Glassy floating nav (logo left · live + locale right). */}
+      {/* Glassy floating nav (live + locale left · brand large right). */}
       <nav className={styles.nav}>
-        <BrandLogo size={30} />
+        <span className={styles.live}>
+          <i className={styles.liveDot} aria-hidden />
+          {tc("baseMainnet")}
+        </span>
         <div className={styles.navRight}>
-          <span className={styles.live}>
-            <i className={styles.liveDot} aria-hidden />
-            {tc("baseMainnet")}
-          </span>
           <LocaleSwitcher />
+          <span className={styles.navBrand}>
+            <BrandLogo size={40} />
+          </span>
         </div>
       </nav>
 
