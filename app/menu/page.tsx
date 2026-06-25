@@ -21,20 +21,20 @@ function MenuInner() {
         <SideNav address={address} />
 
         <main className={styles.mainCol}>
-          <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 0 } as CSSProperties}>
+          <div className={`dr-enter`} style={{ "--i": 0 } as CSSProperties}>
+            <BaseBanner />
+          </div>
+
+          <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 1 } as CSSProperties}>
             <AirdropHero address={address} />
           </div>
 
-          <div className={`dr-enter`} style={{ "--i": 1 } as CSSProperties}>
+          <div className={`dr-enter`} style={{ "--i": 2 } as CSSProperties}>
             <Leaderboard address={address} />
           </div>
 
-          <div className={`dr-enter`} style={{ "--i": 2 } as CSSProperties}>
-            <RecentActivity address={address} />
-          </div>
-
           <div className={`dr-enter`} style={{ "--i": 3 } as CSSProperties}>
-            <BaseBanner />
+            <RecentActivity address={address} />
           </div>
 
           <div className={`dr-term dr-enter ${styles.term}`} style={{ "--i": 4 } as CSSProperties}>
