@@ -14,7 +14,7 @@ type Entry = { address: string; score: number };
  * ranking reads at a glance; ranks 4+ follow as a dense list. The connected
  * wallet's row is tagged YOU. Basenames resolve via OnchainKit.
  */
-const COLLAPSED = 10;
+const COLLAPSED = 5;
 
 export default function Leaderboard({ address }: { address: string }) {
   const t = useTranslations("leaderboard");
