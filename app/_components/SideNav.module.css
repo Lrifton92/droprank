@@ -14,7 +14,8 @@
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  justify-content: center;
+  gap: 20px;
   padding: 22px 16px;
 }
 
@@ -25,10 +26,8 @@
 }
 
 .nav {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 8px;
 }
 
@@ -119,12 +118,12 @@
 }
 
 .foot {
-  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-top: 12px;
+  padding-top: 14px;
+  margin-top: 4px;
   border-top: 1px solid var(--border);
 }
 .home {
