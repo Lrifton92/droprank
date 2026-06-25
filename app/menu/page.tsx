@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import BaseBanner from "../_components/BaseBanner";
-import BasenameCard from "../_components/BasenameCard";
 import AirdropHero from "./AirdropHero";
 import Leaderboard from "../_components/Leaderboard";
 import RecentActivity from "./RecentActivity";
@@ -42,10 +41,6 @@ function MenuInner() {
         <div className={styles.board}>
         <div className={`dr-enter ${styles.zoneHero}`} style={{ "--i": 0 } as CSSProperties}>
           <AirdropHero address={address} />
-        </div>
-
-        <div className={`dr-enter ${styles.zoneIdentity}`} style={{ "--i": 3 } as CSSProperties}>
-          <BasenameCard address={address} />
         </div>
 
         <nav className={`${styles.grid} ${styles.zoneNav}`}>

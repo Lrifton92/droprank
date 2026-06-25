@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 22px;
+  margin-top: 0;
   padding: 18px 20px;
   border-radius: var(--r-lg);
   border: 1px solid color-mix(in srgb, var(--tier, var(--base-300)) 22%, var(--border));

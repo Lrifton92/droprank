@@ -7,6 +7,7 @@ import { estimateAllocation } from "@/lib/allocation";
 import { tierFor, shortAddr } from "../_components/presentation";
 import BrandLogo from "../_components/BrandLogo";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
+import BasenameCard from "../_components/BasenameCard";
 import styles from "./AirdropHero.module.css";
 
 const REDUCE = () =>
@@ -100,66 +101,74 @@ export default function AirdropHero({ address }: { address: string }) {
         </div>
       </nav>
 
-      {/* Headline — the money, overlaid on the stage. */}
-      <div className={styles.lead}>
-        <span className={styles.eyebrow}>{t("title")}</span>
-        {est?.eligible ? (
-          <div className={styles.amount}>
-            <span className={styles.cur}>$</span>
-            {nf.format(lowN)}
-            <span className={styles.dash}>–</span>
-            <span className={styles.cur}>$</span>
-            {nf.format(highN)}
-          </div>
-        ) : (
-          <div className={styles.amount}>{data ? "—" : "··"}</div>
-        )}
-        <span className={styles.method}>{t("method")}</span>
-      </div>
-
-      {/* Footer band — stats left, secondary block + CTA right. */}
-      <div className={styles.foot}>
-        <div className={styles.stats}>
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>{td("score")}</span>
-            <span className={styles.statVal}>
-              {data ? scoreN : "··"}
-              <small>/100</small>
-            </span>
-            {tier && (
-              <span className={styles.tier}>
-                <i className={styles.tierDot} aria-hidden />
-                {tier.name}
-              </span>
+      {/* Two columns: money + stats (left), grouped identity + scan cards
+          (right, stacked at equal width). */}
+      <div className={styles.body}>
+        <div className={styles.leftCol}>
+          <div className={styles.lead}>
+            <span className={styles.eyebrow}>{t("title")}</span>
+            {est?.eligible ? (
+              <div className={styles.amount}>
+                <span className={styles.cur}>$</span>
+                {nf.format(lowN)}
+                <span className={styles.dash}>–</span>
+                <span className={styles.cur}>$</span>
+                {nf.format(highN)}
+              </div>
+            ) : (
+              <div className={styles.amount}>{data ? "—" : "··"}</div>
             )}
+            <span className={styles.method}>{t("method")}</span>
           </div>
-          <span className={styles.statDiv} aria-hidden />
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>{td("rank")}</span>
-            <span className={styles.statVal}>
-              {topPct !== null ? ts("topPercent", { pct: topPct }) : "··"}
-            </span>
-          </div>
-          <span className={styles.statDiv} aria-hidden />
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>{tc("activeTarget")}</span>
-            <span className={`mono ${styles.statVal} ${styles.statAddr}`}>
-              {shortAddr(address)}
-            </span>
+
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>{td("score")}</span>
+              <span className={styles.statVal}>
+                {data ? scoreN : "··"}
+                <small>/100</small>
+              </span>
+              {tier && (
+                <span className={styles.tier}>
+                  <i className={styles.tierDot} aria-hidden />
+                  {tier.name}
+                </span>
+              )}
+            </div>
+            <span className={styles.statDiv} aria-hidden />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>{td("rank")}</span>
+              <span className={styles.statVal}>
+                {topPct !== null ? ts("topPercent", { pct: topPct }) : "··"}
+              </span>
+            </div>
+            <span className={styles.statDiv} aria-hidden />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>{tc("activeTarget")}</span>
+              <span className={`mono ${styles.statVal} ${styles.statAddr}`}>
+                {shortAddr(address)}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className={styles.secondary}>
-          <span className={styles.note}>{t("speculative")}</span>
-          <button
-            className={styles.cta}
-            onClick={() => router.replace("/")}
-          >
-            {tc("scanOther")}
-            <svg viewBox="0 0 20 12" width="16" height="11" fill="none" aria-hidden>
-              <path d="M2 6h14M12.5 1.5 17 6l-4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+        <div className={styles.rightCol}>
+          <div className={styles.identity}>
+            <BasenameCard address={address} />
+          </div>
+
+          <div className={styles.secondary}>
+            <span className={styles.note}>{t("speculative")}</span>
+            <button
+              className={styles.cta}
+              onClick={() => router.replace("/")}
+            >
+              {tc("scanOther")}
+              <svg viewBox="0 0 20 12" width="16" height="11" fill="none" aria-hidden>
+                <path d="M2 6h14M12.5 1.5 17 6l-4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>
