@@ -1,0 +1,98 @@
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 14px;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.all {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--base);
+  background: var(--base-soft);
+  border: 1px solid color-mix(in srgb, var(--base-300) 26%, transparent);
+  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out);
+}
+.head:hover .all {
+  background: var(--base);
+  color: #fff;
+}
+
+.state {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  padding: 6px 2px;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 0;
+}
+.link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 8px;
+  border-radius: 10px;
+  transition: background 0.16s var(--ease-out), transform 0.16s var(--ease-out);
+}
+.link:hover {
+  background: var(--base-soft);
+}
+.kind {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--base);
+  background: var(--base-soft);
+  border: 1px solid color-mix(in srgb, var(--base-300) 24%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.kind[data-news] {
+  color: var(--text-dim);
+  background: rgba(10, 11, 13, 0.04);
+  border-color: var(--border);
+}
+.title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.chev {
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  transition: color 0.16s var(--ease-out), transform 0.16s var(--ease-out);
+}
+.link:hover .chev {
+  color: var(--base);
+  transform: translateX(2px);
+}
