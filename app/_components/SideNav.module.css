@@ -14,8 +14,8 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 26px;
+  justify-content: center;
+  gap: 22px;
   padding: 24px 16px;
 }
 

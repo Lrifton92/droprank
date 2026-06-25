@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import BrandLogo from "./BrandLogo";
 import LocaleSwitcher from "./LocaleSwitcher";
 import styles from "./SideNav.module.css";
 
@@ -61,10 +60,6 @@ export default function SideNav({ address }: { address: string }) {
   return (
     <aside className={styles.side}>
       <div className={styles.sideInner}>
-        <Link href={`/menu${qs}`} className={styles.brand} aria-label="DropRank">
-          <BrandLogo size={40} />
-        </Link>
-
         <nav className={styles.nav}>
           {items.map((it) => {
             const active = path === it.href;

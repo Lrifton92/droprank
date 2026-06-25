@@ -49,6 +49,16 @@
   mask-image: radial-gradient(120% 100% at 0% 50%, #000, transparent 75%);
 }
 
+/* DropRank site brand — pinned top-left of the header band, enlarged. */
+.brand {
+  position: absolute;
+  left: clamp(16px, 2vw, 30px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  font-size: 21px;
+}
+
 /* Base square mark. */
 .mark {
   flex-shrink: 0;
