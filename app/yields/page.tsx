@@ -1,15 +1,12 @@
 "use client";
 import { Suspense, useEffect, useState, type CSSProperties } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { formatUsd } from "../_components/presentation";
 import { YIELD_CHAINS, ALL_SLUG, type ChainSlug, type YieldPool, type YieldsResult } from "@/lib/yields";
 import InfoTip from "../_components/InfoTip";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
-import BackArrow from "../_components/BackArrow";
 import styles from "./yields.module.css";
 
 type ProfileKey = "stable" | "majors" | "degen";

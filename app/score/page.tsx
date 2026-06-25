@@ -10,7 +10,6 @@ import Counter from "../_components/Counter";
 import BackArrow from "../_components/BackArrow";
 import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import InfoTip from "../_components/InfoTip";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
 import RecentActivity from "../menu/RecentActivity";

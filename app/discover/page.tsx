@@ -8,15 +8,12 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { timeAgo, formatUsd } from "../_components/presentation";
 import type { DiscoverItem } from "@/lib/discover";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
-import BackArrow from "../_components/BackArrow";
 import styles from "./discover.module.css";
 
 const REDUCE = () =>

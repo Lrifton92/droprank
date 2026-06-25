@@ -8,15 +8,12 @@ import {
   type CSSProperties,
   type PointerEvent,
 } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { timeAgo } from "../_components/presentation";
 import type { NewsItem } from "@/lib/news";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
-import BackArrow from "../_components/BackArrow";
 import styles from "./news.module.css";
 
 /**

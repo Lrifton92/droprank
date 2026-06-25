@@ -1,6 +1,5 @@
 "use client";
 import { Suspense, useEffect, useState, type CSSProperties } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useMessages } from "next-intl";
 import { isAddress } from "viem";
@@ -74,7 +73,6 @@ import Counter from "../_components/Counter";
 import BackArrow from "../_components/BackArrow";
 import InfoTip from "../_components/InfoTip";
 import { shortAddr } from "../_components/presentation";
-import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
 import AppShell from "../_components/AppShell";
 import styles from "./radar.module.css";

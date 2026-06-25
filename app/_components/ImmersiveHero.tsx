@@ -51,7 +51,7 @@ export default function ImmersiveHero({
 
       <div className={styles.lead}>
         <h1 className={styles.title}>
-          <span className={styles.slash}>//</span> {clean}
+          <span className={styles.slash}>{"//"}</span> {clean}
         </h1>
       </div>
     </header>

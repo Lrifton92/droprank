@@ -107,7 +107,7 @@ const STEP_ICONS = [
  * progress and lets you jump.
  */
 const RING_C = 2 * Math.PI * 86;
-export const CAROUSEL_COUNT = 6;
+const CAROUSEL_COUNT = 6;
 
 /** Controlled carousel: the active index + auto-advance live in <Home> so the
  * real hero and its inverted (reveal) clone always show the same card in sync.
