@@ -1,0 +1,19 @@
+/* Persistent app frame — left nav rail + main content column. */
+.appShell {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100dvh;
+}
+.mainCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.2vw, 32px);
+  padding: 4px clamp(16px, 2vw, 30px) clamp(32px, 5vw, 64px);
+}
+@media (max-width: 900px) {
+  .appShell {
+    flex-direction: column;
+  }
+}

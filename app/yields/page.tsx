@@ -8,6 +8,7 @@ import { YIELD_CHAINS, ALL_SLUG, type ChainSlug, type YieldPool, type YieldsResu
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
+import AppShell from "../_components/AppShell";
 import BackArrow from "../_components/BackArrow";
 import styles from "./yields.module.css";
 
@@ -151,9 +152,7 @@ function YieldsInner() {
   const [hero, ...rest] = pools;
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className={`dr-shell dr-wide`}>
+    <AppShell address={address}>
         <ImmersiveHero label={t("eyebrow")} backHref={`/menu${qs}`} />
 
         {/* Chain selector — mono pills, one per supported chain. Picking a chain
@@ -295,8 +294,7 @@ function YieldsInner() {
         )}
 
         {legalOpen && <LegalSheet t={t} onClose={() => setLegalOpen(false)} />}
-      </main>
-    </>
+    </AppShell>
   );
 }
 

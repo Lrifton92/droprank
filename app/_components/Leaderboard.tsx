@@ -9,11 +9,10 @@ import styles from "./Leaderboard.module.css";
 type Entry = { address: string; score: number };
 
 /**
- * Public leaderboard card: the top wallets by DropRank score, pulled from
- * /api/leaderboard (the Upstash percentile sorted-set). Terminal-row layout
- * (fixed columns, tabular nums), top-3 medal-tinted, the connected wallet's row
- * highlighted with a YOU tag. Basenames resolve via OnchainKit, falling back to
- * the address.
+ * Public leaderboard — the top wallets by DropRank score (/api/leaderboard).
+ * The top 3 are shown as a podium (2nd · 1st · 3rd, bars sized by rank) so the
+ * ranking reads at a glance; ranks 4+ follow as a dense list. The connected
+ * wallet's row is tagged YOU. Basenames resolve via OnchainKit.
  */
 const COLLAPSED = 10;
 
@@ -35,6 +34,12 @@ export default function Leaderboard({ address }: { address: string }) {
   const total = entries?.length ?? 0;
   const shown =
     entries && !expanded ? entries.slice(0, COLLAPSED) : entries ?? [];
+  const top3 = shown.slice(0, 3);
+  const rest = shown.slice(3);
+  // Visual order on the podium: 2nd (left), 1st (centre), 3rd (right).
+  const podiumOrder = [top3[1], top3[0], top3[2]];
+  const placeFor = (e?: Entry) =>
+    e ? top3.indexOf(e) + 1 : 0;
 
   return (
     <section className={`dr-panel ${styles.board}`} aria-label={t("title")}>
@@ -45,46 +50,79 @@ export default function Leaderboard({ address }: { address: string }) {
       ) : entries.length === 0 ? (
         <span className={styles.state}>{t("empty")}</span>
       ) : (
-        <ol className={styles.list}>
-          {shown.map((e, i) => {
-            const tier = tierFor(e.score);
-            const isMe = e.address.toLowerCase() === me;
-            return (
-              <li
-                key={e.address}
-                className={`${styles.row} ${isMe ? styles.me : ""}`}
-                style={{ "--rank": i } as CSSProperties}
-              >
-                <span className={styles.rank}>{i + 1}</span>
-                <span className={styles.who}>
+        <>
+          <div className={styles.podium}>
+            {podiumOrder.map((e, i) => {
+              if (!e) return <div key={i} className={styles.pod} aria-hidden />;
+              const place = placeFor(e); // 1 | 2 | 3
+              const tier = tierFor(e.score);
+              const isMe = e.address.toLowerCase() === me;
+              return (
+                <div
+                  key={e.address}
+                  className={`${styles.pod} ${styles[`pod${place}`]} ${isMe ? styles.podMe : ""}`}
+                >
+                  <span className={styles.podRank}>{place}</span>
                   <Name
                     address={e.address as `0x${string}`}
                     chain={base}
-                    className={styles.name}
+                    className={styles.podName}
                   />
-                  {isMe && <span className={styles.youTag}>{t("you")}</span>}
-                </span>
-                <span
-                  className={styles.score}
-                  style={{ "--tier": tier.color } as CSSProperties}
-                >
-                  <i className={styles.dot} aria-hidden />
-                  {e.score}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      )}
+                  <span
+                    className={styles.podScore}
+                    style={{ "--tier": tier.color } as CSSProperties}
+                  >
+                    {e.score}
+                  </span>
+                  <span className={styles.podBar} aria-hidden />
+                </div>
+              );
+            })}
+          </div>
 
-      {total > COLLAPSED && (
-        <button
-          type="button"
-          className={styles.toggle}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? t("showLess") : t("showMore", { n: total - COLLAPSED })}
-        </button>
+          {rest.length > 0 && (
+            <ol className={styles.list} start={4}>
+              {rest.map((e, i) => {
+                const tier = tierFor(e.score);
+                const isMe = e.address.toLowerCase() === me;
+                return (
+                  <li
+                    key={e.address}
+                    className={`${styles.row} ${isMe ? styles.me : ""}`}
+                    style={{ "--rank": i } as CSSProperties}
+                  >
+                    <span className={styles.rank}>{i + 4}</span>
+                    <span className={styles.who}>
+                      <Name
+                        address={e.address as `0x${string}`}
+                        chain={base}
+                        className={styles.name}
+                      />
+                      {isMe && <span className={styles.youTag}>{t("you")}</span>}
+                    </span>
+                    <span
+                      className={styles.score}
+                      style={{ "--tier": tier.color } as CSSProperties}
+                    >
+                      <i className={styles.dot} aria-hidden />
+                      {e.score}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+
+          {total > COLLAPSED && (
+            <button
+              type="button"
+              className={styles.toggle}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? t("showLess") : t("showMore", { n: total - COLLAPSED })}
+            </button>
+          )}
+        </>
       )}
     </section>
   );

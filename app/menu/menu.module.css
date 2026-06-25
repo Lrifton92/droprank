@@ -235,6 +235,22 @@
   }
 }
 
+/* Activity (flexible) + leaderboard (fixed compact card) side by side from lg. */
+.dataRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(16px, 2vw, 28px);
+}
+.dataMain {
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .dataRow {
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 27vw, 380px);
+    align-items: start;
+  }
+}
+
 .board {
   display: contents;
 }

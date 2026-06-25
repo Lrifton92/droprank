@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import type { ScoreResult } from "@/lib/types";
 import { estimateAllocation } from "@/lib/allocation";
@@ -8,6 +7,7 @@ import { tierFor, shortAddr } from "../_components/presentation";
 import BrandLogo from "../_components/BrandLogo";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BasenameCard from "../_components/BasenameCard";
+import Leaderboard from "../_components/Leaderboard";
 import styles from "./AirdropHero.module.css";
 
 const REDUCE = () =>
@@ -46,7 +46,6 @@ function useCountUp(value: number | null, duration = 1100): number {
  * + secondary CTA card. Pulls the cached /api/score.
  */
 export default function AirdropHero({ address }: { address: string }) {
-  const router = useRouter();
   const t = useTranslations("allocation");
   const ts = useTranslations("score");
   const td = useTranslations("dashboard");
@@ -157,17 +156,8 @@ export default function AirdropHero({ address }: { address: string }) {
             <BasenameCard address={address} />
           </div>
 
-          <div className={styles.secondary}>
-            <span className={styles.note}>{t("speculative")}</span>
-            <button
-              className={styles.cta}
-              onClick={() => router.replace("/")}
-            >
-              {tc("scanOther")}
-              <svg viewBox="0 0 20 12" width="16" height="11" fill="none" aria-hidden>
-                <path d="M2 6h14M12.5 1.5 17 6l-4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+          <div className={styles.board}>
+            <Leaderboard address={address} />
           </div>
         </div>
       </div>

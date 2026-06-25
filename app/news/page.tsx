@@ -15,6 +15,7 @@ import { timeAgo } from "../_components/presentation";
 import type { NewsItem } from "@/lib/news";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
+import AppShell from "../_components/AppShell";
 import BackArrow from "../_components/BackArrow";
 import styles from "./news.module.css";
 
@@ -83,9 +84,7 @@ function NewsInner() {
   }, [reload, locale]);
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className={`dr-shell dr-wide`}>
+    <AppShell address={address}>
         <ImmersiveHero label={t("baseFeed")} backHref={`/menu${qs}`} />
 
         {error && (
@@ -146,8 +145,7 @@ function NewsInner() {
             </ul>
           </>
         )}
-      </main>
-    </>
+    </AppShell>
   );
 }
 

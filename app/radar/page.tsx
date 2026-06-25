@@ -82,6 +82,7 @@ import InfoTip from "../_components/InfoTip";
 import { shortAddr } from "../_components/presentation";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
+import AppShell from "../_components/AppShell";
 import styles from "./radar.module.css";
 
 function RadarInner() {
@@ -142,9 +143,7 @@ function RadarInner() {
   }, [data, pct]);
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className={`dr-shell dr-wide`}>
+    <AppShell address={address}>
         <ImmersiveHero label={t("questRadar")} backHref={`/menu${qs}`} />
 
         {!valid && (
@@ -306,8 +305,7 @@ function RadarInner() {
             </section>
           </>
         )}
-      </main>
-    </>
+    </AppShell>
   );
 }
 

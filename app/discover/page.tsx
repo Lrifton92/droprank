@@ -15,6 +15,7 @@ import { timeAgo, formatUsd } from "../_components/presentation";
 import type { DiscoverItem } from "@/lib/discover";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
+import AppShell from "../_components/AppShell";
 import BackArrow from "../_components/BackArrow";
 import styles from "./discover.module.css";
 
@@ -238,9 +239,7 @@ function DiscoverInner() {
   const rest = feature ? items!.slice(1) : (items ?? []);
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className={`dr-shell dr-wide`}>
+    <AppShell address={address}>
         <ImmersiveHero label={t("eyebrow")} backHref={`/menu${qs}`} />
 
         {error && (
@@ -308,8 +307,7 @@ function DiscoverInner() {
             <p className={`mono ${styles.disclaimer}`}>{t("disclaimer")}</p>
           </>
         )}
-      </main>
-    </>
+    </AppShell>
   );
 }
 

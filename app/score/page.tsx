@@ -12,6 +12,7 @@ import { tierFor, shortAddr, improveFor } from "../_components/presentation";
 import InfoTip from "../_components/InfoTip";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import ImmersiveHero from "../_components/ImmersiveHero";
+import AppShell from "../_components/AppShell";
 import MintButton from "./MintButton";
 import CheckinButton from "./CheckinButton";
 import styles from "./score.module.css";
@@ -70,9 +71,7 @@ function ScoreInner() {
   };
 
   return (
-    <>
-      <div className="dr-grid-bg" />
-      <main className="dr-shell dr-wide">
+    <AppShell address={address}>
         <ImmersiveHero label={t("report")} backHref={`/menu${qs}`} />
 
         {!valid && (
@@ -244,8 +243,7 @@ function ScoreInner() {
             </div>
           </>
         )}
-      </main>
-    </>
+    </AppShell>
   );
 }
 
