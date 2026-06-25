@@ -56,7 +56,7 @@
   padding: 7px 13px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(8, 12, 22, 0.6);
+  background: #ffffff;
   color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -92,7 +92,7 @@
   padding: 4px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(8, 12, 22, 0.6);
+  background: #ffffff;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -231,7 +231,7 @@
   padding: 1px 6px;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  background: rgba(8, 12, 22, 0.6);
+  background: #ffffff;
   color: var(--text-faint);
   font-size: 9px;
   font-weight: 700;
@@ -495,7 +495,7 @@
 .item {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(12, 17, 28, 0.5);
+  background: #ffffff;
   /* Marked entry cascade: rows slide up further (18px) & fade in, staggered
      ~40ms apart via the inline animationDelay. GPU-only (transform/opacity).
      Snappier ease-out than dr-rise so the dance reads as deliberately lively,
@@ -509,7 +509,7 @@
 }
 .item:hover {
   border-color: var(--border-strong);
-  background: rgba(14, 20, 33, 0.62);
+  background: rgba(0, 0, 255, 0.04);
   transform: translateY(-1px);
   box-shadow: inset 2px 0 0 var(--base-300), 0 14px 38px -24px var(--base-glow);
 }

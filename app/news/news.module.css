@@ -102,7 +102,7 @@
   padding: 14px 15px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(12, 17, 28, 0.5);
+  background: #ffffff;
   transform-style: preserve-3d;
   transform: rotateX(var(--rx)) rotateY(var(--ry));
   will-change: transform;
@@ -115,7 +115,7 @@
 }
 .item:hover {
   border-color: var(--border-strong);
-  background: rgba(14, 20, 33, 0.62);
+  background: rgba(0, 0, 255, 0.04);
   box-shadow: inset 2px 0 0 var(--base-300), 0 18px 44px -24px var(--base-glow);
 }
 

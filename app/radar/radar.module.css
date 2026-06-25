@@ -164,7 +164,7 @@
   padding: 13px 14px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(12, 17, 28, 0.5);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 9px;
@@ -226,7 +226,7 @@
   padding: 13px 14px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(12, 17, 28, 0.5);
+  background: #ffffff;
   animation: dr-rise 0.4s var(--ease-out) both;
   transition:
     border-color var(--hover-dur) var(--ease-out),
@@ -397,7 +397,7 @@
   padding: 7px 12px;
   border-radius: var(--r-sm);
   border: 1px solid color-mix(in srgb, var(--base-300) 26%, transparent);
-  background: rgba(12, 17, 28, 0.5);
+  background: #ffffff;
   transition:
     background var(--hover-dur) var(--ease-out),
     color var(--hover-dur) var(--ease-out),
@@ -490,7 +490,7 @@
   /* Validated rows: a green inset rail (left) instead of a full green fill —
      cleaner in a row, lets the green read as a status accent not a block. */
   .questDone {
-    background: rgba(12, 17, 28, 0.5);
+    background: #ffffff;
     border-color: var(--border);
     box-shadow: inset 3px 0 0 var(--ok);
   }
