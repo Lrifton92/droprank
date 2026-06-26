@@ -84,7 +84,8 @@
       "indexing": "INDEXING ONCHAIN ACTIVITY",
       "accessGranted": "ACCESS GRANTED"
     },
-    "skip": "tap to skip →"
+    "skip": "tap to skip →",
+    "status": "Initializing · Base mainnet"
   },
   "menu": {
     "score": {

@@ -181,6 +181,29 @@
   color: #fff;
 }
 
+/* Phones: shrink the banner so the page title sits close to the nav and the
+   real content rises into view instead of trailing a tall empty blue stage. */
+@media (max-width: 600px) {
+  .hero {
+    min-height: 172px;
+    gap: 14px;
+    padding: 14px;
+  }
+  .nav {
+    padding: 9px 12px;
+    gap: 10px;
+  }
+  .navRight {
+    gap: 12px;
+  }
+  .live {
+    font-size: 10px;
+  }
+  .title {
+    font-size: clamp(28px, 8.4vw, 40px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .floor,
   .glowA,

@@ -1,0 +1,261 @@
+/* DropRank boot sequence — faithful port of the approved "Cube Base → Onde"
+   showcase: a Base cube falls + tumbles, shatters into glass shards, rings
+   ripple out, a full blue wave sweeps and reveals the lockup (droplet zoom +
+   wordmark letter-by-letter), then status + progress bar. White stage. */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* ── 1) Base cube falling + tumbling ── */
+.cubeWrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -26px;
+  width: 52px;
+  height: 52px;
+  perspective: 600px;
+  transform: translateY(-66vh);
+  animation: fall 0.9s cubic-bezier(0.45, 0.05, 0.78, 0.32) forwards;
+  transform-origin: 50% 100%;
+}
+.cube {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  transform-style: preserve-3d;
+  animation: tumble 0.9s cubic-bezier(0.3, 0, 0.4, 1) forwards;
+}
+.face {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 2px 8px -3px rgba(255, 255, 255, 0.5),
+    inset 0 -8px 14px -6px rgba(0, 0, 90, 0.7);
+}
+.fFront { background: linear-gradient(155deg, #3a54ff, #0011db); transform: translateZ(26px); }
+.fBack { background: linear-gradient(155deg, #1d33e6, #000bb0); transform: rotateY(180deg) translateZ(26px); }
+.fRight { background: linear-gradient(155deg, #2440f5, #000fc4); transform: rotateY(90deg) translateZ(26px); }
+.fLeft { background: linear-gradient(155deg, #2440f5, #000fc4); transform: rotateY(-90deg) translateZ(26px); }
+.fTop { background: linear-gradient(155deg, #6f86ff, #3551ff); transform: rotateX(90deg) translateZ(26px); }
+.fBottom { background: linear-gradient(155deg, #0a1bcf, #00088c); transform: rotateX(-90deg) translateZ(26px); }
+
+@keyframes fall {
+  0% { transform: translateY(-66vh); }
+  74% { transform: translateY(-4px) scale(1); }
+  85% { transform: translateY(0) scaleX(1.4) scaleY(0.6); }
+  92% { transform: translateY(-12px) scaleX(0.94) scaleY(1.08); }
+  100% { transform: translateY(0) scale(0.5); opacity: 0; }
+}
+@keyframes tumble {
+  0% { transform: rotateX(-40deg) rotateY(20deg); }
+  74% { transform: rotateX(360deg) rotateY(330deg); }
+  100% { transform: rotateX(380deg) rotateY(360deg); }
+}
+
+/* glass shards projected on impact */
+.shard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px;
+  border-radius: 6px;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(120, 150, 255, 0.35), rgba(0, 0, 255, 0.12));
+  backdrop-filter: blur(4px) saturate(140%);
+  -webkit-backdrop-filter: blur(4px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.sh1 { animation: sh1 0.7s cubic-bezier(0.25, 0.7, 0.35, 1) 0.83s forwards; }
+.sh2 { animation: sh2 0.75s cubic-bezier(0.25, 0.7, 0.35, 1) 0.83s forwards; }
+.sh3 { animation: sh3 0.65s cubic-bezier(0.25, 0.7, 0.35, 1) 0.85s forwards; }
+.sh4 { animation: sh4 0.72s cubic-bezier(0.25, 0.7, 0.35, 1) 0.85s forwards; }
+.sh5 { animation: sh5 0.68s cubic-bezier(0.25, 0.7, 0.35, 1) 0.84s forwards; }
+@keyframes sh1 { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); } 100% { opacity: 0; transform: translate(-58px, -34px) rotate(-120deg) scale(0.4); } }
+@keyframes sh2 { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); } 100% { opacity: 0; transform: translate(60px, -30px) rotate(140deg) scale(0.4); } }
+@keyframes sh3 { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.85); } 100% { opacity: 0; transform: translate(-30px, -52px) rotate(-90deg) scale(0.3); } }
+@keyframes sh4 { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.85); } 100% { opacity: 0; transform: translate(36px, -48px) rotate(110deg) scale(0.3); } }
+@keyframes sh5 { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.7); } 100% { opacity: 0; transform: translate(4px, -60px) rotate(60deg) scale(0.25); } }
+
+/* ── 2) ripple rings ── */
+.ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px;
+  border: 2px solid #0000ff;
+  border-radius: 14px;
+  opacity: 0;
+  transform: scale(0);
+}
+.r1 { animation: ripple 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.87s forwards; }
+.r2 { animation: ripple 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1.02s forwards; }
+.r3 { animation: ripple 1.7s cubic-bezier(0.22, 1, 0.36, 1) 1.18s forwards; }
+@keyframes ripple {
+  0% { opacity: 0.8; transform: scale(0); border-width: 3px; }
+  100% { opacity: 0; transform: scale(42); border-width: 1px; }
+}
+
+/* ── 3) full wave sweep + reveal ── */
+.wave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px;
+  background: #0000ff;
+  border-radius: 14px;
+  transform: scale(0);
+  opacity: 0;
+  animation: wave 1.45s cubic-bezier(0.65, 0, 0.35, 1) 0.92s forwards;
+}
+@keyframes wave {
+  0% { transform: scale(0); opacity: 1; }
+  45% { transform: scale(60); opacity: 1; }
+  100% { transform: scale(60); opacity: 0; }
+}
+
+/* ── 4) reveal: droplet zoom-out → wordmark letter-by-letter → bar ── */
+.core {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.mark {
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 255, 0.45));
+  opacity: 0;
+  transform: scale(2.4);
+  animation: markZoom 0.85s cubic-bezier(0.2, 0.9, 0.3, 1) 2.05s forwards;
+}
+@keyframes markZoom {
+  0% { opacity: 0; transform: scale(2.4); filter: blur(7px) drop-shadow(0 10px 24px rgba(0, 0, 255, 0.45)); }
+  60% { opacity: 1; filter: blur(0) drop-shadow(0 10px 24px rgba(0, 0, 255, 0.45)); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.wordmark {
+  font-family: var(--font-sans);
+  font-size: clamp(40px, 6vw, 62px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ltr {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.42em) rotateX(-55deg);
+  transform-origin: 50% 100%;
+  animation: ltrIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(2.75s + var(--i) * 0.11s) forwards;
+}
+@keyframes ltrIn { to { opacity: 1; transform: none; } }
+.la { color: var(--text); }
+.ldot { color: #0000ff; }
+.lb {
+  background: linear-gradient(120deg, #0000ff, #5a78ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  animation: softIn 0.6s ease 3.7s forwards;
+}
+.meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  opacity: 0;
+  animation: softIn 0.6s ease 3.85s forwards;
+}
+@keyframes softIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.bar {
+  position: relative;
+  width: 340px;
+  max-width: 76vw;
+  height: 8px;
+  border-radius: 999px;
+  background: #eaeefb;
+  box-shadow: inset 0 1px 2px rgba(10, 11, 40, 0.12);
+  overflow: hidden;
+}
+.bar i {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0010d8, #0000ff 50%, #5a78ff);
+  box-shadow: 0 0 12px -2px rgba(0, 0, 255, 0.7);
+  animation: fill 1.8s cubic-bezier(0.45, 0, 0.15, 1) 4s forwards;
+}
+.bar i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(-120%);
+  animation: shine 1.3s ease-in-out 4.1s infinite;
+}
+@keyframes fill { to { width: 100%; } }
+@keyframes shine {
+  0% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(220%); }
+}
+.pct {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #0000ff;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cubeWrap, .cube, .shard, .ripple, .wave {
+    animation: none;
+    opacity: 0;
+  }
+  .mark, .ltr, .status, .meter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .bar i { animation: none; width: 100%; }
+  .bar i::after { animation: none; }
+}

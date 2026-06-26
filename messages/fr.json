@@ -84,7 +84,8 @@
       "indexing": "INDEXATION DE L'ACTIVITÉ ONCHAIN",
       "accessGranted": "ACCÈS AUTORISÉ"
     },
-    "skip": "appuie pour passer →"
+    "skip": "appuie pour passer →",
+    "status": "Initialisation · Base mainnet"
   },
   "menu": {
     "score": {

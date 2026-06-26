@@ -2,15 +2,27 @@
   position: relative;
   min-height: 100dvh;
   width: 100%;
-  max-width: var(--shell-w);
-  margin: 0 auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 40px;
   cursor: pointer;
   user-select: none;
+}
+
+/* Skip hint, pinned bottom-centre over the boot stage. */
+.skip {
+  position: fixed;
+  z-index: 4;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  animation: skipIn 0.6s ease 4.2s forwards;
+}
+@keyframes skipIn {
+  to { opacity: 0.7; }
 }
 
 /* Scanline texture goes FULL VIEWPORT (fixed), not absolute-in-wrap: clipped

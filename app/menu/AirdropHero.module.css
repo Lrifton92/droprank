@@ -368,6 +368,46 @@
   }
 }
 
+/* Phones: the floating nav brand "DROP·RANK" overflowed the hero (clipped on
+   the right). Drop it here — the brand already shows in the header band — and
+   tighten the stats so the three columns never crowd. */
+@media (max-width: 600px) {
+  .hero {
+    min-height: clamp(420px, 70vh, 560px);
+  }
+  .nav {
+    padding: 9px 13px;
+    gap: 10px;
+  }
+  .navBrand {
+    display: none;
+  }
+  .navRight {
+    gap: 12px;
+  }
+  .live {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .stats {
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .statVal {
+    font-size: 20px;
+  }
+  .statAddr {
+    font-size: 13px;
+  }
+  .statLabel {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+  .statVal small {
+    font-size: 10px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .floor,
   .glowA,

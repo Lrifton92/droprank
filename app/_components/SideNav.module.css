@@ -139,7 +139,9 @@
   color: var(--base);
 }
 
-/* On narrow viewports the rail collapses to a horizontal scroller on top. */
+/* On narrow viewports the rail collapses to a compact horizontal bar on top.
+   Items go icon-only so all five + the locale fit the width with no scroll/clip;
+   only the ACTIVE destination keeps its label so the current page is named. */
 @media (max-width: 900px) {
   .side {
     width: 100%;
@@ -151,33 +153,70 @@
     height: auto;
     flex-direction: row;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    overflow-x: auto;
+    gap: 10px;
+    padding: 10px 12px;
   }
   .brand {
     flex: none;
   }
   .nav {
+    flex: 1;
+    min-width: 0;
     flex-direction: row;
     margin-top: 0;
     gap: 8px;
   }
   .item {
-    grid-template-columns: 34px auto;
+    flex: none;
+    grid-template-columns: auto;
+    justify-items: center;
+    padding: 8px;
+    gap: 0;
   }
+  .itemText,
   .itemSub,
   .itemNo {
     display: none;
   }
-  .foot {
-    margin-top: 0;
-    margin-left: auto;
-    border-top: none;
-    padding-top: 0;
-    flex: none;
+  /* Active item expands to icon + title so the user sees where they are. */
+  .itemActive {
+    grid-template-columns: auto auto;
+    gap: 9px;
+    padding: 8px 13px;
   }
-  .home {
+  .itemActive .itemText {
+    display: flex;
+  }
+  .itemActive .itemTitle {
+    overflow: visible;
+    max-width: none;
+  }
+  .itemActive .itemSub {
     display: none;
+  }
+  /* The locale switcher is redundant on phones — every page's hero already
+     carries one — so drop the foot here; this frees the width the five items
+     plus the active label need, so nothing is pushed off-screen. */
+  .foot {
+    display: none;
+  }
+}
+
+/* Tightest phones: trim glyph + gaps so five icons + the active label + locale
+   still fit a 360px row without horizontal scroll. */
+@media (max-width: 400px) {
+  .sideInner {
+    gap: 7px;
+    padding: 9px 10px;
+  }
+  .glyph {
+    width: 34px;
+    height: 34px;
+  }
+  .nav {
+    gap: 6px;
+  }
+  .itemActive .itemTitle {
+    font-size: 12px;
   }
 }

@@ -134,8 +134,38 @@
   .glow, .sweep { animation: none; }
 }
 
-@media (max-width: 480px) {
-  .banner { padding: 18px; gap: 14px; }
-  .chip { display: none; }
-  .title { font-size: 15px; }
+/* On phones the centred "BUILT ON BASE" group collided with the absolute
+   site brand. Re-flow into a left-aligned row: brand → mark → title (no
+   absolute positioning, sub + chip dropped to keep one tidy line). */
+@media (max-width: 600px) {
+  .banner {
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .brand {
+    position: static;
+    transform: none;
+    font-size: 18px;
+    flex: none;
+  }
+  .mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+  }
+  .markInner {
+    width: 18px;
+    height: 18px;
+  }
+  .title {
+    font-size: 14px;
+    letter-spacing: 0.1em;
+  }
+  .sub {
+    display: none;
+  }
+  .chip {
+    display: none;
+  }
 }
