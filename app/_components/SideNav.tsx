@@ -60,6 +60,13 @@ export default function SideNav({ address }: { address: string }) {
   return (
     <aside className={styles.side}>
       <div className={styles.sideInner}>
+        <div className={styles.foot}>
+          <Link href={`/menu${qs}`} className={styles.home}>
+            ‹ {tc("back")}
+          </Link>
+          <LocaleSwitcher />
+        </div>
+
         <nav className={styles.nav}>
           {items.map((it) => {
             const active = path === it.href;
@@ -83,13 +90,6 @@ export default function SideNav({ address }: { address: string }) {
             );
           })}
         </nav>
-
-        <div className={styles.foot}>
-          <Link href={`/menu${qs}`} className={styles.home}>
-            ‹ {tc("back")}
-          </Link>
-          <LocaleSwitcher />
-        </div>
       </div>
     </aside>
   );

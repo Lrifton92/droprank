@@ -94,7 +94,9 @@ export default function AirdropHero({ address }: { address: string }) {
           {tc("baseMainnet")}
         </span>
         <div className={styles.navRight}>
-          <LocaleSwitcher />
+          <span className={styles.heroLocale}>
+            <LocaleSwitcher />
+          </span>
         </div>
       </nav>
 

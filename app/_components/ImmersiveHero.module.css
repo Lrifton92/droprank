@@ -6,16 +6,18 @@
   isolation: isolate;
   overflow: hidden;
   margin-top: 0;
-  min-height: clamp(220px, 34vh, 380px);
-  padding: clamp(16px, 2.2vw, 28px);
+  /* Compact banner — the old 34vh/380px band left a huge empty blue void on
+     desktop. A tighter header reads as a pro section title, not dead space. */
+  min-height: clamp(150px, 20vh, 210px);
+  padding: clamp(14px, 1.8vw, 22px);
   border-radius: var(--r-lg);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
   color: #fff;
-  box-shadow: 0 46px 110px -56px rgba(0, 0, 255, 0.58);
+  box-shadow: 0 36px 90px -56px rgba(0, 0, 255, 0.58);
 }
 
 .bg {
@@ -129,6 +131,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+/* Language toggle lives in the hero only on mobile; on desktop the left rail
+   header carries it, so it's dropped here to avoid a redundant EN | FR. */
+.heroLocale {
+  display: inline-flex;
+}
+@media (min-width: 901px) {
+  .heroLocale {
+    display: none;
+  }
 }
 .live {
   display: inline-flex;

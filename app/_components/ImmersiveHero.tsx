@@ -45,7 +45,9 @@ export default function ImmersiveHero({
               {live}
             </span>
           )}
-          <LocaleSwitcher />
+          <span className={styles.heroLocale}>
+            <LocaleSwitcher />
+          </span>
         </div>
       </nav>
 

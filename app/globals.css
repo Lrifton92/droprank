@@ -207,7 +207,8 @@
     font-family: var(--font-mono);
     font-size: 13px;
     line-height: 1.7;
-    background: linear-gradient(180deg, rgba(8, 12, 22, 0.92), rgba(6, 9, 16, 0.92));
+    /* Light panel (was a dark console) so it matches the rest of the light UI. */
+    background: var(--bg-1);
     border: 1px solid var(--border);
     border-radius: var(--r-md);
     overflow: hidden;
@@ -245,7 +246,7 @@
     padding: 5px 0;
   }
   .dr-term__row + .dr-term__row {
-    border-top: 1px dashed rgba(120, 160, 255, 0.08);
+    border-top: 1px dashed var(--border);
   }
 
   /* Syntax tokens */
@@ -253,6 +254,11 @@
   .syn-num { color: var(--syn-num); font-variant-numeric: tabular-nums; }
   .syn-str { color: var(--syn-str); }
   .syn-punct { color: var(--syn-punct); }
+  /* …re-tinted darker INSIDE the light terminal so keys/numbers stay legible
+     on white (the default syn-* light hues are tuned for dark backgrounds). */
+  .dr-term .syn-key { color: var(--base-300); }
+  .dr-term .syn-num { color: var(--text); }
+  .dr-term .syn-punct { color: var(--text-faint); }
   .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
   /* Blink cursor */

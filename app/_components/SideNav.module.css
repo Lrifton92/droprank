@@ -8,15 +8,16 @@
   background: var(--bg-1);
   border-right: 1px solid var(--border);
 }
+/* Top-anchored, sticky block: the nav sits at a constant level near the top on
+   EVERY page (it used to be vertically centred in the full-height rail, so on
+   long pages it drifted far down). Sticky keeps it in view while scrolling. */
 .sideInner {
   position: sticky;
   top: 0;
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 22px;
-  padding: 24px 16px;
+  gap: 20px;
+  padding: 26px 16px;
 }
 
 /* Enlarged brand lockup, pinned top-left. */
@@ -119,14 +120,15 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* Rail header (top): Back + language, with a separator below it. */
 .foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-top: 14px;
-  margin-top: 4px;
-  border-top: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--border);
 }
 .home {
   font-family: var(--font-mono);

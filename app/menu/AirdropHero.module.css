@@ -122,6 +122,16 @@
   align-items: center;
   gap: 16px;
 }
+/* Language toggle lives in the hero only on mobile; on desktop the left rail
+   header carries it, so it's dropped here to avoid a redundant EN | FR. */
+.heroLocale {
+  display: inline-flex;
+}
+@media (min-width: 901px) {
+  .heroLocale {
+    display: none;
+  }
+}
 .live {
   display: inline-flex;
   align-items: center;
