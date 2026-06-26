@@ -4,7 +4,6 @@ import { useTranslations, useLocale } from "next-intl";
 import type { ScoreResult } from "@/lib/types";
 import { estimateAllocation } from "@/lib/allocation";
 import { tierFor, shortAddr } from "../_components/presentation";
-import BrandLogo from "../_components/BrandLogo";
 import LocaleSwitcher from "../_components/LocaleSwitcher";
 import BasenameCard from "../_components/BasenameCard";
 import Leaderboard from "../_components/Leaderboard";
@@ -96,9 +95,6 @@ export default function AirdropHero({ address }: { address: string }) {
         </span>
         <div className={styles.navRight}>
           <LocaleSwitcher />
-          <span className={styles.navBrand}>
-            <BrandLogo size={40} />
-          </span>
         </div>
       </nav>
 

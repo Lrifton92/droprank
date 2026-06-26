@@ -268,6 +268,33 @@
   }
 }
 
+/* The cursor-reveal clone is a pointer-only delight — it can never be revealed
+   on a touch device (no cursor to follow). Drop it there so it isn't dead weight
+   and can never flash a partial frame. */
+@media (hover: none) and (pointer: coarse) {
+  .heroInvert {
+    display: none;
+  }
+}
+
+/* Phones: the black header crowded brand + "BASE MAINNET" + the EN | FR toggle,
+   pushing the locale (esp. "FR") off the right edge. Drop the decorative status
+   so the language toggle stays fully visible and tappable. */
+@media (max-width: 600px) {
+  .head {
+    padding: 16px;
+  }
+  .head :global(.dr-brand) {
+    font-size: 22px;
+  }
+  .status {
+    display: none;
+  }
+  .headRight {
+    gap: 14px;
+  }
+}
+
 /* Vertical "how it works" carousel — card swaps replay the blur+rise reveal. */
 .carousel {
   position: relative;

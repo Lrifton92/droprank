@@ -63,7 +63,7 @@ export default function BootSequence({ onDone }: { onDone: () => void }) {
   }, []);
 
   return (
-    <div className={styles.stage} aria-hidden>
+    <div className={styles.stage} onClick={onDone} role="presentation">
       <div className={styles.cubeWrap}>
         <div className={styles.cube}>
           <div className={`${styles.face} ${styles.fFront}`} />
@@ -139,6 +139,8 @@ export default function BootSequence({ onDone }: { onDone: () => void }) {
           <div className={styles.pct}>{pct}%</div>
         </div>
       </div>
+
+      <span className={styles.skip}>{t("skip")}</span>
     </div>
   );
 }

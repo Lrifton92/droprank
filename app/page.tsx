@@ -7,6 +7,8 @@ import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import BrandLogo from "./_components/BrandLogo";
 import LocaleSwitcher from "./_components/LocaleSwitcher";
+import BootSequence from "./_components/BootSequence";
+import { shortAddr } from "./_components/presentation";
 import styles from "./landing.module.css";
 
 /* CTA arrow: chevron head at rest, the shaft draws in on hover. */
@@ -209,7 +211,8 @@ function StepCarousel({
  * Landing — a premium, conversion-first Base website. A deep-blue Base hero (the
  * hook + scan), then sections that alternate light/dark and walk the visitor
  * through the funnel: how it works → the number → grow it → social proof (live
- * leaderboard) → final CTA. Scan logic unchanged (connect or paste → /enter).
+ * leaderboard) → final CTA. A boot intro plays over it on load; entering the
+ * app (after connect) goes straight to /menu.
  */
 export default function Home() {
   const router = useRouter();
@@ -260,6 +263,10 @@ export default function Home() {
     );
     return () => window.clearInterval(id);
   }, []);
+
+  // Boot intro: the "Cube Base → Onde" sequence plays over the connection page
+  // on every load, then reveals the landing. Skippable on click.
+  const [booting, setBooting] = useState(true);
 
   // Cursor reveal over the WHOLE hero. A full clone of the hero content
   // (.heroInvert), recoloured to an inverted blue/white scheme and laid exactly
@@ -316,7 +323,9 @@ export default function Home() {
             {/* The clone uses a static ghost (no real Wallet → no duplicate
                 OnchainKit/connect popups); it only needs to match the layout. */}
             {invert ? (
-              <div className={styles.connectGhost}>{t("connectGhost")}</div>
+              <div className={styles.connectGhost}>
+                {isConnected && address ? shortAddr(address) : t("connectGhost")}
+              </div>
             ) : (
               <Wallet />
             )}
@@ -328,7 +337,7 @@ export default function Home() {
               onClick={
                 invert
                   ? undefined
-                  : () => router.push(`/enter?address=${address}`)
+                  : () => router.push(`/menu?address=${address}`)
               }
             >
               {t("enter")}
@@ -345,7 +354,9 @@ export default function Home() {
   );
 
   return (
-    <main className={styles.page}>
+    <>
+      {booting && <BootSequence onDone={() => setBooting(false)} />}
+      <main className={styles.page}>
       <header className={styles.head}>
         <BrandLogo size={48} />
         <span className={styles.headRight}>
@@ -388,6 +399,7 @@ export default function Home() {
           {t("footerCredit")}
         </a>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }
